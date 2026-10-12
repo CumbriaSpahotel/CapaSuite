@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="js/theme-manager.js?v=20261001-ia-theme"></script>
     <script src="js/state.js"></script>
-    <script src="js/storage.js"></script>
+    <script src="js/storage.js?v=20261013-1"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -853,6 +853,9 @@
             let consecutiveFlatPriceCount = 0;
             let prevPrice = null;
             let hasFlatRateWarning = false;
+            let rivalAnomalies = [];
+            let rivalStrategicChanges = [];
+            let rivalStats = {};
 
             let ignoredComps = new Set();
             try {
@@ -1009,7 +1012,7 @@
                 };
 
                 // 1. Gather baseline stats per external rival
-                const rivalStats = {};
+                rivalStats = {};
                 compData.data.forEach(d => {
                     if (!d.hotels) return;
                     const dayInfo = getDayInfo(d.dateISO || d.date);
@@ -1075,8 +1078,8 @@
                 });
 
                 // 2. Detect Abnormal Behaviors (Spikes & Dumping)
-                const rivalAnomalies = [];
-                const rivalStrategicChanges = [];
+                rivalAnomalies = [];
+                rivalStrategicChanges = [];
 
                 compData.data.forEach(d => {
                     if (!d.hotels) return;
