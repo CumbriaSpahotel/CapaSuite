@@ -877,17 +877,17 @@
                             <th class="bg-group-rev detail-th-prev" style="font-size: 0.7rem;">Real 25</th>
                             <th class="bg-group-rev detail-th-curr">OBJ 26 + <span
                                     style="font-size: 0.7rem; color: var(--primary);">REAL 26</span></th>
-                            <th class="bg-group-rev border-sep">Var %</th>
+                            <th class="bg-group-rev border-sep detail-th-var" title="Variación Presupuesto Objetivo vs Año Anterior" style="font-size: 0.75rem;">Var %<br><span style="font-size:0.65rem; font-weight:normal; opacity:0.85;">Obj vs Ref</span></th>
 
                             <th class="bg-group-adr detail-th-prev" style="font-size: 0.7rem;">Real 25</th>
                             <th class="bg-group-adr detail-th-curr">OBJ 26 + <span
                                     style="font-size: 0.7rem; color: var(--primary);">REAL 26</span></th>
-                            <th class="bg-group-adr border-sep">Var %</th>
+                            <th class="bg-group-adr border-sep detail-th-var" title="Variación Presupuesto Objetivo vs Año Anterior" style="font-size: 0.75rem;">Var %<br><span style="font-size:0.65rem; font-weight:normal; opacity:0.85;">Obj vs Ref</span></th>
 
                             <th class="bg-group-occ detail-th-prev" style="font-size: 0.7rem;">Real 25</th>
                             <th class="bg-group-occ detail-th-curr">OBJ 26 + <span style="font-size: 0.7rem; color: #c2410c;">REAL
                                     26</span></th>
-                            <th class="bg-group-occ border-sep">Var %</th>
+                            <th class="bg-group-occ border-sep detail-th-var" title="Variación Presupuesto Objetivo vs Año Anterior" style="font-size: 0.75rem;">Var %<br><span style="font-size:0.65rem; font-weight:normal; opacity:0.85;">Obj vs Ref</span></th>
 
                             <th class="detail-th-prev" style="font-size: 0.7rem;">Real 25</th>
                             <th class="detail-th-curr-only">OBJ 26</th>
@@ -2139,6 +2139,7 @@
             document.querySelectorAll('.detail-th-prev').forEach(el => el.innerText = `Ref. ${prevYear.slice(-2)}`);
             document.querySelectorAll('.detail-th-curr').forEach(el => el.innerHTML = `OBJ ${currentYear.slice(-2)} + <span style="font-size: 0.7rem; color: var(--primary);">REAL ${currentYear.slice(-2)}</span>`);
             document.querySelectorAll('.detail-th-curr-only').forEach(el => el.innerText = `OBJ ${currentYear.slice(-2)}`);
+            document.querySelectorAll('.detail-th-var').forEach(el => el.innerHTML = `Var %<br><span style="font-size:0.65rem; font-weight:normal; opacity:0.85;">Obj vs Ref</span>`);
 
             const headerCurrYearSold = document.getElementById('header-curr-year-sold');
             if (headerCurrYearSold) headerCurrYearSold.innerText = `Vendido ${currentYear.slice(-2)}`;
@@ -2903,6 +2904,11 @@
                     detailStatusBadge = `<span style="margin-left: 6px; font-size: 0.65rem; padding: 1px 6px; border-radius: 8px; font-weight: 600; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0;">📅 Futuro</span>`;
                 }
 
+                // Variación Real (Vendido) vs Objetivo
+                const varRevReal = rev > 0 && rev26Real > 0 ? ((rev26Real - rev) / rev) * 100 : null;
+                const varAdrReal = adr > 0 && adr26Real > 0 ? ((adr26Real - adr) / adr) * 100 : null;
+                const varRnReal = rn > 0 && rn26Real > 0 ? ((rn26Real - rn) / rn) * 100 : null;
+
                 tbody.innerHTML += `<tr style="${timing.isCurrent ? 'background: rgba(99,102,241,0.035);' : ''}">
                 <td style="padding: 6px 10px; white-space: nowrap;" class="bg-neutral border-sep font-bold">${months[i]} ${detailStatusBadge}</td>
                 <td style="color:#64748b; font-size: 0.8rem;" class="bg-neutral border-sep">${formatNum(h.capacity[i])}</td>
@@ -2912,21 +2918,30 @@
                     <div style="${isClosed ? 'font-size:0.7rem; color:#94a3b8;' : 'font-weight:600;'}">${formatNum(rev)}€</div>
                     <div style="${isClosed ? 'font-size:1rem; color:var(--primary); font-weight:700;' : 'font-size:0.7rem; color:var(--primary); font-weight:700;'}">${formatNum(rev26Real)}€</div>
                 </td>
-                <td class="bg-group-rev border-sep ${varRev >= 0 ? 'text-success' : 'text-danger'}" style="font-size: 0.85rem;">${h.real2025.rev[i] > 0 ? (varRev > 0 ? '+' : '') + varRev.toFixed(1) + '%' : '-'}</td>
+                <td class="bg-group-rev border-sep" style="font-size: 0.85rem; line-height: 1.25;">
+                    <div class="${varRev >= 0 ? 'text-success' : 'text-danger'}" title="Objetivo vs Referencia anterior" style="font-weight:600;">${h.real2025.rev[i] > 0 ? (varRev > 0 ? '+' : '') + varRev.toFixed(1) + '%' : '-'}</div>
+                    ${varRevReal !== null ? `<div style="font-size: 0.7rem; color: ${varRevReal >= 0 ? '#16a34a' : '#ea580c'}; font-weight: 500;" title="Real Vendido vs Objetivo presupuestado">${varRevReal > 0 ? '+' : ''}${varRevReal.toFixed(1)}% <span style="font-size:0.6rem; opacity:0.8;">real</span></div>` : ''}
+                </td>
 
                 <td style="color:#94a3b8; font-size: 0.8rem;" class="bg-group-adr">${h.real2025.adr[i].toFixed(1)}€</td>
                 <td class="bg-group-adr">
                     <div style="${isClosed ? 'font-size:0.7rem; color:#94a3b8;' : 'font-weight:600;'}">${adr.toFixed(2)}€</div>
                     <div style="${isClosed ? 'font-size:1rem; color:var(--primary); font-weight:700;' : 'font-size:0.7rem; color:var(--primary);'}">${adr26Real.toFixed(1)}€</div>
                 </td>
-                <td class="bg-group-adr border-sep ${varAdr >= 0 ? 'text-success' : 'text-danger'}" style="font-size: 0.85rem;">${h.real2025.adr[i] > 0 ? (varAdr > 0 ? '+' : '') + varAdr.toFixed(1) + '%' : '-'}</td>
+                <td class="bg-group-adr border-sep" style="font-size: 0.85rem; line-height: 1.25;">
+                    <div class="${varAdr >= 0 ? 'text-success' : 'text-danger'}" title="Objetivo vs Referencia anterior" style="font-weight:600;">${h.real2025.adr[i] > 0 ? (varAdr > 0 ? '+' : '') + varAdr.toFixed(1) + '%' : '-'}</div>
+                    ${varAdrReal !== null ? `<div style="font-size: 0.7rem; color: ${varAdrReal >= 0 ? '#16a34a' : '#ea580c'}; font-weight: 500;" title="Real Vendido vs Objetivo presupuestado">${varAdrReal > 0 ? '+' : ''}${varAdrReal.toFixed(1)}% <span style="font-size:0.6rem; opacity:0.8;">real</span></div>` : ''}
+                </td>
 
                 <td style="color:#94a3b8; font-size: 0.8rem;" class="bg-group-occ">${formatNum(h.real2025.rn[i])}</td>
                 <td class="bg-group-occ">
                     <div style="${isClosed ? 'font-size:0.7rem; color:#94a3b8;' : ''}">${formatNum(rn)}</div>
                     <div style="${isClosed ? 'font-size:1rem; color:#c2410c; font-weight:700;' : 'font-size:0.7rem; color:#c2410c; font-weight:700;'}">${formatNum(rn26Real)}</div>
                 </td>
-                <td class="bg-group-occ border-sep ${varRn >= 0 ? 'text-success' : 'text-danger'}" style="font-size: 0.85rem;">${h.real2025.rn[i] > 0 ? (varRn > 0 ? '+' : '') + varRn.toFixed(1) + '%' : '-'}</td>
+                <td class="bg-group-occ border-sep" style="font-size: 0.85rem; line-height: 1.25;">
+                    <div class="${varRn >= 0 ? 'text-success' : 'text-danger'}" title="Objetivo vs Referencia anterior" style="font-weight:600;">${h.real2025.rn[i] > 0 ? (varRn > 0 ? '+' : '') + varRn.toFixed(1) + '%' : '-'}</div>
+                    ${varRnReal !== null ? `<div style="font-size: 0.7rem; color: ${varRnReal >= 0 ? '#16a34a' : '#ea580c'}; font-weight: 500;" title="Real Vendido vs Objetivo presupuestado">${varRnReal > 0 ? '+' : ''}${varRnReal.toFixed(1)}% <span style="font-size:0.6rem; opacity:0.8;">real</span></div>` : ''}
+                </td>
 
                 <td style="color:#94a3b8; font-size: 0.8rem;">${(h.real2025.rn[i] / h.capacity[i] * 100).toFixed(1)}%</td>
                 <td class="${occClass}" style="font-weight: 600;">${((isClosed ? rn26Real : rn) / h.capacity[i] * 100).toFixed(1)}%</td>
@@ -4450,7 +4465,7 @@
         }
 
         function renderSegmentBreakdownSection(breakdown) {
-            const { hotel, year, monthIdx, histYear, targetRev, targetRN, targetAdr, sumTargetRev, sumTargetRN, diffRev, diffRN, isCustomized, segments } = breakdown;
+            const { hotel, year, monthIdx, histYear, targetRev, targetRN, targetAdr, sumTargetRev, sumTargetRN, sumCommissions, sumNetTargetRev, diffRev, diffRN, isCustomized, segments } = breakdown;
 
             const diffRevAbs = Math.abs(diffRev);
             const diffRNAbs = Math.abs(diffRN);
@@ -5321,6 +5336,7 @@ Generado con CapaSuite Presupuestos.`;
                 El presupuesto oficial de <b id="unlockYearText" style="color:var(--primary);">2027</b> está bloqueado. Introduce la clave para modificarlo:
             </p>
             <form onsubmit="event.preventDefault(); verifyUnlockPin();" autocomplete="off" style="margin:0;">
+                <input type="text" name="username" autocomplete="username" value="manager" style="display:none;" aria-hidden="true" tabindex="-1">
                 <input type="password" id="unlockPinInput" autocomplete="current-password" maxlength="10" placeholder="••••" 
                     style="width:100%; text-align:center; font-size:1.8rem; letter-spacing:8px; padding:10px; border:2px solid #cbd5e1; border-radius:14px; margin-bottom:10px; font-weight:700; color:#1e293b;">
                 <div id="unlockErrorMsg" style="color:#ef4444; font-size:0.8rem; min-height:20px; margin-bottom:14px; display:none; font-weight:600;">❌ Clave incorrecta</div>
