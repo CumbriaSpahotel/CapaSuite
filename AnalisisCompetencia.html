@@ -1664,16 +1664,20 @@
 
         // --- UPDATE HOTEL LOGO (DEPRECATED: Use switchHotel) ---
         function updateHotelLogo() {
-            const hotel = document.getElementById('hotelSelector').value;
+            const hotel = document.getElementById('hotelSelector')?.value || activeHotel || 'Guadiana';
             const logoImg = document.getElementById('hotelLogo');
-            if (hotel === 'Guadiana') logoImg.src = 'Imagen/logo-guadiana.svg';
-            else logoImg.src = 'Imagen/logo-cumbria.svg';
+            if (logoImg) {
+                if (hotel === 'Guadiana') logoImg.src = 'Imagen/logo-guadiana.svg';
+                else logoImg.src = 'Imagen/logo-cumbria.svg';
+            }
             activeHotel = hotel;
         }
 
         // Global function for top-nav unification
         function switchHotel(h) {
-            document.getElementById('hotelSelector').value = h;
+            const hSel = document.getElementById('hotelSelector');
+            if (hSel) hSel.value = h;
+            activeHotel = h;
             updateHotelLogo();
             renderAll();
         }
@@ -2367,8 +2371,8 @@
         }
 
         function refreshActiveView() {
-            activeHotel = document.getElementById('hotelSelector').value;
-            const selectedMonth = document.getElementById('monthSelector').value;
+            activeHotel = document.getElementById('hotelSelector')?.value || window.CapaState?.activeHotel || localStorage.getItem('active_hotel_suite') || activeHotel || "Guadiana";
+            const selectedMonth = document.getElementById('monthSelector')?.value || 'all';
             
             // Recalcular promedios de mercado sobre todo el dataset para que cualquier cambio de precio se propague
             recalcMarketAverages(processedData);
@@ -3564,8 +3568,8 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
         // --- RENDER ---
         function renderAll() {
             activeTableFilter = null;
-            activeHotel = document.getElementById('hotelSelector').value;
-            const selectedMonth = document.getElementById('monthSelector').value;
+            activeHotel = document.getElementById('hotelSelector')?.value || window.CapaState?.activeHotel || localStorage.getItem('active_hotel_suite') || activeHotel || "Guadiana";
+            const selectedMonth = document.getElementById('monthSelector')?.value || 'all';
 
             let data = [...processedData];
             if (selectedMonth !== 'all') {

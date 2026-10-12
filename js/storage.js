@@ -87,7 +87,27 @@
                     localStorage.setItem(`${VERSION}_${key}`, value);
                     persisted = true;
                 } catch (e) { 
-                    logError("Fallo guardando en localStorage (Posible límite de cuota excedido)", { key });
+                    // Si se alcanza el límite de cuota (5MB), intentar purgar claves legacy sin prefijo v3_
+                    try {
+                        let freed = false;
+                        for (let i = localStorage.length - 1; i >= 0; i--) {
+                            const k = localStorage.key(i);
+                            if (k && !k.startsWith(VERSION + '_') && !k.startsWith('firebase:')) {
+                                localStorage.removeItem(k);
+                                freed = true;
+                            }
+                        }
+                        if (freed) {
+                            localStorage.setItem(`${VERSION}_${key}`, value);
+                            persisted = true;
+                        }
+                    } catch (_) { }
+
+                    if (!persisted) {
+                        if (typeof console !== 'undefined' && console.warn) {
+                            console.warn(`[CapaSuite Storage] Cuota de localStorage superada para '${key}'. Guardando en memoria/sesión de respaldo.`, e);
+                        }
+                    }
                 }
             }
             const savedInSession = saveToSession(key, value);
