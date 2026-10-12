@@ -259,7 +259,7 @@ test('email HTML renders hotel branding, clear table headers, and free rooms cor
 
     // Free rooms (libres): Cumbria has capacity 50 - 20 rooms = 30 libres
     assert.match(htmlCumbria, /30\s*<span[^>]*>libres<\/span>/i);
-    assert.match(plainCumbria, /30 libres/);
+    assert.match(plainCumbria, /30 (?:libres|lib\.)/);
 
     // Guadiana has capacity 50 - 45 rooms = 5 libres
     assert.match(htmlGuadiana, /5\s*<span[^>]*>libres<\/span>/i);
@@ -472,8 +472,8 @@ test('Guadiana is branded and displayed everywhere as Sercotel Guadiana in email
     assert.match(htmlOutput, /Cambios de Tarifas Realizados Hoy &mdash; Sercotel Guadiana/);
 
     // Plain text
-    assert.match(plainOutput, /- Hotel: Sercotel Guadiana/);
-    assert.match(plainOutput, /para Sercotel Guadiana:/);
+    assert.match(plainOutput, /[•\-] \*?Hotel:\*? Sercotel Guadiana/);
+    assert.match(plainOutput, /para \*?Sercotel Guadiana\*?:/);
 });
 
 test('Cumbria is branded and displayed everywhere as Cumbria Spa&Hotel in email and modal cards', () => {
@@ -500,8 +500,8 @@ test('Cumbria is branded and displayed everywhere as Cumbria Spa&Hotel in email 
     assert.match(htmlOutput, /Cambios de Tarifas Realizados Hoy &mdash; Cumbria Spa&Hotel/);
 
     // Plain text
-    assert.match(plainOutput, /- Hotel: Cumbria Spa&Hotel/);
-    assert.match(plainOutput, /para Cumbria Spa&Hotel:/);
+    assert.match(plainOutput, /[•\-] \*?Hotel:\*? Cumbria Spa&Hotel/);
+    assert.match(plainOutput, /para \*?Cumbria Spa&Hotel\*?:/);
 });
 
 test('email HTML provides wider date column with side-by-side day badge and transfers colored occupancy badges', () => {

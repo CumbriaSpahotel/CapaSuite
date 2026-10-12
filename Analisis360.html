@@ -1765,7 +1765,7 @@
                 <!-- 2. CHARTS GRID (DISTRIBUCIÓN Y DEMANDA SEMANAL) -->
                 <div class="charts-grid" style="margin-bottom: 25px;">
                     <div class="chart-container">
-                        <h3 style="color: var(--text-main);"><span style="color: var(--primary);">◔</span> Ingresos de habitaciones</h3>
+                        <h3 style="color: var(--text-main);"><span style="color: var(--primary);">◔</span> Producción por Servicio</h3>
                         <div class="chart-wrapper">
                             <canvas id="serviceChart"></canvas>
                         </div>
@@ -4336,8 +4336,8 @@
             
             renderKPIRow(agg, currentHotel);
             renderHistoricalChart(midx);
-            renderCharts(agg, data.segment || {}, data.daily || {}, midx);
-            renderTables(agg, data.segment || {}, midx);
+            renderCharts(agg, data.segment || {}, data.daily || {}, midx, data);
+            renderTables(agg, data.segment || {}, midx, data);
             if (typeof renderYieldStrategy === 'function') {
                 renderYieldStrategy(data, currentHotel, currentYear, midx);
             }
@@ -4995,12 +4995,85 @@
             return result;
         }
 
-        function renderCharts(agg, segmentDb, dailyDb, midx) {
-            const colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#f97316'];
+        function renderCharts(agg, segmentDb, dailyDb, midx, yearDataArg) {
+            const colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#f97316', '#14b8a6', '#64748b'];
             
-            // 1. Service Chart
-            const serviceLabels = Object.keys(agg.summary);
-            const serviceData = Object.values(agg.summary).map(s => s.revenue);
+            // 1. Service Chart (Producción por Servicio / Departamento)
+            const resolvedYearData = yearDataArg || (typeof db !== 'undefined' && db[currentHotel] && db[currentHotel][currentYear]) || {};
+            const serviceDb = resolvedYearData.service || {};
+            const groupedTY = getGroupedProduction(serviceDb);
+            const otbData = resolvedYearData.otb || { revenue: new Array(12).fill(0), rooms: new Array(12).fill(0), breakdown: {} };
+            const mode = (typeof currentViewMode !== 'undefined' ? currentViewMode : 'projected');
+
+            const now = new Date();
+            const curY = now.getFullYear();
+            const curM = now.getMonth();
+            const isMonthClosed = (m) => {
+                if (parseInt(currentYear) < curY) return true;
+                if (parseInt(currentYear) > curY) return false;
+                return m < curM;
+            };
+
+            const deptSummary = {};
+            let totalDeptRev = 0;
+
+            Object.entries(groupedTY).forEach(([gid, g]) => {
+                let gRealVal = 0, gOtbVal = 0, gProjVal = 0;
+                for (let m = 0; m < 12; m++) {
+                    if (midx !== -1 && m !== midx) continue;
+                    const r = g.revenue?.[m] || 0;
+                    gRealVal += r;
+
+                    let otbKey = null;
+                    const gName = g.name.toUpperCase();
+                    if (gName.includes('HABITACIÓN') || gName.includes('HABITACION')) otbKey = 'habitacion';
+                    else if (gName.includes('DESAYUNO')) otbKey = 'desayunos';
+                    else if (gName.includes('RESTAURANTE') || gName.includes('ALMUERZO') || gName.includes('CENA')) otbKey = 'restaurante';
+                    else if (gName.includes('SPA')) otbKey = 'spa';
+                    else if (gName.includes('VARIOS') || gName.includes('OTROS') || gName.includes('EXTRAS')) otbKey = 'varios';
+
+                    const groupOtbArr = (otbData.breakdown && otbKey && otbData.breakdown[otbKey])
+                        ? otbData.breakdown[otbKey]
+                        : ((otbKey === 'habitacion' && otbData.breakdown?.habitacion) ? otbData.breakdown.habitacion : new Array(12).fill(0));
+
+                    const o = groupOtbArr[m] || 0;
+                    gOtbVal += o;
+
+                    if (isMonthClosed(m)) {
+                        gProjVal += r;
+                    } else {
+                        gProjVal += (r + o);
+                    }
+                }
+
+                let chosenVal = 0;
+                if (mode === 'real') chosenVal = gRealVal;
+                else if (mode === 'otb') chosenVal = gOtbVal;
+                else chosenVal = gProjVal;
+
+                if (chosenVal > 0) {
+                    const cleanName = g.name.split('. ')[1] || g.name;
+                    deptSummary[cleanName] = (deptSummary[cleanName] || 0) + chosenVal;
+                    totalDeptRev += chosenVal;
+                }
+            });
+
+            let serviceLabels = [];
+            let serviceData = [];
+
+            if (Object.keys(deptSummary).length > 0) {
+                // Ordenar de mayor a menor ingreso
+                const sortedDepts = Object.entries(deptSummary).sort((a, b) => b[1] - a[1]);
+                sortedDepts.forEach(([name, rev]) => {
+                    const pct = totalDeptRev > 0 ? (rev / totalDeptRev * 100).toFixed(1) : '0';
+                    serviceLabels.push(`${name} (${pct}%)`);
+                    serviceData.push(rev);
+                });
+            } else {
+                serviceLabels = Object.keys(agg.summary);
+                serviceData = Object.values(agg.summary).map(s => s.revenue);
+            }
+
             updateChart('serviceChart', 'doughnut', serviceLabels, serviceData, colors);
 
             // 2. Channel Chart (Detailed Channels if available, else Grouped Segments)
@@ -5113,13 +5186,43 @@
             updateChart('weeklyChart', 'bar', ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"], avgWeekly, '#6366f1');
         }
 
-        function renderTables(agg, segmentDb, midx) {
+        function renderTables(agg, segmentDb, midx, yearDataArg) {
             const getVal = (arr) => midx === -1 ? arr.reduce((a, b) => a + b, 0) : arr[midx];
 
             const sBody = document.getElementById('servicesBody');
             sBody.innerHTML = '';
-            agg.raw.sort((a, b) => b.rev - a.rev).forEach(item => {
-                const mix = agg.totalRev > 0 ? (item.rev / agg.totalRev * 100).toFixed(1) : 0;
+
+            const resolvedYearData = yearDataArg || (typeof db !== 'undefined' && db[currentHotel] && db[currentHotel][currentYear]) || {};
+            const serviceDb = resolvedYearData.service || {};
+            
+            // Recoger todos los servicios/conceptos con producción en el periodo
+            const allServiceItems = [];
+            let totalHotelProduction = 0;
+
+            Object.values(serviceDb).forEach(s => {
+                const name = typeof normalizeStr === 'function' ? normalizeStr(s.name) : String(s.name || '').toUpperCase().trim();
+                if (name === "TOTAL" || name === "TOTAL_MASTER" || name.includes("TOTAL_PROD")) return;
+                let rev = 0, rms = 0;
+                for (let m = 0; m < 12; m++) {
+                    if (midx !== -1 && m !== midx) continue;
+                    rev += (s.revenue?.[m] || 0);
+                    rms += (s.rooms?.[m] || 0);
+                }
+                const gid = typeof getGroupID === 'function' ? getGroupID(s.name) : "VARIOS";
+                if (gid === 'OMIT') return;
+                const category = GROUP_TO_CATEGORY[gid] || "Otros";
+                if (rev > 0 || rms > 0) {
+                    allServiceItems.push({ name: s.name, rev, rms, category });
+                    totalHotelProduction += rev;
+                }
+            });
+
+            // Si hay conceptos de servicios cargados, mostrarlos; si no, fallback a agg.raw
+            const itemsToRender = allServiceItems.length > 0 ? allServiceItems : (agg.raw || []);
+            const baseTotal = totalHotelProduction > 0 ? totalHotelProduction : (agg.totalRev || 0);
+
+            itemsToRender.sort((a, b) => b.rev - a.rev).forEach(item => {
+                const mix = baseTotal > 0 ? (item.rev / baseTotal * 100).toFixed(1) : 0;
                 sBody.innerHTML += `<tr>
                     <td><div style="font-weight:700; color:var(--text-main);">${item.name}</div><div style="font-size:0.65rem; color:var(--text-muted);">${item.category}</div></td>
                     <td style="font-weight:600;">${fmt(item.rev)}</td>
