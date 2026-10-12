@@ -4005,6 +4005,16 @@
 
                 const commissionNote = r.commissionAmountTY > 0 ? ` <span style="font-size:0.65rem; color:#ef4444; display:block; font-weight:normal;">(-${fmt(r.commissionAmountTY)})</span>` : '';
 
+                let tanteoAlertBadge = '';
+                if (typeof SegmentAnalysis !== 'undefined' && SegmentAnalysis.canonical && SegmentAnalysis.canonical(r.name) === 'GRTANTEO' && SegmentAnalysis.detectGrtanteoAlerts) {
+                    try {
+                        const tAlert = SegmentAnalysis.detectGrtanteoAlerts({ forecastDB, hotel, year });
+                        if (tAlert && tAlert.hasAlert) {
+                            tanteoAlertBadge = ` <span style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); border-radius:4px; padding:1px 6px; font-size:0.68rem; font-weight:700; margin-left:6px;" title="No se permiten reservas en tanteo a menos de 15 días de la llegada">⚠️ < 15d (${tAlert.totalRooms} RN)</span>`;
+                        }
+                    } catch (e) {}
+                }
+
                 let mainRow = `
                     <tr style="border-bottom: 1px solid var(--border);">
                         <td style="font-weight:700; color:var(--text-main); white-space:nowrap;">
@@ -4012,6 +4022,7 @@
                                 ${expandBtn}
                                 <span>${r.name}</span>
                                 ${hasChannels ? `<span style="font-size:0.68rem; color:var(--text-muted); font-weight:normal; margin-left:4px;">(${r.channels.length} can.)</span>` : ''}
+                                ${tanteoAlertBadge}
                             </div>
                         </td>
                         <!-- PRODUCCIÓN HABITACIÓN -->

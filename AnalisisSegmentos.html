@@ -487,10 +487,96 @@
             from { transform: scale(0.95); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
-        .upload-area.dragging {
-            border-color: var(--primary) !important;
-            background: rgba(99, 102, 241, 0.12) !important;
-            transform: scale(1.01);
+        .grtanteo-alert-card {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(245, 158, 11, 0.08) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            border-left: 5px solid #ef4444;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: all 0.25s ease;
+        }
+        .grtanteo-alert-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .grtanteo-alert-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #ef4444;
+            margin: 0;
+        }
+        [data-theme="light"] .grtanteo-alert-title {
+            color: #b91c1c;
+        }
+        .grtanteo-alert-desc {
+            margin: 4px 0 0 0;
+            font-size: 0.88rem;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+        .grtanteo-alert-dates {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .grtanteo-date-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        [data-theme="light"] .grtanteo-date-pill {
+            color: #b91c1c;
+            background: #fee2e2;
+        }
+        .grtanteo-ok-card {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-left: 4px solid #10b981;
+            border-radius: 10px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.88rem;
+            color: var(--text-main);
+        }
+        .badge-grtanteo-warning {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-left: 6px;
+            line-height: 1.2;
+        }
+        [data-theme="light"] .badge-grtanteo-warning {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .row-grtanteo-alert {
+            background: rgba(239, 68, 68, 0.06) !important;
         }
 
     </style>
@@ -575,6 +661,7 @@
         <div id="dashboard" class="dashboard">
             <div class="metric-indicator"><label for="segmentSelector"><strong>Segmento que quieres analizar</strong></label><select id="segmentSelector" onchange="selectSegment(this.value)"></select><span class="analysis-note">Actualiza indicadores, evolución, comparativa y detalle mensual.</span></div>
             <p id="period-note" class="analysis-note"></p>
+            <div id="grtanteo-global-alert" style="display:none; margin: 12px 0;"></div>
             <div class="kpi-grid">
                 <div class="card" style="border-left: 4px solid var(--primary);">
                     <div class="kpi-label">Prod. Habitación</div>
@@ -643,7 +730,7 @@
                 </div>
             </div>
 
-            <section class="card"><h3 id="monthly-title">Detalle mensual</h3><div class="table-container"><table><thead><tr><th>Mes</th><th>Producción</th><th>Año comparado</th><th>Variación</th><th>Habitaciones (RN)</th><th>ADR</th><th>Peso en el hotel</th></tr></thead><tbody id="monthly-body"></tbody></table></div></section>
+            <section class="card"><h3 id="monthly-title">Detalle mensual</h3><div id="grtanteo-monthly-alert" style="display:none; margin: 12px 0 16px 0;"></div><div class="table-container"><table><thead><tr><th>Mes</th><th>Producción</th><th>Año comparado</th><th>Variación</th><th>Habitaciones (RN)</th><th>ADR</th><th>Peso en el hotel</th></tr></thead><tbody id="monthly-body"></tbody></table></div></section>
             
             <!-- DESGLOSE POR CANALES / OPERADORES -->
             <section class="card" id="channels-card" style="display: none; padding: 0; overflow: hidden; margin-top: 20px;">

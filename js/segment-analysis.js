@@ -1096,6 +1096,144 @@
         };
     }
 
+    function detectGrtanteoAlerts(params = {}) {
+        const thresholdDays = Number(params.thresholdDays) || 15;
+        let todayStr = '';
+        if (typeof params.refDate === 'string' && params.refDate) {
+            todayStr = params.refDate;
+        } else {
+            try {
+                todayStr = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Madrid' }).format(params.refDate || new Date());
+            } catch (e) {
+                todayStr = new Date().toISOString().slice(0, 10);
+            }
+        }
+
+        const refD = new Date(todayStr + 'T00:00:00Z');
+        const hotel = params.hotel || '';
+        const year = params.year ? String(params.year) : String(refD.getUTCFullYear());
+        const items = [];
+        const coveredMonthsFromDaily = new Set();
+
+        // 1. Revisar previsiones diarias (segment_forecast_v2)
+        if (params.forecastDB && hotel) {
+            const hForecast = params.forecastDB[hotel] || {};
+            const segMap = hForecast.segment || {};
+            for (const [sName, sData] of Object.entries(segMap)) {
+                if (canonical(sName) !== 'GRTANTEO') continue;
+                if (!sData || !sData.days) continue;
+
+                for (const [iso, dt] of Object.entries(sData.days)) {
+                    const rms = Number(dt.rooms) || 0;
+                    if (rms <= 0) continue;
+
+                    const targetD = new Date(iso + 'T00:00:00Z');
+                    if (isNaN(targetD.getTime())) continue;
+
+                    const diffDays = Math.round((targetD - refD) / 86400000);
+                    const [yStr, mStr, dStr] = iso.split('-');
+                    const mIdx = parseInt(mStr, 10) - 1;
+                    coveredMonthsFromDaily.add(mIdx);
+
+                    if (diffDays < thresholdDays) {
+                        items.push({
+                            iso,
+                            dateFormatted: `${dStr}/${mStr}/${yStr}`,
+                            year: yStr,
+                            month: mIdx,
+                            day: parseInt(dStr, 10),
+                            rooms: rms,
+                            revenue: Number(dt.accommodation || dt.revenue || 0),
+                            diffDays,
+                            isExpired: diffDays < 0,
+                            isUrgent: diffDays >= 0 && diffDays < thresholdDays,
+                            statusLabel: diffDays < 0 
+                                ? `Vencida (hace ${Math.abs(diffDays)} d.)` 
+                                : (diffDays === 0 ? 'Llegada HOY' : `Llegada en ${diffDays} d.`)
+                        });
+                    }
+                }
+            }
+        }
+
+        // 2. Revisar si hay datos en hotelData (producción o forecast mensual) para el año en curso
+        const hData = params.hotelData || (params.historicalDB && hotel && params.historicalDB[hotel]?.[year]);
+        if (hData && hData.segment) {
+            for (const [sName, sObj] of Object.entries(hData.segment)) {
+                if (canonical(sName) !== 'GRTANTEO') continue;
+                if (!sObj || !sObj.rooms) continue;
+
+                const refYear = String(refD.getUTCFullYear());
+                if (year === refYear) {
+                    const curMonthIdx = refD.getUTCMonth();
+                    const dayOfMonth = refD.getUTCDate();
+                    const daysInCurMonth = new Date(Date.UTC(Number(year), curMonthIdx + 1, 0)).getUTCDate();
+                    const daysLeftInCurMonth = daysInCurMonth - dayOfMonth;
+
+                    // Si el mes en curso tiene habitaciones y no se desglosó por día en previsiones
+                    if (!coveredMonthsFromDaily.has(curMonthIdx) && (sObj.rooms[curMonthIdx] || 0) > 0) {
+                        items.push({
+                            iso: `${year}-${String(curMonthIdx + 1).padStart(2, '0')}`,
+                            dateFormatted: `${months[curMonthIdx]} ${year}`,
+                            year: year,
+                            month: curMonthIdx,
+                            day: dayOfMonth,
+                            rooms: sObj.rooms[curMonthIdx],
+                            revenue: Number(sObj.accommodation?.[curMonthIdx] || sObj.revenue?.[curMonthIdx] || 0),
+                            diffDays: daysLeftInCurMonth,
+                            isExpired: false,
+                            isUrgent: true,
+                            isMonthlyNotice: true,
+                            statusLabel: `Mes en curso (${daysLeftInCurMonth} días restantes)`
+                        });
+                    }
+
+                    // Próximo mes si estamos a menos de 15 días del fin de mes
+                    if (daysLeftInCurMonth < thresholdDays) {
+                        const nextMonthIdx = curMonthIdx + 1;
+                        if (nextMonthIdx < 12 && !coveredMonthsFromDaily.has(nextMonthIdx) && (sObj.rooms[nextMonthIdx] || 0) > 0) {
+                            items.push({
+                                iso: `${year}-${String(nextMonthIdx + 1).padStart(2, '0')}`,
+                                dateFormatted: `${months[nextMonthIdx]} ${year}`,
+                                year: year,
+                                month: nextMonthIdx,
+                                day: 1,
+                                rooms: sObj.rooms[nextMonthIdx],
+                                revenue: Number(sObj.accommodation?.[nextMonthIdx] || sObj.revenue?.[nextMonthIdx] || 0),
+                                diffDays: daysLeftInCurMonth + 1,
+                                isExpired: false,
+                                isUrgent: true,
+                                isMonthlyNotice: true,
+                                statusLabel: `Próximo mes (inicia en ${daysLeftInCurMonth + 1} días)`
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        items.sort((a, b) => a.iso.localeCompare(b.iso));
+        const totalRooms = items.reduce((s, it) => s + (it.rooms || 0), 0);
+        const totalRevenue = items.reduce((s, it) => s + (it.revenue || 0), 0);
+        const affectedMonths = [...new Set(items.map(it => it.month))].sort((a, b) => a - b);
+        const hasAlert = items.length > 0;
+
+        return {
+            hasAlert,
+            thresholdDays,
+            refDate: todayStr,
+            totalRooms,
+            totalRevenue,
+            itemCount: items.length,
+            items,
+            affectedMonths,
+            message: hasAlert
+                ? `Se han detectado ${totalRooms} habitaciones en GRTANTEO con menos de ${thresholdDays} días de la llegada (${items.length} fecha${items.length > 1 ? 's' : ''}).`
+                : 'No se registran reservas activas en GRTANTEO a menos de 15 días de la llegada.',
+            policyRule: 'No debemos tener reservas en GRTANTEO con menos de 15 días de la llegada. Deben confirmarse a GRUPOS o cancelarse para liberar el inventario.'
+        };
+    }
+
     const api = { 
         parse, 
         merge, 
@@ -1121,6 +1259,7 @@
         getChannelCommissionConfig,
         saveChannelCommissionConfig,
         calculateNetMetrics,
+        detectGrtanteoAlerts,
         DEFAULT_CHANNEL_COMMISSIONS,
         DEFAULT_SEGMENT_COMMISSIONS
     };

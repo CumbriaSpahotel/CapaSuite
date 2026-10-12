@@ -786,8 +786,66 @@ function renderDashboard() {
     const months = el('monthSelector').value === 'All' ? SegmentAnalysis.availableMonths(hotelData) : [Number(el('monthSelector').value)];
     const segmentNames = [...new Set([...SegmentAnalysis.segments(hotelData), ...SegmentAnalysis.segments(hotelPrevious)].map(s => s.name))].sort((a, b) => a.localeCompare(b, 'es'));
     if (currentSegment && !segmentNames.includes(currentSegment)) currentSegment = '';
-    el('segmentSelector').replaceChildren(new Option('Todos los segmentos', ''), ...segmentNames.map(name => new Option(name, name)));
+
+    const grtanteoAlerts = (SegmentAnalysis && SegmentAnalysis.detectGrtanteoAlerts) ? SegmentAnalysis.detectGrtanteoAlerts({
+        forecastDB,
+        historicalDB,
+        hotel: currentHotel,
+        year: currentYear,
+        hotelData
+    }) : { hasAlert: false, totalRooms: 0, items: [], affectedMonths: [] };
+
+    el('segmentSelector').replaceChildren(
+        new Option('Todos los segmentos', ''),
+        ...segmentNames.map(name => {
+            const isTanteo = SegmentAnalysis && SegmentAnalysis.canonical && SegmentAnalysis.canonical(name) === 'GRTANTEO';
+            const label = (isTanteo && grtanteoAlerts.hasAlert)
+                ? `⚠️ ${name} (${grtanteoAlerts.totalRooms} RN a < 15 días)`
+                : name;
+            return new Option(label, name);
+        })
+    );
     el('segmentSelector').value = currentSegment;
+
+    const globalAlertEl = el('grtanteo-global-alert');
+    if (globalAlertEl) {
+        if (grtanteoAlerts.hasAlert) {
+            const nearestItems = grtanteoAlerts.items.slice(0, 6);
+            const remainingCount = grtanteoAlerts.items.length - nearestItems.length;
+            const pillsHtml = nearestItems.map(it => 
+                `<span class="grtanteo-date-pill">📅 <strong>${it.dateFormatted}</strong>: ${it.rooms} RN · <em>${it.statusLabel}</em></span>`
+            ).join('');
+            const moreHtml = remainingCount > 0 ? `<span style="font-size:0.8rem; color:var(--text-muted); align-self:center;">+${remainingCount} fecha(s) más</span>` : '';
+
+            globalAlertEl.style.display = 'block';
+            globalAlertEl.innerHTML = `
+                <div class="grtanteo-alert-card">
+                    <div class="grtanteo-alert-header">
+                        <div>
+                            <h4 class="grtanteo-alert-title">
+                                <span>⚠️</span> AVISO CRÍTICO DE REVENUE · Reservas en GRTANTEO con menos de 15 días
+                            </h4>
+                            <p class="grtanteo-alert-desc">
+                                <strong>Política de Revenue:</strong> No debemos tener reservas en <strong>GRTANTEO</strong> con menos de 15 días de la llegada.
+                                Hay <strong>${grtanteoAlerts.totalRooms} habitaciones-noche</strong> (${fmt(grtanteoAlerts.totalRevenue)}) retenidas en tanteo que deben <strong>confirmarse a GRUPOS</strong> o <strong>liberarse al inventario</strong> inmediatamente para no retener inventario bloqueado.
+                            </p>
+                        </div>
+                        <button class="btn" style="padding: 6px 14px; font-size: 0.8rem; background: #ef4444;" onclick="selectSegment('GRTANTEO')">
+                            🔍 Analizar GRTANTEO
+                        </button>
+                    </div>
+                    <div class="grtanteo-alert-dates">
+                        ${pillsHtml}
+                        ${moreHtml}
+                    </div>
+                </div>
+            `;
+        } else {
+            globalAlertEl.style.display = 'none';
+            globalAlertEl.innerHTML = '';
+        }
+    }
+
     const scopeName = currentSegment || 'Todos los segmentos';
     const data = SegmentAnalysis.scope(hotelData, currentSegment), previous = SegmentAnalysis.scope(hotelPrevious, currentSegment);
     const comparable = SegmentAnalysis.comparable(data, previous, months);
@@ -922,7 +980,12 @@ function renderDashboard() {
         const expandIcon = hasMultipleChannels ? `<button class="toggle-btn" data-toggle-seg="${escapeHTML(row.name)}" style="padding: 2px 6px; font-size: 0.7rem; margin-right: 6px; border-radius: 4px; line-height: 1;" title="${isExpanded ? 'Colapsar canales' : 'Ver canales de este segmento'}">${isExpanded ? '▼' : '▶'}</button>` : '';
         const channelCountBadge = hasMultipleChannels ? `<span style="font-size: 0.72rem; color: var(--text-muted); font-weight: normal; margin-left: 6px;">(${segChannels.length} can.)</span>` : '';
 
-        let mainRow = `<tr><td><div style="display: flex; align-items: center;">${expandIcon}<button class="toggle-btn${row.name === currentSegment ? ' active' : ''}" data-segment="${escapeHTML(row.name)}">${escapeHTML(row.name)}</button>${channelCountBadge}</div></td><td>${fmt(row.value, currentMetric)}</td><td>${fmt(row.before, currentMetric)}</td><td class="${difference > 0 ? 'positive' : difference < 0 ? 'negative' : ''}">${difference > 0 ? '+' : ''}${fmt(difference, currentMetric)}</td><td>${delta(row.value, row.before)}</td><td>${pct(mix)}</td><td>${oldMix == null || mix == null ? '—' : new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: 'always' }).format((mix - oldMix) * 100) + ' pp'}</td></tr>`;
+        const isTanteoRow = SegmentAnalysis && SegmentAnalysis.canonical && SegmentAnalysis.canonical(row.name) === 'GRTANTEO';
+        const tanteoBadge = (isTanteoRow && grtanteoAlerts.hasAlert)
+            ? `<span class="badge-grtanteo-warning" title="No debemos tener reservas en tanteo con menos de 15 días de la llegada">⚠️ ${grtanteoAlerts.totalRooms} RN a &lt; 15 d.</span>`
+            : '';
+
+        let mainRow = `<tr><td><div style="display: flex; align-items: center;">${expandIcon}<button class="toggle-btn${row.name === currentSegment ? ' active' : ''}" data-segment="${escapeHTML(row.name)}">${escapeHTML(row.name)}</button>${channelCountBadge}${tanteoBadge}</div></td><td>${fmt(row.value, currentMetric)}</td><td>${fmt(row.before, currentMetric)}</td><td class="${difference > 0 ? 'positive' : difference < 0 ? 'negative' : ''}">${difference > 0 ? '+' : ''}${fmt(difference, currentMetric)}</td><td>${delta(row.value, row.before)}</td><td>${pct(mix)}</td><td>${oldMix == null || mix == null ? '—' : new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: 'always' }).format((mix - oldMix) * 100) + ' pp'}</td></tr>`;
 
         let subRows = '';
         if (isExpanded && hasMultipleChannels) {
@@ -983,6 +1046,11 @@ function renderDashboard() {
     const mover = previous ? [...rows].sort((a, b) => Math.abs(b.accommodation - (b.oldAccommodation ?? 0)) - Math.abs(a.accommodation - (a.oldAccommodation ?? 0)))[0] : null;
     el('insights').replaceChildren();
     const notes = [];
+    if (grtanteoAlerts.hasAlert) {
+        const topSample = grtanteoAlerts.items.slice(0, 3).map(i => `${i.dateFormatted} (${i.rooms} RN)`).join(', ');
+        const extraText = grtanteoAlerts.items.length > 3 ? ` (+${grtanteoAlerts.items.length - 3} más)` : '';
+        notes.push(`🚨 AVISO CRÍTICO GRTANTEO: Detectadas ${grtanteoAlerts.totalRooms} habitaciones en Grupos Tanteo a menos de 15 días de la llegada [${topSample}${extraText}]. Por política comercial no se pueden mantener tanteos con menos de 15 días: deben confirmarse a GRUPOS o liberarse de inmediato.`);
+    }
     if (currentSegment) {
         notes.push(`${scopeName}: ${pct(totalEffectiveAcc ? displayProd / totalEffectiveAcc : null)} de la producción de habitación ${isNetRevenueMode ? 'neta ' : ''}del hotel y ${pct(hotelTotals.rooms ? totals.rooms / hotelTotals.rooms : null)} de sus habitaciones-noche.`);
         if (prior) notes.push(`Frente a ${compareYear}: ${fmt(displayProd - displayPriorProd)} de producción ${isNetRevenueMode ? 'neta ' : ''}de habitación, ${fmt(totals.rooms - prior.rooms, 'rooms')} habitaciones-noche y ${fmt(displayAdr != null && displayPriorAdr != null ? displayAdr - displayPriorAdr : null, 'adr')} de diferencia en ADR.`);
@@ -994,6 +1062,49 @@ function renderDashboard() {
     if (invalidStored.length) notes.push('Hay errores de segmentación pendientes. Reimporta el informe para corregir los bloques señalados.');
     for (const note of notes) { const item = document.createElement('p'); item.textContent = note; el('insights').append(item); }
     el('monthly-title').textContent = `Detalle mensual · ${scopeName} · ${currentYear}${compareYear ? ' vs ' + compareYear : ''}`;
+
+    const isCurrentSegTanteo = SegmentAnalysis && SegmentAnalysis.canonical && SegmentAnalysis.canonical(scopeName) === 'GRTANTEO';
+    const mAlertEl = el('grtanteo-monthly-alert');
+    if (mAlertEl) {
+        if (isCurrentSegTanteo) {
+            if (grtanteoAlerts.hasAlert) {
+                mAlertEl.style.display = 'block';
+                mAlertEl.innerHTML = `
+                    <div class="grtanteo-alert-card">
+                        <div class="grtanteo-alert-header">
+                            <div>
+                                <h4 class="grtanteo-alert-title">
+                                    <span>🚨</span> AVISO OPERATIVO: No debemos tener reservas en GRTANTEO con menos de 15 días de la llegada
+                                </h4>
+                                <p class="grtanteo-alert-desc">
+                                    Se han localizado <strong>${grtanteoAlerts.totalRooms} habitaciones-noche</strong> (${fmt(grtanteoAlerts.totalRevenue)}) a menos de 15 días de la fecha de llegada.
+                                    <br><strong>Acciones requeridas:</strong>
+                                    <br>1️⃣ <strong>Confirmar:</strong> Si el grupo está cerrado, cambiar el segmento en el PMS a <strong>GRUPOS</strong> (Grupos Confirmados).
+                                    <br>2️⃣ <strong>Liberar:</strong> Si no está cerrado, liberar inmediatamente el bloqueo para que las habitaciones vuelvan al inventario general y puedan venderse.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="grtanteo-alert-dates">
+                            ${grtanteoAlerts.items.map(it => 
+                                `<span class="grtanteo-date-pill">📅 <strong>${it.dateFormatted}</strong>: ${it.rooms} RN · <em>${it.statusLabel}</em></span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                mAlertEl.style.display = 'block';
+                mAlertEl.innerHTML = `
+                    <div class="grtanteo-ok-card">
+                        <span>✅</span> <strong>Control de Tanteos Correcto:</strong> No hay reservas activas en GRTANTEO con menos de 15 días de la llegada. Se cumple la política de corte y liberación.
+                    </div>
+                `;
+            }
+        } else {
+            mAlertEl.style.display = 'none';
+            mAlertEl.innerHTML = '';
+        }
+    }
+
     el('monthly-body').innerHTML = months.map(m => {
         const value = SegmentAnalysis.aggregate(data, [m]), hotel = SegmentAnalysis.aggregate(hotelData, [m]);
         const old = previous ? SegmentAnalysis.aggregate(previous, [m]) : null;
@@ -1005,7 +1116,15 @@ function renderDashboard() {
         const mOldAcc = isNetRevenueMode ? mOldNet?.netAccommodation : old?.accommodation;
         const mHotelAcc = isNetRevenueMode ? mHotelNet.netAccommodation : hotel.accommodation;
         const adr = isNetRevenueMode ? mNet.netAdr : (value.adr != null ? value.adr : (value.rooms > 0 && value.accommodation != null ? value.accommodation / value.rooms : null));
-        return `<tr><td>${MONTH_ORDER[m]}</td><td>${fmt(mAcc)}</td><td>${fmt(mOldAcc)}</td><td>${delta(mAcc, mOldAcc)}</td><td>${fmt(value.rooms, 'rooms')}</td><td>${fmt(adr, 'adr')}</td><td>${pct(mHotelAcc ? mAcc / mHotelAcc : null)}</td></tr>`;
+
+        const isMonthAlert = isCurrentSegTanteo && grtanteoAlerts.affectedMonths.includes(m);
+        const rowClass = isMonthAlert ? ' class="row-grtanteo-alert"' : '';
+        const monthBadge = isMonthAlert ? ' <span class="badge-grtanteo-warning">⚠️ &lt; 15 días</span>' : '';
+        const roomsCell = (isMonthAlert && value.rooms > 0)
+            ? `<strong style="color: #ef4444;">${fmt(value.rooms, 'rooms')}</strong>`
+            : fmt(value.rooms, 'rooms');
+
+        return `<tr${rowClass}><td>${MONTH_ORDER[m]}${monthBadge}</td><td>${fmt(mAcc)}</td><td>${fmt(mOldAcc)}</td><td>${delta(mAcc, mOldAcc)}</td><td>${roomsCell}</td><td>${fmt(adr, 'adr')}</td><td>${pct(mHotelAcc ? mAcc / mHotelAcc : null)}</td></tr>`;
     }).join('');
     
     // Render Channels / Operators Section with Net & Gross capabilities
