@@ -854,6 +854,12 @@
             let prevPrice = null;
             let hasFlatRateWarning = false;
 
+            let ignoredComps = new Set();
+            try {
+                const rawIgnored = (typeof CapaStorage !== 'undefined' ? CapaStorage.getItem('ignored_competitors') : null) || (typeof localStorage !== 'undefined' ? localStorage.getItem('ignored_competitors') : null);
+                if (rawIgnored) ignoredComps = new Set(JSON.parse(rawIgnored));
+            } catch(e) {}
+
             if (compData && compData.data && compData.data.length > 0) {
                 compData.data.forEach(d => {
                     if (!d.hotels) return;
@@ -861,12 +867,25 @@
                     const dayInfo = getDayInfo(dateStr);
                     const my = d.hotels[currentHotel];
 
+                    // Helper to strictly identify external rivals (excludes Cumbria and Guadiana)
+                    const isExternalRival = (name) => {
+                        if (!name) return false;
+                        const lower = name.toLowerCase();
+                        if (lower.includes('guadiana') || lower.includes('cumbria')) return false;
+                        if (lower.includes('líbere') || lower.includes('libere')) return false;
+                        if (ignoredComps.has(name)) return false;
+                        return true;
+                    };
+
                     // Extract competitors and calculate active compSet metrics
                     const soldCompetitors = [];
                     const openCompPrices = [];
 
                     Object.keys(d.hotels).forEach(hKey => {
                         if (hKey !== currentHotel && d.hotels[hKey]) {
+                            const isLibere = hKey.toLowerCase().includes("líbere") || hKey.toLowerCase().includes("libere");
+                            if (ignoredComps.has(hKey) || isLibere) return;
+
                             if (d.hotels[hKey].sold) {
                                 soldCompetitors.push(hKey);
                             } else if (d.hotels[hKey].price > 0) {
@@ -875,10 +894,10 @@
                         }
                     });
 
-                    // Accurate average of open competitors
-                    let compAvg = (openCompPrices.length > 0)
-                        ? (openCompPrices.reduce((a, b) => a + b, 0) / openCompPrices.length)
-                        : (d.compAvg || 0);
+                    // Usar la media oficial d.compAvg (calculada y filtrada en AnalisisCompetencia); fallback a media de competidores activos
+                    let compAvg = (d.compAvg && d.compAvg > 0)
+                        ? d.compAvg
+                        : (openCompPrices.length > 0 ? (openCompPrices.reduce((a, b) => a + b, 0) / openCompPrices.length) : 0);
 
                     if (my && !my.sold && my.price > 0) {
                         // Check flat rate consecutive
@@ -894,7 +913,9 @@
                             const diff = compAvg - my.price;
                             const diffPct = (diff / compAvg) * 100;
 
-                            if (my.price < compAvg * 0.85) {
+                            // FILTRO ESTRATÉGICO: Ignorar oscilaciones triviales de +/- 10€.
+                            // Solo alertar si la brecha es verdaderamente estratégica: > 10€ Y > 15% por debajo.
+                            if (diff > 10 && my.price < compAvg * 0.85) {
                                 underpricedDates.push({
                                     dateISO: dateStr,
                                     dayOfWeek: dayInfo.dayOfWeek,
@@ -904,7 +925,9 @@
                                     compAvg: Math.round(compAvg),
                                     diff: Math.round(diff),
                                     diffPct: diffPct.toFixed(1),
-                                    tactic: dayInfo.isWeekend ? '🔺 Subir tarifa +15€ a +20€ (Fin de semana)' : '🔺 Ajustar tarifa BAR +10€ (Paridad laboral)'
+                                    tactic: dayInfo.isWeekend 
+                                        ? `Brecha de -${Math.round(diff)}€ en fin de semana: el mercado absorbe tarifas superiores; subir escalón BAR +15€ y exigir MLOS 2 noches.`
+                                        : `Brecha de -${Math.round(diff)}€ en laboral: la plaza sostiene precio más alto; reposicionar BAR +${Math.min(15, Math.round(diff * 0.7))}€ protegiendo ADR corporativo.`
                                 });
                             }
 
@@ -924,7 +947,7 @@
                         }
                     }
 
-                    // Sold Out tracking for competitors
+                    // Sold Out tracking for competitors (Análisis Estratégico de Demanda)
                     if (soldCompetitors.length > 0) {
                         const myPrice = (my && !my.sold && my.price > 0) ? my.price : 0;
                         const roundedCompAvg = compAvg > 0 ? Math.round(compAvg) : null;
@@ -932,13 +955,28 @@
                         const diffPct = (roundedCompAvg && diff !== null) ? ((diff / roundedCompAvg) * 100).toFixed(1) : null;
                         const mainComp = soldCompetitors.join(', ');
 
+                        // LECTURA ESTRATÉGICA: No solo alertar porque esté en Sold Out,
+                        // sino discernir según la brecha real con los rivales que aún quedan disponibles.
                         let tactic = '';
-                        if (myPrice > 0 && roundedCompAvg && myPrice < roundedCompAvg) {
-                            tactic = `🚨 ${mainComp} completo: Tu tarifa (${myPrice}€) está por debajo de los rivales disponibles (${roundedCompAvg}€). Subir BAR +25% de inmediato.`;
+                        let strategyType = 'neutral';
+                        if (myPrice > 0 && roundedCompAvg) {
+                            if (diff > 10) {
+                                // Sub-pricing severo con rival completo
+                                strategyType = 'opportunity';
+                                tactic = `🔥 Oportunidad Máxima: Con ${mainComp} completo y los rivales disponibles en ${roundedCompAvg}€, tu precio (${myPrice}€) tiene una brecha de -${Math.round(diff)}€. Subir BAR +20% a +25% de inmediato para capturar la demanda sobrante.`;
+                            } else if (diff < -10) {
+                                // Ya estamos por encima del resto
+                                strategyType = 'premium';
+                                tactic = `💎 Posición Favorable: Ya estás posicionado a precio premium (${myPrice}€ vs ${roundedCompAvg}€ de media disponible) con ${mainComp} agotado. Mantener tarifa BAR y reservar últimas unidades al canal directo.`;
+                            } else {
+                                // En paridad de mercado (+/- 10€)
+                                strategyType = 'parity';
+                                tactic = `⚖️ Paridad con el Mercado (${myPrice}€ vs ${roundedCompAvg}€): Demanda cautiva por el lleno de ${mainComp}. No tocar precio de apertura, pero aplicar estancia mínima (MLOS) si es fin de semana.`;
+                            }
                         } else if (myPrice > 0) {
-                            tactic = `🚨 ${mainComp} completo: Elevar BAR +20% a +35% para capturar demanda desplazada a precio premium.`;
+                            tactic = `🚨 ${mainComp} completo: Elevar BAR +15% a +25% para monetizar la demanda displaced a tarifa óptima.`;
                         } else {
-                            tactic = `🚨 ${mainComp} en Sold Out: Oportunidad de venta a tarifa máxima.`;
+                            tactic = `🚨 ${mainComp} en Sold Out: Oportunidad de venta a tarifa máxima en fechas punta.`;
                         }
 
                         soldOutDates.push({
@@ -952,11 +990,182 @@
                             compAvg: roundedCompAvg,
                             diff: diff,
                             diffPct: diffPct,
+                            strategyType: strategyType,
                             tactic: tactic
                         });
                     }
                 });
-            }
+
+                // ============================================================
+                // COMPETITOR INTELLIGENCE ENGINE (Excluding Cumbria & Guadiana)
+                // ============================================================
+                const isExternalRival = (name) => {
+                    if (!name) return false;
+                    const lower = name.toLowerCase();
+                    if (lower.includes('guadiana') || lower.includes('cumbria')) return false;
+                    if (lower.includes('líbere') || lower.includes('libere')) return false;
+                    if (ignoredComps.has(name)) return false;
+                    return true;
+                };
+
+                // 1. Gather baseline stats per external rival
+                const rivalStats = {};
+                compData.data.forEach(d => {
+                    if (!d.hotels) return;
+                    const dayInfo = getDayInfo(d.dateISO || d.date);
+                    Object.keys(d.hotels).forEach(hKey => {
+                        if (!isExternalRival(hKey)) return;
+                        const hObj = d.hotels[hKey];
+                        if (!hObj || hObj.sold || !hObj.price || hObj.price <= 0) return;
+
+                        if (!rivalStats[hKey]) {
+                            rivalStats[hKey] = {
+                                prices: [],
+                                weekdayPrices: [],
+                                weekendPrices: [],
+                                soldCount: 0
+                            };
+                        }
+                        rivalStats[hKey].prices.push(hObj.price);
+                        if (dayInfo.isWeekend) {
+                            rivalStats[hKey].weekendPrices.push(hObj.price);
+                        } else {
+                            rivalStats[hKey].weekdayPrices.push(hObj.price);
+                        }
+                    });
+                });
+
+                // Track sold outs for rivalStats
+                compData.data.forEach(d => {
+                    if (!d.hotels) return;
+                    Object.keys(d.hotels).forEach(hKey => {
+                        if (isExternalRival(hKey) && d.hotels[hKey] && d.hotels[hKey].sold) {
+                            if (!rivalStats[hKey]) rivalStats[hKey] = { prices: [], weekdayPrices: [], weekendPrices: [], soldCount: 0 };
+                            rivalStats[hKey].soldCount = (rivalStats[hKey].soldCount || 0) + 1;
+                        }
+                    });
+                });
+
+                Object.keys(rivalStats).forEach(hKey => {
+                    const st = rivalStats[hKey];
+                    st.avg = st.prices.length > 0 ? (st.prices.reduce((a, b) => a + b, 0) / st.prices.length) : 0;
+                    st.weekdayAvg = st.weekdayPrices.length > 0 ? (st.weekdayPrices.reduce((a, b) => a + b, 0) / st.weekdayPrices.length) : st.avg;
+                    st.weekendAvg = st.weekendPrices.length > 0 ? (st.weekendPrices.reduce((a, b) => a + b, 0) / st.weekendPrices.length) : st.avg;
+                    st.min = st.prices.length > 0 ? Math.min(...st.prices) : 0;
+                    st.max = st.prices.length > 0 ? Math.max(...st.prices) : 0;
+                    st.spread = st.max - st.min;
+                    // Detect strategy profile
+                    const weekendSurplus = st.weekendAvg - st.weekdayAvg;
+                    if (st.spread > 45 || (st.max >= st.avg * 1.5)) {
+                        st.strategyProfile = '⚡ Yield Agresivo / Alta Elasticidad';
+                        st.strategyDesc = 'Mueve precios fuertemente según ocupación y demanda de plaza.';
+                    } else if (weekendSurplus >= 18) {
+                        st.strategyProfile = '🏖️ Recargo Fin de Semana Fuerte';
+                        st.strategyDesc = `Prima el fin de semana (+${Math.round(weekendSurplus)}€) respecto a días de diario.`;
+                    } else if (st.spread <= 12) {
+                        st.strategyProfile = '🛡️ Tarifa Plana / Conservadora';
+                        st.strategyDesc = 'Apenas modula precios entre días laborables y festivos.';
+                    } else if (st.avg >= 90) {
+                        st.strategyProfile = '💎 Posicionamiento Premium';
+                        st.strategyDesc = 'Mantiene tarifas consistentemente altas protegiendo el ADR.';
+                    } else {
+                        st.strategyProfile = '📦 Estrategia de Volumen';
+                        st.strategyDesc = 'Tarifas ajustadas buscando volumen y alta rotación.';
+                    }
+                });
+
+                // 2. Detect Abnormal Behaviors (Spikes & Dumping)
+                const rivalAnomalies = [];
+                const rivalStrategicChanges = [];
+
+                compData.data.forEach(d => {
+                    if (!d.hotels) return;
+                    const dateStr = d.dateISO || d.date;
+                    const dayInfo = getDayInfo(dateStr);
+                    const my = d.hotels[currentHotel];
+                    const myPrice = (my && !my.sold && my.price > 0) ? my.price : 0;
+
+                    Object.keys(d.hotels).forEach(hKey => {
+                        if (!isExternalRival(hKey)) return;
+                        const hObj = d.hotels[hKey];
+                        if (!hObj) return;
+
+                        const rStat = rivalStats[hKey];
+                        const normalBase = dayInfo.isWeekend ? (rStat?.weekendAvg || rStat?.avg || 75) : (rStat?.weekdayAvg || rStat?.avg || 70);
+
+                        // Price anomaly detection
+                        if (!hObj.sold && hObj.price > 0 && rStat && rStat.prices.length >= 3) {
+                            const diffNormal = hObj.price - normalBase;
+                            const isSpike = (hObj.price >= normalBase * 1.30 && diffNormal >= 18) || hObj.price >= 125;
+                            const isDumping = (hObj.price <= normalBase * 0.72 && diffNormal <= -18);
+
+                            if (isSpike) {
+                                rivalAnomalies.push({
+                                    dateISO: dateStr,
+                                    dayOfWeek: dayInfo.dayOfWeek,
+                                    dayLabel: dayInfo.dayLabel,
+                                    isWeekend: dayInfo.isWeekend,
+                                    competitor: hKey,
+                                    rivalPrice: hObj.price,
+                                    normalPrice: Math.round(normalBase),
+                                    diff: Math.round(diffNormal),
+                                    type: 'spike',
+                                    badgeText: '🔺 PICO ANÓMALO',
+                                    badgeColor: '#dc2626',
+                                    myPrice: myPrice,
+                                    diagnosis: `Tarifa ${hObj.price}€ (+${Math.round(diffNormal)}€ sobre su media habitual de ${Math.round(normalBase)}€).`,
+                                    tactic: myPrice > 0 && myPrice < hObj.price
+                                        ? `Elevar tu BAR (+15€ a +25€) de inmediato. El rival detecta alta demanda o evento en la plaza.`
+                                        : `Monitorear disponibilidad. Posible evento local o pico de demanda cerrado.`
+                                });
+                            } else if (isDumping) {
+                                rivalAnomalies.push({
+                                    dateISO: dateStr,
+                                    dayOfWeek: dayInfo.dayOfWeek,
+                                    dayLabel: dayInfo.dayLabel,
+                                    isWeekend: dayInfo.isWeekend,
+                                    competitor: hKey,
+                                    rivalPrice: hObj.price,
+                                    normalPrice: Math.round(normalBase),
+                                    diff: Math.round(diffNormal),
+                                    type: 'dumping',
+                                    badgeText: '🔻 CAÍDA ANÓMALA',
+                                    badgeColor: '#ea580c',
+                                    myPrice: myPrice,
+                                    diagnosis: `Tarifa ${hObj.price}€ (${Math.round(diffNormal)}€ bajo su media habitual de ${Math.round(normalBase)}€).`,
+                                    tactic: `No entrar en guerra de precios hacia abajo. Proteger ADR corporativo o exigir estancia mínima.`
+                                });
+                            }
+                        }
+
+                        // Strategic Changes between uploads (change property)
+                        // FILTRO ESTRATÉGICO: Ignorar movimientos menores de +/-10€.
+                        // Solo alertar si el cambio es un giro estratégico real (> 10€ de movimiento).
+                        if (hObj.change && hObj.change.prev && hObj.price > 0) {
+                            const changeAmount = hObj.price - hObj.change.prev;
+                            if (Math.abs(changeAmount) > 10) {
+                                const isUp = changeAmount > 0;
+                                rivalStrategicChanges.push({
+                                    dateISO: dateStr,
+                                    dayOfWeek: dayInfo.dayOfWeek,
+                                    dayLabel: dayInfo.dayLabel,
+                                    isWeekend: dayInfo.isWeekend,
+                                    competitor: hKey,
+                                    rivalPrice: hObj.price,
+                                    prevPrice: hObj.change.prev,
+                                    diff: changeAmount,
+                                    type: isUp ? 'increase' : 'decrease',
+                                    myPrice: myPrice,
+                                    diagnosis: `Giro estratégico: ${isUp ? 'subida fuerte' : 'bajada agresiva'} de ${isUp ? '+' : ''}${changeAmount}€ (${hObj.change.prev}€ ➔ ${hObj.price}€).`,
+                                    tactic: isUp
+                                        ? `Subida acusada (+${changeAmount}€): el rival detecta aceleración de demanda o cierre de cupos. Reevalúa tu BAR al alza sin perder demanda.`
+                                        : `Bajada acusada (-${Math.abs(changeAmount)}€): el rival sufre falta de pick-up. No precipitarse a bajar; auditar antes tu ocupación actual.`
+                                });
+                            }
+                        }
+                    });
+                });
+
 
             const hotelRooms = getHotelRoomsCount(currentHotel);
             let totalOpportunityEuros = 0;
@@ -1049,6 +1258,81 @@
 • <b>Romper la Tarifa Plana:</b> Establece una política de precios dinámica: aplica un suplemento natural de <b>+15€ a +25€ en fines de semana</b> y prima los martes/miércoles corporativos, reduciendo la tarifa únicamente los domingos para capturar estancias puente.<br>
 • <b>Segmentación por Ventana:</b> Las reservas a más de 30 días vista deben tener una tarifa de apertura más firme que las de última hora en temporada valle.`,
                     actionUrl: 'AnalisisCalendario.html'
+                });
+            }
+
+            // ============================================================
+            // AUDIT 4B: Comportamiento Anormal de Precios en Rivales (Spikes & Dumping)
+            // ============================================================
+            if (rivalAnomalies && rivalAnomalies.length > 0) {
+                const spikeCount = rivalAnomalies.filter(a => a.type === 'spike').length;
+                const dumpCount = rivalAnomalies.filter(a => a.type === 'dumping').length;
+                const topAnomComps = [...new Set(rivalAnomalies.map(a => a.competitor))].slice(0, 3).join(', ');
+
+                insights.push({
+                    id: 'ins_comp_anomalies',
+                    category: 'competitor',
+                    priority: spikeCount > 0 ? 'critical' : 'warning',
+                    badge: '🚨 ANOMALÍAS DE PRECIO COMPSET',
+                    title: `Comportamiento anormal en competidores detectado en ${rivalAnomalies.length} fechas`,
+                    diagnostic: `Se han detectado <b>${rivalAnomalies.length} anomalías tarifarias</b> en rivales externos (${topAnomComps}): <b>${spikeCount} picos extraordinarios</b> (+30% a +60% sobre su media habitual, sugiriendo eventos locales o compresión súbita) y <b>${dumpCount} caídas anómalas</b> (posible dumping o liquidación de última hora). <i>(Excluye hoteles propios Cumbria y Guadiana).</i>`,
+                    strategy: `<b>Estrategia Revenue Experta ante Anomalías Rivales:</b><br>
+• <b>Explotación de Picos Rivales:</b> En las ${spikeCount} fechas donde los rivales disparan tarifas, incrementa de inmediato tu tarifa de apertura BAR entre <b>+15€ y +25€</b> para capturar la demanda sin regalar ocupación.<br>
+• <b>Inmunidad ante Dumping:</b> Si un rival tira tarifas por debajo de su suelo histórico, no entres en guerra de precios hacia abajo. Protege tu tarifa corporativa con valor añadido (parking, desayuno o cancelación flexible).<br>
+• <b>Alerta Temprana de Eventos:</b> Los picos anómalos son el mejor indicador de bodas multitudinarias, congresos o eventos deportivos en Ciudad Real aún no anunciados en calendario.`,
+                    dates: rivalAnomalies,
+                    datesTitle: 'Anomalías de Precio en Competidores del CompSet',
+                    datesSubtitle: `Detalle de ${rivalAnomalies.length} fechas con picos alcistas extraordinarios o caídas anómalas en rivales directos`,
+                    actionUrl: 'AnalisisCompetencia.html'
+                });
+            }
+
+            // ============================================================
+            // AUDIT 4C: Evolución & Cambios Estratégicos Recientes en Rivales
+            // ============================================================
+            if (rivalStrategicChanges && rivalStrategicChanges.length > 0) {
+                const upChanges = rivalStrategicChanges.filter(c => c.type === 'increase').length;
+                const downChanges = rivalStrategicChanges.filter(c => c.type === 'decrease').length;
+                const avgChange = Math.round(rivalStrategicChanges.reduce((s, c) => s + Math.abs(c.diff), 0) / rivalStrategicChanges.length);
+
+                insights.push({
+                    id: 'ins_comp_changes',
+                    category: 'competitor',
+                    priority: 'warning',
+                    badge: '📈 EVOLUCIÓN ESTRATÉGICA RIVALES',
+                    title: `Movimientos estratégicos recientes en ${rivalStrategicChanges.length} fechas del CompSet`,
+                    diagnostic: `Entre los últimos informes de mercado, los competidores directos han ajustado sus tarifas en <b>${rivalStrategicChanges.length} fechas</b> (variación media: <b>±${avgChange}€</b>): <b>${upChanges} subidas</b> y <b>${downChanges} bajadas</b>. Esto revela que los rivales están reaccionando activamente al ritmo de reservas.`,
+                    strategy: `<b>Lectura Estratégica & Contramedidas:</b><br>
+• <b>Acompañar Subidas de Mercado:</b> En las ${upChanges} fechas donde los competidores han subido tarifas, evalúa elevar tu BAR de forma paralela para no quedarte rezagado en precio medio.<br>
+• <b>Resistir a Bajadas Aisladas:</b> En las ${downChanges} fechas a la baja, comprueba primero tu OTB y pick-up antes de igualar a la baja; la mayoría son ajustes tácticos de última hora.<br>
+• <b>Monitorización Continua:</b> Los cambios acumulados señalan hacia qué meses del año se está desplazando la demanda real en Ciudad Real.`,
+                    dates: rivalStrategicChanges,
+                    datesTitle: 'Evolución y Cambios Estratégicos de Competidores',
+                    datesSubtitle: `Seguimiento de ${rivalStrategicChanges.length} modificaciones de precio detectadas entre cargas del CompSet`,
+                    actionUrl: 'AnalisisCompetencia.html'
+                });
+            }
+
+            // ============================================================
+            // AUDIT 4D: Radiografía de Estrategias y Perfiles Competitivos
+            // ============================================================
+            if (rivalStats && Object.keys(rivalStats).length > 0) {
+                const profileCards = Object.entries(rivalStats).map(([compName, st]) => {
+                    return `• <b>${compName}:</b> Tarifa Media: <b>${Math.round(st.avg)}€</b> (Laboral: ${Math.round(st.weekdayAvg)}€ · Fin de Sem: ${Math.round(st.weekendAvg)}€ · Rango: ${Math.round(st.min)}€-${Math.round(st.max)}€). <i>Perfil:</i> <b>${st.strategyProfile}</b> — ${st.strategyDesc}`;
+                }).join('<br>');
+
+                insights.push({
+                    id: 'ins_comp_profiles',
+                    category: 'competitor',
+                    priority: 'info',
+                    badge: '🕵️ INTELIGENCIA DE COMPSET',
+                    title: `Radiografía Estratégica: Cómo compiten los rivales de la plaza`,
+                    diagnostic: `Análisis de comportamiento y elasticidad de precios de los competidores directos en Ciudad Real (análisis exclusivo de rivales externos, excluyendo Cumbria y Guadiana):<br><br>${profileCards}`,
+                    strategy: `<b>Directrices de Posicionamiento Estratégico:</b><br>
+• <b>Diferenciación por Segmento:</b> Frente a hoteles con recargo agresivo de fin de semana, ofrece paquetes experienciales de valor (gastronomía, bienestar/spa).<br>
+• <b>Ataque a Rivales con Tarifa Plana:</b> Los hoteles con tarifa plana no optimizan ingresos ni en picos ni en valles; captura a sus clientes corporativos entre semana con tarifas competitivas y lidera el precio en fechas de ocio.<br>
+• <b>Benchmarking Continuo:</b> Contrasta semanalmente tu posicionamiento en la pantalla de <b>Análisis de Competencia</b> para mantener el liderazgo en RevPAR Index.`,
+                    actionUrl: 'AnalisisCompetencia.html'
                 });
             }
 
@@ -1361,6 +1645,7 @@
                     all: insights.length,
                     priority: insights.filter(i => i.priority === 'critical').length,
                     pricing: insights.filter(i => i.category === 'pricing').length,
+                    competitor: insights.filter(i => i.category === 'competitor').length,
                     distribution: insights.filter(i => i.category === 'distribution').length,
                     pickup: insights.filter(i => i.category === 'pickup').length,
                     budget: insights.filter(i => i.category === 'budget').length
@@ -1375,6 +1660,9 @@
                     </button>
                     <button class="filter-pill-btn" data-cat="pricing" onclick="filterInsights('pricing')">
                         <span>💰</span> Tarifas & Yield (${counts.pricing})
+                    </button>
+                    <button class="filter-pill-btn" data-cat="competitor" onclick="filterInsights('competitor')">
+                        <span>🕵️</span> Competencia (${counts.competitor})
                     </button>
                     <button class="filter-pill-btn" data-cat="distribution" onclick="filterInsights('distribution')">
                         <span>👥</span> Canales & Mix (${counts.distribution})
@@ -1465,9 +1753,13 @@
             if (subEl) subEl.innerText = subtitle;
 
             const isSoldOut = (insightId === 'ins_soldout');
+            const isCompAnomalies = (insightId === 'ins_comp_anomalies');
+            const isCompChanges = (insightId === 'ins_comp_changes');
 
             if (tableContainer) {
-                const headerHtml = isSoldOut ? `
+                let headerHtml = '';
+                if (isSoldOut) {
+                    headerHtml = `
                     <thead>
                         <tr style="background: rgba(0,0,0,0.03); border-bottom: 2px solid var(--border); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted);">
                             <th style="padding: 10px 12px;">Fecha</th>
@@ -1479,7 +1771,39 @@
                             <th style="padding: 10px 12px;">Estrategia Recomendada</th>
                         </tr>
                     </thead>
-                ` : `
+                    `;
+                } else if (isCompAnomalies) {
+                    headerHtml = `
+                    <thead>
+                        <tr style="background: rgba(0,0,0,0.03); border-bottom: 2px solid var(--border); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted);">
+                            <th style="padding: 10px 12px;">Fecha</th>
+                            <th style="padding: 10px 12px; text-align: center;">Día</th>
+                            <th style="padding: 10px 12px;">Rival CompSet</th>
+                            <th style="padding: 10px 12px; text-align: center;">Tipo Anomalía</th>
+                            <th style="padding: 10px 12px; text-align: right;">Tarifa Rival</th>
+                            <th style="padding: 10px 12px; text-align: right;">Media Normal</th>
+                            <th style="padding: 10px 12px; text-align: right;">Tu Tarifa</th>
+                            <th style="padding: 10px 12px;">Lectura & Recomendación Estratégica</th>
+                        </tr>
+                    </thead>
+                    `;
+                } else if (isCompChanges) {
+                    headerHtml = `
+                    <thead>
+                        <tr style="background: rgba(0,0,0,0.03); border-bottom: 2px solid var(--border); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted);">
+                            <th style="padding: 10px 12px;">Fecha</th>
+                            <th style="padding: 10px 12px; text-align: center;">Día</th>
+                            <th style="padding: 10px 12px;">Rival CompSet</th>
+                            <th style="padding: 10px 12px; text-align: center;">Movimiento</th>
+                            <th style="padding: 10px 12px; text-align: right;">Tarifa Previa</th>
+                            <th style="padding: 10px 12px; text-align: right;">Tarifa Actual</th>
+                            <th style="padding: 10px 12px; text-align: right;">Tu Tarifa</th>
+                            <th style="padding: 10px 12px;">Lectura Revenue</th>
+                        </tr>
+                    </thead>
+                    `;
+                } else {
+                    headerHtml = `
                     <thead>
                         <tr style="background: rgba(0,0,0,0.03); border-bottom: 2px solid var(--border); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted);">
                             <th style="padding: 10px 12px;">Fecha</th>
@@ -1490,7 +1814,8 @@
                             <th style="padding: 10px 12px;">Táctica Recomendada</th>
                         </tr>
                     </thead>
-                `;
+                    `;
+                }
 
                 const rowsHtml = targetInsight.dates.map(d => {
                     const displayDate = formatSpanishDate(d.dateISO || d.date);
@@ -1529,6 +1854,73 @@
                                 </td>
                                 <td style="padding: 10px 12px; font-size: 0.78rem; color: #0f172a;">
                                     ${d.tactic}
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    if (isCompAnomalies) {
+                        return `
+                            <tr style="border-bottom: 1px solid var(--border); font-size: 0.83rem;">
+                                <td style="padding: 10px 12px; font-weight: 700; white-space: nowrap;">
+                                    ${displayDate}
+                                </td>
+                                <td style="padding: 10px 12px; text-align: center;">
+                                    ${dayBadge}
+                                </td>
+                                <td style="padding: 10px 12px; font-weight: 700; color: #1e293b;">
+                                    🏨 ${d.competitor}
+                                </td>
+                                <td style="padding: 10px 12px; text-align: center;">
+                                    <span style="background:${d.type === 'spike' ? '#fee2e2' : '#ffedd5'}; color:${d.badgeColor}; padding:3px 8px; border-radius:6px; font-size:0.72rem; font-weight:800;">
+                                        ${d.badgeText}
+                                    </span>
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 800; color: #dc2626;">
+                                    ${d.rivalPrice} €
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 600; color: #64748b;">
+                                    ${d.normalPrice} €
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 800; color: #4338ca;">
+                                    ${d.myPrice ? d.myPrice + ' €' : '-'}
+                                </td>
+                                <td style="padding: 10px 12px; font-size: 0.78rem; color: #0f172a;">
+                                    <b>${d.diagnosis}</b><br><span style="color:#475569;">${d.tactic}</span>
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    if (isCompChanges) {
+                        const isUp = d.type === 'increase';
+                        return `
+                            <tr style="border-bottom: 1px solid var(--border); font-size: 0.83rem;">
+                                <td style="padding: 10px 12px; font-weight: 700; white-space: nowrap;">
+                                    ${displayDate}
+                                </td>
+                                <td style="padding: 10px 12px; text-align: center;">
+                                    ${dayBadge}
+                                </td>
+                                <td style="padding: 10px 12px; font-weight: 700; color: #1e293b;">
+                                    🏨 ${d.competitor}
+                                </td>
+                                <td style="padding: 10px 12px; text-align: center;">
+                                    <span style="background:${isUp ? '#dcfce7' : '#fee2e2'}; color:${isUp ? '#15803d' : '#b91c1c'}; padding:3px 8px; border-radius:6px; font-size:0.72rem; font-weight:800;">
+                                        ${isUp ? '📈 Subida +' + d.diff + '€' : '📉 Bajada ' + d.diff + '€'}
+                                    </span>
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 600; color: #64748b;">
+                                    ${d.prevPrice} €
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 800; color: ${isUp ? '#15803d' : '#b91c1c'};">
+                                    ${d.rivalPrice} €
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 800; color: #4338ca;">
+                                    ${d.myPrice ? d.myPrice + ' €' : '-'}
+                                </td>
+                                <td style="padding: 10px 12px; font-size: 0.78rem; color: #0f172a;">
+                                    <b>${d.diagnosis}</b><br><span style="color:#475569;">${d.tactic}</span>
                                 </td>
                             </tr>
                         `;
@@ -1579,16 +1971,31 @@
 
         function copyDatesModalData() {
             if (!currentActiveInsightDates || currentActiveInsightDates.length === 0) return;
-            const isSoldOut = currentActiveInsightDates[0] && currentActiveInsightDates[0].competitor !== undefined;
-            const header = isSoldOut
-                ? "FECHA\tDÍA\tRIVAL SOLD OUT\tTU TARIFA\tCOMPSET DISPONIBLE\tDIFERENCIA\tTÁCTICA\n"
-                : "FECHA\tDÍA\tTU TARIFA\tCOMPSET\tDIFERENCIA\tTÁCTICA\n";
+            const first = currentActiveInsightDates[0];
+            const isSoldOut = first && first.competitorsList !== undefined;
+            const isCompAnomalies = first && first.normalPrice !== undefined;
+            const isCompChanges = first && first.prevPrice !== undefined;
+
+            let header = "FECHA\tDÍA\tTU TARIFA\tCOMPSET\tDIFERENCIA\tTÁCTICA\n";
+            if (isSoldOut) {
+                header = "FECHA\tDÍA\tRIVAL SOLD OUT\tTU TARIFA\tCOMPSET DISPONIBLE\tDIFERENCIA\tTÁCTICA\n";
+            } else if (isCompAnomalies) {
+                header = "FECHA\tDÍA\tRIVAL\tTIPO\tTARIFA RIVAL\tMEDIA HABITUAL\tTU TARIFA\tRECOMENDACIÓN\n";
+            } else if (isCompChanges) {
+                header = "FECHA\tDÍA\tRIVAL\tVARIACIÓN\tTARIFA PREVIA\tTARIFA ACTUAL\tTU TARIFA\tLECTURA REVENUE\n";
+            }
 
             const text = header + currentActiveInsightDates.map(d => {
                 const dateStr = formatSpanishDate(d.dateISO || d.date);
                 const dayStr = `${d.dayOfWeek || ''} ${d.isWeekend ? '(Fin Sem)' : '(Laboral)'}`;
                 if (isSoldOut) {
                     return `${dateStr}\t${dayStr}\t${d.competitor || ''}\t${d.myPrice || 0} €\t${d.compAvg ? d.compAvg + ' €' : '-'}\t${d.diff ? (d.diff > 0 ? '-' : '+') + Math.abs(d.diff) + ' €' : '-'}\t${d.tactic || ''}`;
+                }
+                if (isCompAnomalies) {
+                    return `${dateStr}\t${dayStr}\t${d.competitor || ''}\t${d.badgeText || ''}\t${d.rivalPrice || 0} €\t${d.normalPrice || 0} €\t${d.myPrice || 0} €\t${d.tactic || ''}`;
+                }
+                if (isCompChanges) {
+                    return `${dateStr}\t${dayStr}\t${d.competitor || ''}\t${d.diff > 0 ? '+' : ''}${d.diff || 0} €\t${d.prevPrice || 0} €\t${d.rivalPrice || 0} €\t${d.myPrice || 0} €\t${d.tactic || ''}`;
                 }
                 return `${dateStr}\t${dayStr}\t${d.myPrice || 0} €\t${d.compAvg ? d.compAvg + ' €' : '-'}\t${d.diff ? (d.diff > 0 ? '-' : '+') + Math.abs(d.diff) + ' €' : '-'}\t${d.tactic || ''}`;
             }).join("\n");
@@ -1912,11 +2319,41 @@
             }
 
             // 4. Competition query
-            if (q.includes('competencia') || q.includes('precios') || q.includes('compset')) {
-                return `🔍 **Diagnóstico de Competencia & CompSet para ${hotelName}:**\n\n` +
-                    `• Se han detectado fechas donde tu hotel está cobrando significativamente menos que la media de la plaza, generando un coste de oportunidad importante.\n` +
-                    `• En días de alta concentración de demanda, tus competidores ya han elevado tarifas por encima de los 120€.\n` +
-                    `• **Acción recomendada:** Revisa la sección **Análisis Competencia** y aplica Yield dinámico: sube tarifas progresivamente conforme la ocupación supere el 50% y el 70%.`;
+            if (q.includes('competencia') || q.includes('precios') || q.includes('compset') || q.includes('rival') || q.includes('anormal') || q.includes('estrategia rival')) {
+                const anomIns = allGeneratedInsights.find(i => i.id === 'ins_comp_anomalies');
+                const chgIns = allGeneratedInsights.find(i => i.id === 'ins_comp_changes');
+                const profIns = allGeneratedInsights.find(i => i.id === 'ins_comp_profiles');
+
+                let compRes = `🕵️ **Inteligencia Competitiva de la Plaza (${hotelName}):**\n*(Análisis exclusivo de rivales directos externos: no incluye Cumbria ni Guadiana)*\n\n`;
+
+                if (anomIns && anomIns.dates && anomIns.dates.length > 0) {
+                    const spikes = anomIns.dates.filter(d => d.type === 'spike');
+                    const dumps = anomIns.dates.filter(d => d.type === 'dumping');
+                    compRes += `🚨 **Comportamientos Anómalos Detectados (${anomIns.dates.length} fechas):**\n`;
+                    if (spikes.length > 0) {
+                        const topSpike = spikes[0];
+                        compRes += `• **Picos Extraordinarios:** ${spikes.length} fechas donde los rivales disparan precios (ej. **${topSpike.competitor}** a **${topSpike.rivalPrice}€** el ${topSpike.dateISO}). Indica picos de demanda local o eventos que debes aprovechar subiendo tu BAR.\n`;
+                    }
+                    if (dumps.length > 0) {
+                        const topDump = dumps[0];
+                        compRes += `• **Caídas Anómalas / Dumping:** ${dumps.length} fechas con caídas agresivas (ej. **${topDump.competitor}** a **${topDump.rivalPrice}€**). Recomendación: no entrar en guerra de precios.\n`;
+                    }
+                    compRes += `\n`;
+                }
+
+                if (chgIns && chgIns.dates && chgIns.dates.length > 0) {
+                    const upCount = chgIns.dates.filter(d => d.type === 'increase').length;
+                    const downCount = chgIns.dates.filter(d => d.type === 'decrease').length;
+                    compRes += `📈 **Evolución y Cambios Estratégicos:**\n• Los rivales han modificado tarifas en **${chgIns.dates.length} fechas** entre cargas (${upCount} subidas y ${downCount} bajadas). El mercado está dinámico y reaccionando a la antelación de reserva.\n\n`;
+                }
+
+                if (profIns) {
+                    compRes += `🎯 **Estrategias Detectadas en Rivales:**\n• Observa en la tarjeta *Radiografía Estratégica* cómo compite cada rival (Yield agresivo, recargo de fin de semana, o tarifa plana). Puedes filtrar arriba por la pestaña **🕵️ Competencia** para ver el detalle fecha a fecha y copiar los datos.`;
+                } else {
+                    compRes += `💡 Puedes consultar el desglose completo pulsando la pestaña **🕵️ Competencia** en los filtros superiores.`;
+                }
+
+                return compRes;
             }
 
             // Default expert response

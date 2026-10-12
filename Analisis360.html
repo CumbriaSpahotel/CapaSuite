@@ -1807,22 +1807,41 @@
                         </div>
                     </div>
 
-                    <!-- DEPARTMENTS TABLE -->
+                    <!-- BUDGET TRACKING TABLE -->
                     <div class="table-card">
                         <div class="table-header">
-                            <span>Producción de habitaciones</span>
-                            <span class="tag tag-seg" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">FINANZAS</span>
+                            <span style="display: flex; align-items: center; gap: 6px;">
+                                <span>🎯</span>
+                                <span>Presupuesto · ¿Cómo vamos?</span>
+                            </span>
+                            <span class="tag tag-seg" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">OBJETIVO</span>
                         </div>
-                        <div style="max-height: 420px; overflow-y: auto;">
-                            <table id="departmentsTable">
+                        <div style="padding: 10px 14px 4px 14px;">
+                            <div style="background: var(--bg-hover, rgba(0,0,0,0.02)); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-main);" id="budgetCardTitleLabel">Cumplimiento Global</span>
+                                    <span id="budgetCardPctBadge" style="font-size: 0.8rem; font-weight: 800; color: var(--secondary);">0%</span>
+                                </div>
+                                <div style="width: 100%; height: 7px; background: rgba(0,0,0,0.06); border-radius: 4px; overflow: hidden;">
+                                    <div id="budgetCardProgressBar" style="width: 0%; height: 100%; background: var(--secondary); transition: width 0.3s;"></div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-muted); margin-top: 5px;">
+                                    <span id="budgetCardSubCurrent">Alcanzado: 0 €</span>
+                                    <span id="budgetCardSubTarget">Obj: 0 €</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="max-height: 330px; overflow-y: auto;">
+                            <table id="budgetProgressTable">
                                 <thead>
                                     <tr>
-                                        <th>Departamento</th>
-                                        <th>Revenue</th>
-                                        <th>Mix %</th>
+                                        <th>Concepto</th>
+                                        <th>Alcanzado</th>
+                                        <th>Presupuesto</th>
+                                        <th>Desvío</th>
                                     </tr>
                                 </thead>
-                                <tbody id="departmentsBody"></tbody>
+                                <tbody id="budgetProgressBody"></tbody>
                             </table>
                         </div>
                     </div>
@@ -5022,12 +5041,30 @@
                     "Otros": ["OTROS", "PARTICULARES", "AGENCIAS", "BONO ONLINE", "BONO SPA"]
                 };
 
+                const chartSegSources = Object.assign({}, db[currentHotel]?.[currentYear]?.segment || {}, segmentDb || {});
+                try {
+                    const sRaw = CapaStorage.getItem('upload_segment_db_v2');
+                    if (sRaw) {
+                        const parsed = JSON.parse(sRaw);
+                        if (parsed && parsed[currentHotel]?.[currentYear]?.segment) {
+                            Object.assign(chartSegSources, parsed[currentHotel][currentYear].segment);
+                        }
+                    }
+                } catch(e) {}
+
                 Object.entries(channelGroups).forEach(([chanName, segNames]) => {
                     let chanTotal = 0;
                     segNames.forEach(sName => {
-                        const obj = segmentDb[sName];
+                        const obj = chartSegSources[sName] || chartSegSources[normalizeSegmentDisplayName(sName)];
+                        if (!obj) return;
                         const roomRevenue = segmentRoomRevenue(obj);
-                        if (roomRevenue) chanTotal += getVal(roomRevenue);
+                        if (roomRevenue) {
+                            chanTotal += getVal(roomRevenue);
+                        } else if (obj.accommodation) {
+                            chanTotal += getVal(obj.accommodation);
+                        } else if (obj.revenue) {
+                            chanTotal += getVal(obj.revenue);
+                        }
                     });
                     if (chanTotal > 10) {
                         chanLabels.push(chanName);
@@ -5091,71 +5128,317 @@
                 </tr>`;
             });
 
-            const deptBody = document.getElementById('departmentsBody');
-            deptBody.innerHTML = '';
-
-            const deptData = [];
-            Object.entries(agg.summary).forEach(([deptName, data]) => {
-                if (data.revenue > 0) {
-                    deptData.push({ name: deptName, rev: data.revenue });
-                }
-            });
-
-            deptData.sort((a, b) => b.rev - a.rev).forEach(item => {
-                const mix = agg.totalRev > 0 ? (item.rev / agg.totalRev * 100).toFixed(1) : 0;
-                deptBody.innerHTML += `<tr>
-                    <td style="font-weight:700; color:var(--text-main);">${item.name}</td>
-                    <td style="font-weight:600;">${fmt(item.rev)}</td>
-                    <td style="color:var(--text-muted);">${mix}%</td>
-                </tr>`;
-            });
-            
-            const realSegmentsBody = document.getElementById('realSegmentsBody');
-            realSegmentsBody.innerHTML = '';
-            const segDBRaw = CapaStorage.getItem('upload_segment_db_v2');
-            if (segDBRaw) {
-                try {
-                    const segDB = JSON.parse(segDBRaw);
-                    const hotelSegs = segDB[currentHotel]?.[currentYear];
-                    if (hotelSegs && hotelSegs.segment) {
-                        const consolidatedMap = {};
-                        Object.entries(hotelSegs.segment).forEach(([rawName, seg]) => {
-                            const canonical = normalizeSegmentDisplayName(rawName);
-                            const roomRevenue = segmentRoomRevenue(seg);
-                            if (!roomRevenue) return;
-                            let rev = 0, acc = 0, rooms = 0;
-                            const mStart = midx === -1 ? 0 : midx;
-                            const mEnd = midx === -1 ? 11 : midx;
-                            for (let m = mStart; m <= mEnd; m++) {
-                                rev += (roomRevenue[m] || 0);
-                                acc += (roomRevenue[m] || 0);
-                                rooms += (seg.rooms?.[m] || 0);
-                            }
-                            if (!consolidatedMap[canonical]) {
-                                consolidatedMap[canonical] = { name: canonical, rev: 0, acc: 0, rooms: 0 };
-                            }
-                            consolidatedMap[canonical].rev += rev;
-                            consolidatedMap[canonical].acc += acc;
-                            consolidatedMap[canonical].rooms += rooms;
-                        });
-                        const segData = Object.values(consolidatedMap).filter(s => s.rev > 0);
-                        segData.sort((a, b) => b.rev - a.rev).slice(0, 8).forEach(item => {
-                            const adr = item.rooms > 0 ? (item.acc / item.rooms) : 0;
-                            realSegmentsBody.innerHTML += `<tr>
-                                <td style="font-weight:700; color:var(--text-main);">${item.name}</td>
-                                <td style="font-weight:600;">${fmt(item.rev)}</td>
-                                    <td style="color:var(--text-muted);">${fmt(adr)}</td>
-                            </tr>`;
-                        });
-                        if (segData.length === 0) {
-                            realSegmentsBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding:20px;">Sin desglose verificable de ingresos de habitaciones por segmento</td></tr>';
-                        }
-                    } else {
-                        realSegmentsBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding:20px;">No hay segmentos cargados</td></tr>';
+            // 2. SEGUIMIENTO DE PRESUPUESTO ("¿CÓMO VAMOS?")
+            const bBody = document.getElementById('budgetProgressBody');
+            if (bBody) {
+                bBody.innerHTML = '';
+                const budgetKey = `custom_budget_${currentYear}`;
+                let budget = db[currentHotel]?.[budgetKey];
+                
+                if (!budget && currentYear === "2026") {
+                    if (currentHotel === "Guadiana") {
+                        budget = {
+                            rev: [48728, 68308, 89982, 117837, 168341, 112215, 135720, 130172, 149670, 153014, 111277, 94975],
+                            adr: [60.00, 70.80, 80.50, 82.80, 92.00, 73.60, 78.50, 69.20, 68.60, 69.30, 66.40, 66.80]
+                        };
+                    } else if (currentHotel === "Cumbria") {
+                        budget = {
+                            rev: [66000, 69000, 81000, 101000, 118000, 108000, 126000, 118000, 116000, 111000, 96000, 86000],
+                            adr: [70.00, 70.00, 75.00, 78.00, 87.00, 83.00, 91.00, 87.00, 86.00, 81.00, 78.00, 77.00]
+                        };
                     }
-                } catch(e) { console.error(e); }
-            } else {
-                realSegmentsBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding:20px;">No hay segmentos cargados</td></tr>';
+                }
+
+                const badgeEl = document.getElementById('budgetCardPctBadge');
+                const barEl = document.getElementById('budgetCardProgressBar');
+                const subCurEl = document.getElementById('budgetCardSubCurrent');
+                const subTgtEl = document.getElementById('budgetCardSubTarget');
+                const titleLabel = document.getElementById('budgetCardTitleLabel');
+                const monthFullNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                const monthShortNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+                if (!budget || !budget.rev) {
+                    if (titleLabel) titleLabel.innerText = 'Presupuesto no definido';
+                    if (badgeEl) { badgeEl.innerText = 'N/A'; badgeEl.style.color = 'var(--text-muted)'; }
+                    if (barEl) { barEl.style.width = '0%'; }
+                    if (subCurEl) subCurEl.innerText = `Alcanzado: ${fmt(agg.totalRev)}`;
+                    if (subTgtEl) subTgtEl.innerText = 'Sin presupuesto';
+                    bBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:30px;">
+                        No hay presupuesto guardado para ${currentHotel} en ${currentYear}.<br>
+                        <a href="CalculadoraPresupuesto.html" style="color:var(--primary); font-size:0.75rem; text-decoration:underline; margin-top:8px; display:inline-block;">Configurar Presupuesto ➔</a>
+                    </td></tr>`;
+                } else {
+                    const yearData = db[currentHotel]?.[currentYear] || {};
+                    const groupedTY = getGroupedProduction(yearData.service || {});
+                    const otbData = yearData.otb || { revenue: new Array(12).fill(0), rooms: new Array(12).fill(0), breakdown: {} };
+                    const otbHabRevArr = otbData.breakdown?.habitacion || new Array(12).fill(0);
+                    const otbHabRmsArr = otbData.breakdown?.habitacion_rn || otbData.rooms || new Array(12).fill(0);
+                    const cap = (currentHotel === 'Cumbria' ? 59 : 108);
+
+                    const now = new Date();
+                    const curY = now.getFullYear();
+                    const curM = now.getMonth();
+                    const isMonthClosed = (m) => {
+                        if (parseInt(currentYear) < curY) return true;
+                        if (parseInt(currentYear) > curY) return false;
+                        return m < curM;
+                    };
+
+                    const curMonthlyRev = new Array(12).fill(0);
+                    const curMonthlyRN = new Array(12).fill(0);
+                    for (let m = 0; m < 12; m++) {
+                        const rRev = groupedTY.HABITACION?.revenue?.[m] || 0;
+                        let rRms = groupedTY.HABITACION?.rooms?.[m] || 0;
+                        if (rRms === 0 && yearData.service?.["TOTAL_MASTER"]?.rooms?.[m]) {
+                            rRms = yearData.service["TOTAL_MASTER"].rooms[m];
+                        }
+                        const oRev = otbHabRevArr[m] || 0;
+                        const oRms = otbHabRmsArr[m] || 0;
+
+                        if (currentViewMode === 'real') {
+                            curMonthlyRev[m] = rRev;
+                            curMonthlyRN[m] = rRms;
+                        } else if (currentViewMode === 'otb') {
+                            curMonthlyRev[m] = oRev;
+                            curMonthlyRN[m] = oRms;
+                        } else {
+                            if (isMonthClosed(m)) {
+                                curMonthlyRev[m] = rRev;
+                                curMonthlyRN[m] = rRms;
+                            } else {
+                                curMonthlyRev[m] = rRev + oRev;
+                                curMonthlyRN[m] = rRms + oRms;
+                            }
+                        }
+                    }
+
+                    const bMonthlyRev = budget.rev || new Array(12).fill(0);
+                    const bMonthlyAdr = budget.adr || new Array(12).fill(0);
+                    const bMonthlyRN = new Array(12).fill(0);
+                    for (let m = 0; m < 12; m++) {
+                        bMonthlyRN[m] = bMonthlyAdr[m] > 0 ? Math.round(bMonthlyRev[m] / bMonthlyAdr[m]) : 0;
+                    }
+
+                    let curRevTarget = 0, curRNTarget = 0, curAdrTarget = 0, curRevparTarget = 0;
+                    let bRevTarget = 0, bRNTarget = 0, bAdrTarget = 0, bRevparTarget = 0;
+
+                    if (midx === -1) {
+                        curRevTarget = curMonthlyRev.reduce((a, b) => a + b, 0);
+                        curRNTarget = curMonthlyRN.reduce((a, b) => a + b, 0);
+                        curAdrTarget = curRNTarget > 0 ? (curRevTarget / curRNTarget) : 0;
+                        const daysYear = 365;
+                        curRevparTarget = (cap * daysYear) > 0 ? (curRevTarget / (cap * daysYear)) : 0;
+
+                        bRevTarget = bMonthlyRev.reduce((a, b) => a + b, 0);
+                        bRNTarget = bMonthlyRN.reduce((a, b) => a + b, 0);
+                        bAdrTarget = bRNTarget > 0 ? (bRevTarget / bRNTarget) : (bMonthlyAdr.reduce((a, b) => a + b, 0) / 12);
+                        bRevparTarget = (cap * daysYear) > 0 ? (bRevTarget / (cap * daysYear)) : 0;
+                    } else {
+                        curRevTarget = curMonthlyRev[midx];
+                        curRNTarget = curMonthlyRN[midx];
+                        curAdrTarget = curRNTarget > 0 ? (curRevTarget / curRNTarget) : 0;
+                        const mDays = new Date(parseInt(currentYear), midx + 1, 0).getDate();
+                        curRevparTarget = (cap * mDays) > 0 ? (curRevTarget / (cap * mDays)) : 0;
+
+                        bRevTarget = bMonthlyRev[midx] || 0;
+                        bRNTarget = bMonthlyRN[midx] || 0;
+                        bAdrTarget = bMonthlyAdr[midx] || 0;
+                        bRevparTarget = (cap * mDays) > 0 ? (bRevTarget / (cap * mDays)) : 0;
+                    }
+
+                    const pctGlobal = bRevTarget > 0 ? (curRevTarget / bRevTarget * 100) : 0;
+                    const diffGlobal = curRevTarget - bRevTarget;
+
+                    if (titleLabel) titleLabel.innerText = midx === -1 ? 'Cumplimiento Anual' : `Cumplimiento ${monthFullNames[midx]}`;
+                    if (badgeEl) {
+                        badgeEl.innerText = `${pctGlobal.toFixed(1)}%`;
+                        badgeEl.style.color = pctGlobal >= 100 ? 'var(--secondary)' : (pctGlobal >= 90 ? '#f59e0b' : '#ef4444');
+                    }
+                    if (barEl) {
+                        barEl.style.width = `${Math.min(100, Math.max(0, pctGlobal))}%`;
+                        barEl.style.background = pctGlobal >= 100 ? 'var(--secondary)' : (pctGlobal >= 90 ? '#f59e0b' : '#ef4444');
+                    }
+                    if (subCurEl) subCurEl.innerText = `Alcanzado: ${fmt(curRevTarget)}`;
+                    if (subTgtEl) subTgtEl.innerText = `Obj: ${fmt(bRevTarget)} (${diffGlobal >= 0 ? '+' : ''}${fmt(diffGlobal)})`;
+
+                    const rowHtml = (concept, actualVal, budgetVal, diffNum, pctNum, isCurrency = true, unit = '') => {
+                        const isPos = diffNum >= 0;
+                        const color = isPos ? 'var(--secondary)' : '#ef4444';
+                        const sign = isPos ? '+' : '';
+                        const diffText = isCurrency
+                            ? `${sign}${fmt(diffNum)}`
+                            : (unit ? `${sign}${fmtNum(diffNum)} ${unit}` : `${sign}${diffNum.toFixed(2).replace('.', ',')} €`);
+                        const pctBadge = pctNum != null
+                            ? ` <span style="font-size:0.68rem; color:${color}; font-weight:700;">(${pctNum.toFixed(1)}%)</span>`
+                            : '';
+                        return `<tr>
+                            <td style="font-weight:700; color:var(--text-main); font-size:0.75rem;">${concept}</td>
+                            <td style="font-weight:600; font-size:0.75rem;">${actualVal}</td>
+                            <td style="color:var(--text-muted); font-size:0.75rem;">${budgetVal}</td>
+                            <td style="font-size:0.75rem; white-space:nowrap;">
+                                <span style="color:${color}; font-weight:700;">${diffText}</span>${pctBadge}
+                            </td>
+                        </tr>`;
+                    };
+
+                    let tableRows = `
+                        ${rowHtml('Ingresos Hab.', fmt(curRevTarget), fmt(bRevTarget), curRevTarget - bRevTarget, bRevTarget > 0 ? (curRevTarget / bRevTarget * 100) : null, true)}
+                        ${rowHtml('Precio Medio (ADR)', `${curAdrTarget.toFixed(2).replace('.', ',')} €`, `${bAdrTarget.toFixed(2).replace('.', ',')} €`, curAdrTarget - bAdrTarget, bAdrTarget > 0 ? (curAdrTarget / bAdrTarget * 100) : null, false)}
+                        ${rowHtml('Noches Vendidas', `${fmtNum(curRNTarget)} RN`, `${fmtNum(bRNTarget)} RN`, curRNTarget - bRNTarget, bRNTarget > 0 ? (curRNTarget / bRNTarget * 100) : null, false, 'RN')}
+                        ${rowHtml('RevPAR', `${curRevparTarget.toFixed(2).replace('.', ',')} €`, `${bRevparTarget.toFixed(2).replace('.', ',')} €`, curRevparTarget - bRevparTarget, bRevparTarget > 0 ? (curRevparTarget / bRevparTarget * 100) : null, false)}
+                    `;
+
+                    if (midx === -1) {
+                        tableRows += `
+                            <tr style="background:var(--bg-hover, rgba(0,0,0,0.02)); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+                                <td colspan="4" style="font-size:0.68rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; padding:6px 12px;">
+                                    Desglose Mensual vs Presupuesto
+                                </td>
+                            </tr>
+                        `;
+                        for (let m = 0; m < 12; m++) {
+                            const mCur = curMonthlyRev[m];
+                            const mB = bMonthlyRev[m] || 0;
+                            const mDiff = mCur - mB;
+                            const mPct = mB > 0 ? (mCur / mB * 100) : 0;
+                            const isPos = mDiff >= 0;
+                            const color = isPos ? 'var(--secondary)' : '#ef4444';
+                            tableRows += `<tr>
+                                <td style="font-weight:700; color:var(--text-main); font-size:0.72rem;">${monthShortNames[m]} · ${monthFullNames[m]}</td>
+                                <td style="font-weight:600; font-size:0.72rem;">${fmt(mCur)}</td>
+                                <td style="color:var(--text-muted); font-size:0.72rem;">${fmt(mB)}</td>
+                                <td style="font-size:0.72rem; white-space:nowrap;">
+                                    <span style="color:${color}; font-weight:700;">${isPos ? '+' : ''}${fmt(mDiff)}</span>
+                                    <span style="font-size:0.65rem; color:${color}; font-weight:600;">(${mPct.toFixed(0)}%)</span>
+                                </td>
+                            </tr>`;
+                        }
+                    }
+
+                    bBody.innerHTML = tableRows;
+                }
+            }
+
+            // Compatibilidad por si algún componente legacy busca departmentsBody
+            const deptBody = document.getElementById('departmentsBody');
+            if (deptBody) deptBody.innerHTML = '';
+            
+            // 3. TOP SEGMENTOS
+            const realSegmentsBody = document.getElementById('realSegmentsBody');
+            if (realSegmentsBody) {
+                realSegmentsBody.innerHTML = '';
+                
+                const segSources = [];
+                
+                try {
+                    const segDBRaw = CapaStorage.getItem('upload_segment_db_v2');
+                    if (segDBRaw) {
+                        const parsed = JSON.parse(segDBRaw);
+                        if (parsed && parsed[currentHotel]?.[currentYear]?.segment) {
+                            segSources.push(parsed[currentHotel][currentYear].segment);
+                        }
+                    }
+                } catch(e) {}
+
+                if (segmentDb && typeof segmentDb === 'object' && Object.keys(segmentDb).length > 0) {
+                    segSources.push(segmentDb);
+                }
+
+                if (db[currentHotel]?.[currentYear]?.segment) {
+                    segSources.push(db[currentHotel][currentYear].segment);
+                }
+
+                try {
+                    const fRaw = CapaStorage.getItem('segment_forecast_v2');
+                    if (fRaw) {
+                        const fParsed = JSON.parse(fRaw);
+                        if (fParsed && fParsed[currentHotel]?.segment) {
+                            segSources.push(fParsed[currentHotel].segment);
+                        }
+                    }
+                } catch(e) {}
+
+                const consolidatedMap = {};
+                const mStart = midx === -1 ? 0 : midx;
+                const mEnd = midx === -1 ? 11 : midx;
+
+                segSources.forEach(src => {
+                    Object.entries(src).forEach(([rawName, seg]) => {
+                        if (!seg) return;
+                        const canonical = normalizeSegmentDisplayName(rawName);
+                        if (!canonical || /^(TOTAL|TOTAL GENERAL|TOTAL_MASTER|TOTAL MASTER|TOTAL PROD|TOTAL_PROD)$/i.test(canonical)) return;
+
+                        if (!consolidatedMap[canonical]) {
+                            consolidatedMap[canonical] = { name: canonical, rev: 0, acc: 0, rooms: 0 };
+                        }
+
+                        const roomRevenue = (typeof segmentRoomRevenue === 'function') ? segmentRoomRevenue(seg) : null;
+                        let sRev = 0, sRooms = 0, sAcc = 0;
+
+                        for (let m = mStart; m <= mEnd; m++) {
+                            sRooms += (Number(seg.rooms?.[m]) || 0);
+                            if (roomRevenue && roomRevenue[m] != null) {
+                                sRev += (Number(roomRevenue[m]) || 0);
+                                sAcc += (Number(roomRevenue[m]) || 0);
+                            } else if (seg.accommodation && seg.accommodation[m] != null) {
+                                sRev += (Number(seg.accommodation[m]) || 0);
+                                sAcc += (Number(seg.accommodation[m]) || 0);
+                            } else if (seg.revenue && seg.revenue[m] != null) {
+                                sRev += (Number(seg.revenue[m]) || 0);
+                                sAcc += (Number(seg.revenue[m]) || 0);
+                            }
+                        }
+
+                        if (seg.days) {
+                            let dayRev = 0, dayRooms = 0;
+                            Object.entries(seg.days).forEach(([iso, dt]) => {
+                                const [yStr, mStr] = iso.split('-');
+                                if (yStr === String(currentYear)) {
+                                    const m = parseInt(mStr, 10) - 1;
+                                    if (m >= mStart && m <= mEnd) {
+                                        dayRooms += (Number(dt.rooms) || 0);
+                                        dayRev += (Number(dt.accommodation) || Number(dt.revenue) || 0);
+                                    }
+                                }
+                            });
+                            if (dayRev > sRev) {
+                                sRev = dayRev;
+                                sAcc = dayRev;
+                            }
+                            if (dayRooms > sRooms) {
+                                sRooms = dayRooms;
+                            }
+                        }
+
+                        if (sRev > consolidatedMap[canonical].rev) {
+                            consolidatedMap[canonical].rev = sRev;
+                            consolidatedMap[canonical].acc = sAcc;
+                        }
+                        if (sRooms > consolidatedMap[canonical].rooms) {
+                            consolidatedMap[canonical].rooms = sRooms;
+                        }
+                    });
+                });
+
+                const segData = Object.values(consolidatedMap).filter(s => s.rev > 0 || s.rooms > 0);
+                const totalSegRev = segData.reduce((acc, s) => acc + s.rev, 0);
+
+                if (segData.length > 0) {
+                    segData.sort((a, b) => b.rev - a.rev).slice(0, 10).forEach(item => {
+                        const adr = item.rooms > 0 ? (item.rev / item.rooms) : 0;
+                        const mix = agg.totalRev > 0 ? (item.rev / agg.totalRev * 100).toFixed(1) : (totalSegRev > 0 ? (item.rev / totalSegRev * 100).toFixed(1) : '0.0');
+                        realSegmentsBody.innerHTML += `<tr>
+                            <td>
+                                <div style="font-weight:700; color:var(--text-main); font-size:0.75rem;">${item.name}</div>
+                                <div style="font-size:0.65rem; color:var(--text-muted);">${item.rooms > 0 ? fmtNum(item.rooms) + ' RN · ' : ''}${mix}% mix</div>
+                            </td>
+                            <td style="font-weight:600; font-size:0.75rem;">${fmt(item.rev)}</td>
+                            <td style="color:var(--text-muted); font-size:0.75rem; font-weight:600;">${adr > 0 ? fmt(adr) : '--'}</td>
+                        </tr>`;
+                    });
+                } else {
+                    realSegmentsBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding:25px;">No hay segmentos cargados para este periodo</td></tr>';
+                }
             }
         }
 
