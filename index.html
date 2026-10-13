@@ -164,6 +164,19 @@
             border-color: rgba(0,0,0,0.1);
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
+        [data-theme="light"] .header {
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid var(--border);
+        }
+        [data-theme="light"] .hero h1 {
+            background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        [data-theme="light"] .card:hover {
+            background: #ffffff;
+        }
         .logout-btn {
             color: #ef4444;
             font-size: 0.7rem;

@@ -58,6 +58,13 @@
     --table-header:     rgba(15, 23, 42, 0.9);
     --table-row:        rgba(30, 41, 59, 0.4);
     --table-row-hover:  rgba(255, 255, 255, 0.05);
+
+    /* Compatibilidad con módulos */
+    --bg-primary:       var(--bg-deep);
+    --card-bg:          var(--bg-card);
+    --border-glass:     var(--border);
+    --bg-grad-start:    rgba(99, 102, 241, 0.12);
+    --bg-grad-end:      rgba(16, 185, 129, 0.08);
 }
 
 /* ─── MODO CLARO ──────────────────────────────────────────────── */
@@ -94,4 +101,11 @@
     --table-header:     #f1f5f9;
     --table-row:        #ffffff;
     --table-row-hover:  #f8fafc;
+
+    /* Compatibilidad con módulos */
+    --bg-primary:       var(--bg-deep);
+    --card-bg:          var(--bg-surface);
+    --border-glass:     var(--border);
+    --bg-grad-start:    rgba(79, 70, 229, 0.05);
+    --bg-grad-end:      rgba(16, 185, 129, 0.03);
 }

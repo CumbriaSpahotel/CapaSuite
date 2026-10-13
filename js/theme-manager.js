@@ -3,12 +3,13 @@
  * CapaSuite Theme Manager
  * Maneja el cambio entre Modo Claro y Modo Noche de forma global
  */
-
 (function() {
-    // 1. Cargar preferencia guardada o usar noche por defecto
-    let savedTheme = 'dark';
+    // 1. Cargar preferencia guardada o usar día por defecto
+    let savedTheme = 'light';
     try {
-        if (localStorage.getItem('capasuite_theme') === 'light') savedTheme = 'light';
+        const storedTheme = localStorage.getItem('capasuite_theme');
+        if (storedTheme === 'dark') savedTheme = 'dark';
+        else if (storedTheme === 'light') savedTheme = 'light';
     } catch (_) { /* El cambio visual funciona aunque el almacenamiento no esté disponible. */ }
     document.documentElement.setAttribute('data-theme', savedTheme);
 

@@ -5248,13 +5248,20 @@ Generado con CapaSuite Presupuestos.`;
             
             window.addEventListener('themeChanged', () => {
                 const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                document.getElementById('themeToggleBtn').innerHTML = isDark ? '🌙' : '☀️';
+                const themeBtn = document.getElementById('themeToggleBtn');
+                if (themeBtn) {
+                    themeBtn.innerHTML = isDark ? '☀️' : '🌙';
+                    themeBtn.title = isDark ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Noche';
+                }
             });
             
             // Initial icon sync
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             const themeBtn = document.getElementById('themeToggleBtn');
-            if (themeBtn) themeBtn.innerHTML = isDark ? '🌙' : '☀️';
+            if (themeBtn) {
+                themeBtn.innerHTML = isDark ? '☀️' : '🌙';
+                themeBtn.title = isDark ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Noche';
+            }
 
             // Auto-open pacing modal if URL param is present
             const params = new URLSearchParams(window.location.search);
