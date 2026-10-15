@@ -1805,7 +1805,10 @@
                             Análisis comparativo de ingresos de habitación, volumen RN y precio medio ADR frente a <span id="yield-ly-label" style="font-weight:700; color:var(--text-main);">Año Anterior</span>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" onclick="openManageOfficialSegmentsModal()" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;" title="Ver y gestionar la segmentación oficial de este hotel">
+                            <span>⚙️</span> Segmentación Oficial
+                        </button>
                         <span id="yield360CommissionBadge" style="font-size: 0.75rem; background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 8px; font-weight: 700; border: 1px solid rgba(99, 102, 241, 0.2);">
                             💰 Comisiones: 0 €
                         </span>
@@ -1817,13 +1820,61 @@
                                 💎 Neto
                             </button>
                         </div>
-                        <div style="font-size: 0.72rem; color: var(--text-muted);">
-                            Fuente: Desglose comercial CapaSuite
+                    </div>
+                </div>
+
+                <!-- BARRA DE VISIÓN MENSUAL Y SELECTORES -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 12px 0 14px 0; padding: 8px 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; flex-wrap: wrap; gap: 10px;">
+                    <!-- Selector de Modo de Vista: Detalle vs Matriz 12M -->
+                    <div style="display: inline-flex; background: rgba(0,0,0,0.25); padding: 2px; border-radius: 8px; border: 1px solid var(--border); gap: 3px;">
+                        <button id="btnSegViewSummary" type="button" onclick="set360SegmentViewMode('summary')" style="background: var(--primary); color: #fff; border: none; padding: 5px 12px; border-radius: 6px; font-size: 0.73rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                            <span>📋</span> Detalle y Pick-up
+                        </button>
+                        <button id="btnSegViewMatrix" type="button" onclick="set360SegmentViewMode('matrix')" style="background: transparent; color: var(--text-muted); border: none; padding: 5px 12px; border-radius: 6px; font-size: 0.73rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                            <span>📅</span> Matriz 12 Meses
+                        </button>
+                    </div>
+
+                    <!-- En modo Detalle: Selector rápido de Mes (Pills) -->
+                    <div id="segSummaryMonthControls" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                        <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">FILTRO MES:</span>
+                        <div id="segMonthPillsContainer" style="display: inline-flex; background: rgba(0,0,0,0.25); padding: 2px; border-radius: 8px; border: 1px solid var(--border); gap: 2px; flex-wrap: wrap;">
+                            <!-- Botones generados dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- En modo Matriz: Selector de Métrica y Comparativa -->
+                    <div id="segMatrixControls" style="display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">MÉTRICA:</span>
+                            <div style="display: inline-flex; background: rgba(0,0,0,0.25); padding: 2px; border-radius: 8px; border: 1px solid var(--border); gap: 3px;">
+                                <button id="btnSegMetricRev" type="button" onclick="set360SegMatrixMetric('rev')" style="background: var(--primary); color: #fff; border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">
+                                    💶 Producción (€)
+                                </button>
+                                <button id="btnSegMetricRms" type="button" onclick="set360SegMatrixMetric('rms')" style="background: transparent; color: var(--text-muted); border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">
+                                    🛏️ RN
+                                </button>
+                                <button id="btnSegMetricAdr" type="button" onclick="set360SegMatrixMetric('adr')" style="background: transparent; color: var(--text-muted); border: none; padding: 4px 10px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">
+                                    🏷️ ADR (€)
+                                </button>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700;">COMPARATIVA:</span>
+                            <div style="display: inline-flex; background: rgba(0,0,0,0.25); padding: 2px; border-radius: 8px; border: 1px solid var(--border); gap: 3px;">
+                                <button id="btnSegMatrixCompTY" type="button" onclick="set360SegMatrixComp('TY')" style="background: rgba(99,102,241,0.25); color: #818cf8; border: 1px solid rgba(99,102,241,0.4); padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">
+                                    Este Año
+                                </button>
+                                <button id="btnSegMatrixCompBoth" type="button" onclick="set360SegMatrixComp('BOTH')" style="background: transparent; color: var(--text-muted); border: 1px solid transparent; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">
+                                    vs LY (Δ%)
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="yield-table-wrapper">
+                <!-- 1. VISTA DETALLE Y PICK-UP -->
+                <div id="segSummaryWrapper" class="yield-table-wrapper">
                     <table class="yield-table">
                         <thead>
                             <tr style="border-bottom: 2px solid var(--border);">
@@ -1859,6 +1910,83 @@
                             <!-- Filas dinámicas por segmento -->
                         </tbody>
                     </table>
+                </div>
+
+                <!-- 2. VISTA MATRIZ MENSUAL (12 MESES) -->
+                <div id="segMatrixWrapper" class="yield-table-wrapper" style="display: none;">
+                    <table class="yield-table" id="segMatrixTable">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border);">
+                                <th style="vertical-align: middle; min-width: 170px;">Segmento</th>
+                                <th style="text-align: right; min-width: 70px;">Ene</th>
+                                <th style="text-align: right; min-width: 70px;">Feb</th>
+                                <th style="text-align: right; min-width: 70px;">Mar</th>
+                                <th style="text-align: right; min-width: 70px;">Abr</th>
+                                <th style="text-align: right; min-width: 70px;">May</th>
+                                <th style="text-align: right; min-width: 70px;">Jun</th>
+                                <th style="text-align: right; min-width: 70px;">Jul</th>
+                                <th style="text-align: right; min-width: 70px;">Ago</th>
+                                <th style="text-align: right; min-width: 70px;">Sep</th>
+                                <th style="text-align: right; min-width: 70px;">Oct</th>
+                                <th style="text-align: right; min-width: 70px;">Nov</th>
+                                <th style="text-align: right; min-width: 70px;">Dic</th>
+                                <th style="text-align: right; min-width: 95px; background: rgba(99, 102, 241, 0.12); color: #a78bfa; font-weight: 800; border-left: 1px solid var(--border);">Total Anual</th>
+                            </tr>
+                        </thead>
+                        <tbody id="segMatrixBody">
+                            <!-- Filas dinámicas de la matriz mensual -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- MODAL DE CORRECCIÓN / REASIGNACIÓN DE SEGMENTO -->
+                <div id="segmentCorrectionModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.8); backdrop-filter:blur(6px); z-index:999999; justify-content:center; align-items:center;">
+                    <div style="background:var(--bg-surface, #1e293b); border:1px solid var(--border, #334155); border-radius:14px; padding:24px; max-width:480px; width:92%; box-shadow:0 25px 50px rgba(0,0,0,0.6); color:var(--text-main, #f8fafc);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                            <h3 style="margin:0; font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                <span>✏️</span> Reasignar Segmento
+                            </h3>
+                            <button type="button" onclick="closeSegmentCorrectionModal()" style="background:transparent; border:none; color:var(--text-muted, #94a3b8); font-size:1.3rem; cursor:pointer;">&times;</button>
+                        </div>
+                        <div style="font-size:0.85rem; color:var(--text-muted, #94a3b8); margin-bottom:16px; line-height:1.5;">
+                            El segmento <strong id="segCorrectionSrcName" style="color:#ef4444; font-family:monospace;">PARTICULARES</strong> no forma parte de la segmentación oficial de <strong id="segCorrectionHotelName">este hotel</strong>. Puedes consolidarlo dentro del segmento oficial correspondiente:
+                        </div>
+                        <div style="margin-bottom:18px;">
+                            <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:6px; letter-spacing:0.5px;">CONSOLIDAR EN SEGMENTO OFICIAL:</label>
+                            <select id="segCorrectionTargetSelect" style="width:100%; padding:10px 12px; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px; color:var(--text-main); font-weight:700; font-size:0.9rem;">
+                                <!-- Opciones cargadas dinámicamente -->
+                            </select>
+                        </div>
+                        <div style="display:flex; justify-content:flex-end; gap:10px;">
+                            <button type="button" onclick="closeSegmentCorrectionModal()" style="background:transparent; border:1px solid var(--border); color:var(--text-muted); padding:8px 16px; border-radius:8px; font-size:0.85rem; font-weight:700; cursor:pointer;">Cancelar</button>
+                            <button type="button" onclick="saveSegmentCorrection()" style="background:var(--primary); color:#fff; border:none; padding:8px 18px; border-radius:8px; font-size:0.85rem; font-weight:700; cursor:pointer; box-shadow:0 4px 12px var(--primary-glow);">💾 Guardar y Consolidar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL DE GESTIÓN DE SEGMENTACIÓN OFICIAL -->
+                <div id="segmentManageModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.8); backdrop-filter:blur(6px); z-index:999999; justify-content:center; align-items:center;">
+                    <div style="background:var(--bg-surface, #1e293b); border:1px solid var(--border, #334155); border-radius:14px; padding:24px; max-width:540px; width:92%; box-shadow:0 25px 50px rgba(0,0,0,0.6); color:var(--text-main, #f8fafc); max-height:85vh; overflow-y:auto;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                            <h3 style="margin:0; font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                                <span>⚙️</span> Segmentación Oficial por Hotel
+                            </h3>
+                            <button type="button" onclick="closeManageOfficialSegmentsModal()" style="background:transparent; border:none; color:var(--text-muted, #94a3b8); font-size:1.3rem; cursor:pointer;">&times;</button>
+                        </div>
+                        <div style="font-size:0.84rem; color:var(--text-muted); margin-bottom:14px; line-height:1.5;">
+                            Segmentos oficiales activos para <strong id="segManageHotelTitle" style="color:var(--text-main);">Hotel</strong> y equivalencias personalizadas aplicadas:
+                        </div>
+                        <div id="segOfficialListContainer" style="margin-bottom:18px;">
+                            <!-- Listado de segmentos oficiales -->
+                        </div>
+                        <h4 style="margin:16px 0 8px 0; font-size:0.85rem; color:#818cf8; text-transform:uppercase; letter-spacing:0.5px;">Reasignaciones y Equivalencias Personalizadas:</h4>
+                        <div id="segCustomMappingContainer" style="margin-bottom:18px; font-size:0.82rem;">
+                            <!-- Mapeos personalizados -->
+                        </div>
+                        <div style="display:flex; justify-content:flex-end;">
+                            <button type="button" onclick="closeManageOfficialSegmentsModal()" style="background:var(--primary); color:#fff; border:none; padding:8px 18px; border-radius:8px; font-size:0.85rem; font-weight:700; cursor:pointer;">Cerrar</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3824,23 +3952,323 @@
             renderSegmentPickupAnalysis(hotel, year, midx);
         }
 
-        function normalizeSegmentDisplayName(name) {
+                function escapeHTML(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        const OFFICIAL_SEGMENTS_BY_HOTEL = {
+            Guadiana: [
+                'DIRECTO ONLINE',
+                'DIRECTO OFFLINE',
+                'OTA/AAVV',
+                'CORPORATIVO LINEAL',
+                'CORPORATIVO DINAMICO',
+                'TTOO DINAMICA',
+                'GRUPOS',
+                'GRTANTEO',
+                'OTROS'
+            ],
+            Cumbria: [
+                'DIRECTO ONLINE',
+                'DIRECTO OFFLINE',
+                'OTA/AAVV',
+                'CORPORATIVO LINEAL',
+                'CORPORATIVO DINAMICO',
+                'TTOO DINAMICA',
+                'GRUPOS',
+                'GRTANTEO',
+                'BONO SPA',
+                'OTROS'
+            ]
+        };
+
+        function getHotelOfficialSegments(hotel = currentHotel) {
+            const isCumbria = String(hotel || '').toLowerCase().includes('cumbria');
+            return isCumbria ? OFFICIAL_SEGMENTS_BY_HOTEL.Cumbria : OFFICIAL_SEGMENTS_BY_HOTEL.Guadiana;
+        }
+
+        function getHotelCustomSegmentMapping(hotel = currentHotel) {
+            let mapping = {};
+            try {
+                const stored = (typeof CapaStorage !== 'undefined' ? CapaStorage.getItem('custom_segment_mapping_v2') : localStorage.getItem('custom_segment_mapping_v2'));
+                if (stored) {
+                    mapping = JSON.parse(stored) || {};
+                }
+            } catch(e) {}
+            const hotelKey = String(hotel || '').toLowerCase().includes('cumbria') ? 'Cumbria' : 'Guadiana';
+            return mapping[hotelKey] || {};
+        }
+
+        function saveHotelCustomSegmentMapping(hotel, srcSeg, targetSeg) {
+            let mapping = {};
+            try {
+                const stored = (typeof CapaStorage !== 'undefined' ? CapaStorage.getItem('custom_segment_mapping_v2') : localStorage.getItem('custom_segment_mapping_v2'));
+                if (stored) {
+                    mapping = JSON.parse(stored) || {};
+                }
+            } catch(e) {}
+            const hotelKey = String(hotel || '').toLowerCase().includes('cumbria') ? 'Cumbria' : 'Guadiana';
+            if (!mapping[hotelKey]) mapping[hotelKey] = {};
+            const cleanKey = String(srcSeg || '').toUpperCase().trim();
+            if (targetSeg) {
+                mapping[hotelKey][cleanKey] = targetSeg;
+            } else {
+                delete mapping[hotelKey][cleanKey];
+            }
+            const serialized = JSON.stringify(mapping);
+            if (typeof CapaStorage !== 'undefined') CapaStorage.setItem('custom_segment_mapping_v2', serialized);
+            localStorage.setItem('custom_segment_mapping_v2', serialized);
+        }
+
+        function normalizeSegmentDisplayName(name, hotel = currentHotel) {
             if (!name) return '';
             const clean = String(name).trim();
             const upper = clean.toUpperCase();
+
+            // 1. Mapeo personalizado del usuario para este hotel (ej. PARTICULARES -> DIRECTO OFFLINE)
+            const customMap = getHotelCustomSegmentMapping(hotel);
+            if (customMap && (customMap[upper] || customMap[clean])) {
+                return customMap[upper] || customMap[clean];
+            }
+
+            // 2. Variaciones directas
             if (upper === 'DIRONLINE' || upper === 'DIR ONLINE' || upper === 'DIR_ONLINE' || upper === 'D ON LINE' || upper === 'DIRECTO ONLINE' || upper === 'DIRECTO ON') {
                 return 'DIRECTO ONLINE';
             }
+            if (upper === 'DIROFFLINE' || upper === 'DIR OFFLINE' || upper === 'DIR_OFFLINE' || upper === 'D OFF LINE' || upper === 'DIRECTO OFFLINE' || upper === 'DIRECTO OFF') {
+                return 'DIRECTO OFFLINE';
+            }
+
+            // 3. Fallback a segment-analysis si existe
+            if (typeof SegmentAnalysis !== 'undefined' && SegmentAnalysis.canonical) {
+                const can = SegmentAnalysis.canonical(name, hotel);
+                if (can) return can;
+            }
             return clean;
+        }
+
+        let currentCorrectionSegment = null;
+
+        function openSegmentCorrectionModal(segName) {
+            currentCorrectionSegment = segName;
+            const hotel = currentHotel;
+            const isCumbria = String(hotel || '').toLowerCase().includes('cumbria');
+            const hotelTitle = isCumbria ? 'Hotel Cumbria' : 'Sercotel Guadiana';
+
+            const srcEl = document.getElementById('segCorrectionSrcName');
+            if (srcEl) srcEl.innerText = segName;
+            const hEl = document.getElementById('segCorrectionHotelName');
+            if (hEl) hEl.innerText = hotelTitle;
+
+            const select = document.getElementById('segCorrectionTargetSelect');
+            if (select) {
+                select.innerHTML = '';
+                const official = getHotelOfficialSegments(hotel);
+                official.forEach(offSeg => {
+                    const opt = document.createElement('option');
+                    opt.value = offSeg;
+                    opt.textContent = offSeg;
+                    if (segName.toUpperCase().includes('PARTIC') && (offSeg === 'DIRECTO OFFLINE' || offSeg === 'DIRECTO ONLINE')) {
+                        opt.selected = true;
+                    }
+                    select.appendChild(opt);
+                });
+            }
+
+            const modal = document.getElementById('segmentCorrectionModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeSegmentCorrectionModal() {
+            const modal = document.getElementById('segmentCorrectionModal');
+            if (modal) modal.style.display = 'none';
+            currentCorrectionSegment = null;
+        }
+
+        function saveSegmentCorrection() {
+            if (!currentCorrectionSegment) return;
+            const select = document.getElementById('segCorrectionTargetSelect');
+            const targetSeg = select ? select.value : '';
+            if (!targetSeg) return;
+
+            saveHotelCustomSegmentMapping(currentHotel, currentCorrectionSegment, targetSeg);
+            closeSegmentCorrectionModal();
+
+            const activeM = (typeof window.__seg360SelectedMonth !== 'undefined' && window.__seg360SelectedMonth !== null) ? window.__seg360SelectedMonth : (typeof currentMonthIdx !== 'undefined' ? currentMonthIdx : -1);
+            renderSegmentPickupAnalysis(currentHotel, currentYear, activeM);
+        }
+
+        function openManageOfficialSegmentsModal() {
+            const hotel = currentHotel;
+            const isCumbria = String(hotel || '').toLowerCase().includes('cumbria');
+            const hotelTitle = isCumbria ? 'Hotel Cumbria' : 'Sercotel Guadiana';
+            const hTitle = document.getElementById('segManageHotelTitle');
+            if (hTitle) hTitle.innerText = hotelTitle;
+
+            const offListContainer = document.getElementById('segOfficialListContainer');
+            if (offListContainer) {
+                const official = getHotelOfficialSegments(hotel);
+                offListContainer.innerHTML = official.map(s => `
+                    <span style="display:inline-block; background:rgba(99,102,241,0.12); color:#818cf8; border:1px solid rgba(99,102,241,0.25); border-radius:6px; padding:3px 8px; margin:3px 4px; font-size:0.75rem; font-weight:700;">
+                        ✓ ${escapeHTML(s)}
+                    </span>
+                `).join('');
+            }
+
+            const mapContainer = document.getElementById('segCustomMappingContainer');
+            if (mapContainer) {
+                const customMap = getHotelCustomSegmentMapping(hotel);
+                const entries = Object.entries(customMap);
+                if (entries.length === 0) {
+                    mapContainer.innerHTML = '<span style="color:var(--text-muted); font-style:italic;">No hay reasignaciones manuales activas para este hotel. Todos los segmentos se procesan por la regla estándar.</span>';
+                } else {
+                    mapContainer.innerHTML = entries.map(([src, trg]) => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:6px; padding:6px 10px; margin-bottom:6px;">
+                            <div>
+                                <strong style="color:#ef4444;">${escapeHTML(src)}</strong>
+                                <span style="color:var(--text-muted); margin:0 6px;">➔ reasignado a:</span>
+                                <strong style="color:#10b981;">${escapeHTML(trg)}</strong>
+                            </div>
+                            <button type="button" onclick="resetSegmentMapping('${escapeHTML(src)}')" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#ef4444; border-radius:4px; padding:2px 6px; font-size:0.7rem; cursor:pointer;">
+                                Eliminar
+                            </button>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            const modal = document.getElementById('segmentManageModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeManageOfficialSegmentsModal() {
+            const modal = document.getElementById('segmentManageModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function resetSegmentMapping(srcSeg) {
+            saveHotelCustomSegmentMapping(currentHotel, srcSeg, null);
+            openManageOfficialSegmentsModal();
+            const activeM = (typeof window.__seg360SelectedMonth !== 'undefined' && window.__seg360SelectedMonth !== null) ? window.__seg360SelectedMonth : (typeof currentMonthIdx !== 'undefined' ? currentMonthIdx : -1);
+            renderSegmentPickupAnalysis(currentHotel, currentYear, activeM);
+        }
+
+        const SEG_MONTHS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+        function set360SegmentMonth(m) {
+            window.__seg360SelectedMonth = m;
+            renderSegmentPickupAnalysis(currentHotel, currentYear, m);
+        }
+
+        function set360SegmentViewMode(mode) {
+            window.__seg360ViewMode = mode;
+            const btnSummary = document.getElementById('btnSegViewSummary');
+            const btnMatrix = document.getElementById('btnSegViewMatrix');
+            const sumWrapper = document.getElementById('segSummaryWrapper');
+            const matWrapper = document.getElementById('segMatrixWrapper');
+            const sumControls = document.getElementById('segSummaryMonthControls');
+            const matControls = document.getElementById('segMatrixControls');
+
+            if (mode === 'matrix') {
+                if (btnSummary) { btnSummary.style.background = 'transparent'; btnSummary.style.color = 'var(--text-muted)'; }
+                if (btnMatrix) { btnMatrix.style.background = 'var(--primary)'; btnMatrix.style.color = '#fff'; }
+                if (sumWrapper) sumWrapper.style.display = 'none';
+                if (matWrapper) matWrapper.style.display = 'block';
+                if (sumControls) sumControls.style.display = 'none';
+                if (matControls) matControls.style.display = 'flex';
+                render360SegmentMatrix();
+            } else {
+                if (btnSummary) { btnSummary.style.background = 'var(--primary)'; btnSummary.style.color = '#fff'; }
+                if (btnMatrix) { btnMatrix.style.background = 'transparent'; btnMatrix.style.color = 'var(--text-muted)'; }
+                if (sumWrapper) sumWrapper.style.display = 'block';
+                if (matWrapper) matWrapper.style.display = 'none';
+                if (sumControls) sumControls.style.display = 'flex';
+                if (matControls) matControls.style.display = 'none';
+            }
+        }
+
+        function set360SegMatrixMetric(metric) {
+            window.__seg360MatrixMetric = metric;
+            ['btnSegMetricRev', 'btnSegMetricRms', 'btnSegMetricAdr'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.style.background = 'transparent';
+                    btn.style.color = 'var(--text-muted)';
+                }
+            });
+            const activeBtn = document.getElementById(metric === 'rev' ? 'btnSegMetricRev' : (metric === 'rms' ? 'btnSegMetricRms' : 'btnSegMetricAdr'));
+            if (activeBtn) {
+                activeBtn.style.background = 'var(--primary)';
+                activeBtn.style.color = '#fff';
+            }
+            render360SegmentMatrix();
+        }
+
+        function set360SegMatrixComp(comp) {
+            window.__seg360MatrixComp = comp;
+            const btnTY = document.getElementById('btnSegMatrixCompTY');
+            const btnBoth = document.getElementById('btnSegMatrixCompBoth');
+            if (btnTY) {
+                btnTY.style.background = comp === 'TY' ? 'rgba(99,102,241,0.25)' : 'transparent';
+                btnTY.style.color = comp === 'TY' ? '#818cf8' : 'var(--text-muted)';
+                btnTY.style.borderColor = comp === 'TY' ? 'rgba(99,102,241,0.4)' : 'transparent';
+            }
+            if (btnBoth) {
+                btnBoth.style.background = comp === 'BOTH' ? 'rgba(99,102,241,0.25)' : 'transparent';
+                btnBoth.style.color = comp === 'BOTH' ? '#818cf8' : 'var(--text-muted)';
+                btnBoth.style.borderColor = comp === 'BOTH' ? 'rgba(99,102,241,0.4)' : 'transparent';
+            }
+            render360SegmentMatrix();
+        }
+
+        function toggle360SegmentMonthlyRow(segName) {
+            window.__seg360ExpandedMonthlyRows = window.__seg360ExpandedMonthlyRows || new Set();
+            if (window.__seg360ExpandedMonthlyRows.has(segName)) {
+                window.__seg360ExpandedMonthlyRows.delete(segName);
+            } else {
+                window.__seg360ExpandedMonthlyRows.add(segName);
+            }
+            const activeM = (typeof window.__seg360SelectedMonth !== 'undefined' && window.__seg360SelectedMonth !== null) ? window.__seg360SelectedMonth : (typeof currentMonthIdx !== 'undefined' ? currentMonthIdx : -1);
+            renderSegmentPickupAnalysis(currentHotel, currentYear, activeM);
         }
 
         /* ==========================================================================
            PICK-UP Y RENDIMIENTO POR SEGMENTO (VS AÑO ANTERIOR)
            ========================================================================== */
         function renderSegmentPickupAnalysis(hotel, year, midx) {
+            const effectiveMonth = (typeof window.__seg360SelectedMonth !== 'undefined' && window.__seg360SelectedMonth !== null) ? window.__seg360SelectedMonth : midx;
+            window.__seg360SelectedMonth = effectiveMonth;
+
             const lyYear = String(Number(year) - 1);
             const lyLabel = document.getElementById('yield-ly-label');
-            if (lyLabel) lyLabel.innerText = `${lyYear} (Año Anterior)`;
+            if (lyLabel) {
+                const monthSuffix = (effectiveMonth >= 0 && effectiveMonth < 12) ? ` · ${SEG_MONTHS[effectiveMonth]}` : ' · Todo el Año';
+                lyLabel.innerText = `${lyYear} (Año Anterior)${monthSuffix}`;
+            }
+
+            // Renderizar Month Pills de Filtro Rápido
+            const pillsContainer = document.getElementById('segMonthPillsContainer');
+            if (pillsContainer) {
+                let pillsHtml = `
+                    <button type="button" onclick="set360SegmentMonth(-1)" style="background:${effectiveMonth === -1 ? 'var(--primary)' : 'transparent'}; color:${effectiveMonth === -1 ? '#fff' : 'var(--text-muted)'}; border:none; padding:3px 8px; border-radius:6px; font-size:0.68rem; font-weight:700; cursor:pointer;">
+                        🌐 Todo
+                    </button>
+                `;
+                SEG_MONTHS.forEach((mName, mIdx) => {
+                    const isAct = (effectiveMonth === mIdx);
+                    pillsHtml += `
+                        <button type="button" onclick="set360SegmentMonth(${mIdx})" style="background:${isAct ? 'var(--primary)' : 'transparent'}; color:${isAct ? '#fff' : 'var(--text-muted)'}; border:none; padding:3px 7px; border-radius:6px; font-size:0.68rem; font-weight:700; cursor:pointer;">
+                            ${mName}
+                        </button>
+                    `;
+                });
+                pillsContainer.innerHTML = pillsHtml;
+            }
 
             const segTbody = document.getElementById('segmentPickupBody');
             if (!segTbody) return;
@@ -3863,14 +4291,12 @@
                 }
             } catch(e) { console.warn("Error leyendo upload_segment_db_v2:", e); }
 
-            // Fallback a db principal si no estaban en upload_segment_db_v2
             if (Object.keys(segDataTY).length === 0 && db[hotel]) {
                 segDataTY = db[hotel][year]?.segment || {};
                 segDataLY = db[hotel][lyYear]?.segment || {};
                 segPrevTY = db[hotel][year]?.segment_prev || {};
             }
 
-            // Leer base de datos de previsiones por segmento y sus snapshots (segment_forecast_v2)
             let forecastDB = {};
             try {
                 forecastDB = JSON.parse(CapaStorage.getItem('segment_forecast_v2') || '{}') || {};
@@ -3884,8 +4310,8 @@
 
             const getSegmentValues = (segObj) => {
                 if (!segObj) return { rooms: 0, rev: 0 };
-                const mStart = midx === -1 ? 0 : midx;
-                const mEnd = midx === -1 ? 11 : midx;
+                const mStart = effectiveMonth === -1 ? 0 : effectiveMonth;
+                const mEnd = effectiveMonth === -1 ? 11 : effectiveMonth;
                 let rooms = 0, rev = 0;
 
                 const roomRevArr = (typeof segmentRoomRevenue === 'function') ? segmentRoomRevenue(segObj) : null;
@@ -3906,10 +4332,10 @@
             const getForecastValues = (segMap) => {
                 const res = {};
                 if (!segMap) return res;
-                const mStart = midx === -1 ? 0 : midx;
-                const mEnd = midx === -1 ? 11 : midx;
+                const mStart = effectiveMonth === -1 ? 0 : effectiveMonth;
+                const mEnd = effectiveMonth === -1 ? 11 : effectiveMonth;
                 Object.entries(segMap).forEach(([rawName, segObj]) => {
-                    const canonical = normalizeSegmentDisplayName(rawName);
+                    const canonical = normalizeSegmentDisplayName(rawName, hotel);
                     if (!res[canonical]) res[canonical] = { rooms: 0, rev: 0 };
                     if (segObj && segObj.days) {
                         Object.entries(segObj.days).forEach(([iso, dt]) => {
@@ -3933,18 +4359,41 @@
             const hasMonthlyOtbPrev = segOtbPrevTY && Object.keys(segOtbPrevTY).length > 0;
             const hasSegmentPrev = segPrevTY && Object.keys(segPrevTY).length > 0;
 
-            // Agrupar y consolidar por nombre canónico (ej. DIRONLINE -> DIRECTO ONLINE)
             const groupedMap = {};
+
             const addToGroup = (srcObj, key) => {
                 if (!srcObj) return;
                 Object.keys(srcObj).forEach(rawName => {
-                    const canonical = normalizeSegmentDisplayName(rawName);
+                    const canonical = normalizeSegmentDisplayName(rawName, hotel);
                     if (!groupedMap[canonical]) {
-                        groupedMap[canonical] = { cur: { rooms: 0, rev: 0 }, ly: { rooms: 0, rev: 0 }, prev: { rooms: 0, rev: 0 } };
+                        groupedMap[canonical] = { 
+                            cur: { rooms: 0, rev: 0 }, 
+                            ly: { rooms: 0, rev: 0 }, 
+                            prev: { rooms: 0, rev: 0 },
+                            monthlyCur: { rooms: new Array(12).fill(0), rev: new Array(12).fill(0) },
+                            monthlyLy: { rooms: new Array(12).fill(0), rev: new Array(12).fill(0) }
+                        };
                     }
                     const vals = getSegmentValues(srcObj[rawName]);
                     groupedMap[canonical][key].rooms += vals.rooms;
                     groupedMap[canonical][key].rev += vals.rev;
+
+                    // Captura mensual completa para la matriz
+                    if (key === 'cur' || key === 'ly') {
+                        const mTarget = key === 'cur' ? groupedMap[canonical].monthlyCur : groupedMap[canonical].monthlyLy;
+                        const sObj = srcObj[rawName];
+                        const roomRevArr = (typeof segmentRoomRevenue === 'function') ? segmentRoomRevenue(sObj) : null;
+                        for (let m = 0; m < 12; m++) {
+                            mTarget.rooms[m] += (Number(sObj.rooms?.[m]) || 0);
+                            if (roomRevArr) {
+                                mTarget.rev[m] += (Number(roomRevArr[m]) || 0);
+                            } else if (sObj.accommodation) {
+                                mTarget.rev[m] += (Number(sObj.accommodation[m]) || 0);
+                            } else if (sObj.revenue) {
+                                mTarget.rev[m] += (Number(sObj.revenue[m]) || 0);
+                            }
+                        }
+                    }
                 });
             };
 
@@ -3952,14 +4401,35 @@
             addToGroup(segDataLY, 'ly');
             addToGroup(segPrevTY, 'prev');
 
-            // Asegurar que segmentos con actividad en forecast también se listen si faltan en histórico
-            Object.keys(curForecastVals).forEach(canonical => {
+            // Asegurar que forecast también alimente monthlyCur
+            Object.entries(curForecastSeg).forEach(([rawName, segObj]) => {
+                const canonical = normalizeSegmentDisplayName(rawName, hotel);
                 if (!groupedMap[canonical]) {
-                    groupedMap[canonical] = { cur: { rooms: 0, rev: 0 }, ly: { rooms: 0, rev: 0 }, prev: { rooms: 0, rev: 0 } };
+                    groupedMap[canonical] = { 
+                        cur: { rooms: 0, rev: 0 }, 
+                        ly: { rooms: 0, rev: 0 }, 
+                        prev: { rooms: 0, rev: 0 },
+                        monthlyCur: { rooms: new Array(12).fill(0), rev: new Array(12).fill(0) },
+                        monthlyLy: { rooms: new Array(12).fill(0), rev: new Array(12).fill(0) }
+                    };
+                }
+                if (segObj && segObj.days) {
+                    Object.entries(segObj.days).forEach(([iso, dt]) => {
+                        const [yStr, mStr] = iso.split('-');
+                        if (yStr === String(year)) {
+                            const m = parseInt(mStr, 10) - 1;
+                            if (m >= 0 && m < 12) {
+                                if (groupedMap[canonical].monthlyCur.rooms[m] === 0) {
+                                    groupedMap[canonical].monthlyCur.rooms[m] += (Number(dt.rooms) || 0);
+                                    groupedMap[canonical].monthlyCur.rev[m] += (Number(dt.accommodation) || Number(dt.revenue) || 0);
+                                }
+                            }
+                        }
+                    });
                 }
             });
 
-            // Si un segmento no tiene producción real en este periodo pero sí OTB de forecast (ej. meses futuros o año de previsión), usar forecast
+            // Si un segmento no tiene producción real en este periodo pero sí OTB de forecast, usar forecast
             Object.keys(groupedMap).forEach(segName => {
                 const fData = curForecastVals[segName];
                 if (fData && fData.rooms > 0 && groupedMap[segName].cur.rooms === 0) {
@@ -3968,9 +4438,14 @@
                 }
             });
 
+            window.__seg360GroupedMap = groupedMap;
+            window.__seg360Hotel = hotel;
+            window.__seg360Year = year;
+
             const allCanonicalKeys = Object.keys(groupedMap);
             if (allCanonicalKeys.length === 0) {
                 segTbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:24px; color:var(--text-muted);">No hay informes de segmentos cargados para este hotel y año</td></tr>';
+                render360SegmentMatrix();
                 return;
             }
 
@@ -3978,6 +4453,8 @@
             let totRmsTY = 0, totRevTY = 0;
             let totRmsLY = 0, totRevLY = 0;
             let totPickupRms = 0, totPickupRev = 0;
+
+            const officialList = getHotelOfficialSegments(hotel);
 
             allCanonicalKeys.forEach(segName => {
                 const cur = groupedMap[segName].cur;
@@ -3987,7 +4464,6 @@
                 let pickupRms = 0;
                 let pickupRev = 0;
 
-                // Pick-up de segmento: priorizar comparativa entre informes de previsión, o histórico de cargas
                 if (hasForecastPrev && curForecastVals[segName] && prevForecastVals[segName]) {
                     pickupRms = curForecastVals[segName].rooms - prevForecastVals[segName].rooms;
                     pickupRev = curForecastVals[segName].rev - prevForecastVals[segName].rev;
@@ -4015,23 +4491,22 @@
                 const deltaAdr = adrTY - adrLY;
                 const deltaAdrPct = adrLY > 0 ? (deltaAdr / adrLY * 100) : 0;
 
-                // Canales y métricas netas
                 let channels = [];
                 let segCommissionsTY = 0;
                 let segCommissionsLY = 0;
 
-                const segRawObjTY = segDataTY[segName] || segDataTY[Object.keys(segDataTY).find(k => normalizeSegmentDisplayName(k) === segName)];
-                const segRawObjLY = segDataLY[segName] || segDataLY[Object.keys(segDataLY).find(k => normalizeSegmentDisplayName(k) === segName)];
+                const segRawObjTY = segDataTY[segName] || segDataTY[Object.keys(segDataTY).find(k => normalizeSegmentDisplayName(k, hotel) === segName)];
+                const segRawObjLY = segDataLY[segName] || segDataLY[Object.keys(segDataLY).find(k => normalizeSegmentDisplayName(k, hotel) === segName)];
 
                 if (typeof SegmentAnalysis !== 'undefined') {
                     if (segRawObjTY) {
                         try {
-                            const mList = midx === -1 ? [] : [midx];
+                            const mList = effectiveMonth === -1 ? [] : [effectiveMonth];
                             const chList = SegmentAnalysis.getSegmentChannels(segRawObjTY, mList, hotel);
                             channels = chList.map(ch => {
                                 const oldCh = segRawObjLY?.channels?.[ch.name];
-                                const oldChRooms = oldCh ? (midx === -1 ? SegmentAnalysis.sum(oldCh, 'rooms') : (Number(oldCh.rooms?.[midx]) || 0)) : 0;
-                                const oldChAcc = oldCh ? (midx === -1 ? SegmentAnalysis.sum(oldCh, 'accommodation') : (Number(oldCh.accommodation?.[midx]) || 0)) : 0;
+                                const oldChRooms = oldCh ? (effectiveMonth === -1 ? SegmentAnalysis.sum(oldCh, 'rooms') : (Number(oldCh.rooms?.[effectiveMonth]) || 0)) : 0;
+                                const oldChAcc = oldCh ? (effectiveMonth === -1 ? SegmentAnalysis.sum(oldCh, 'accommodation') : (Number(oldCh.accommodation?.[effectiveMonth]) || 0)) : 0;
                                 const oldChAdr = oldChRooms > 0 && oldChAcc > 0 ? oldChAcc / oldChRooms : 0;
                                 const oldNet = SegmentAnalysis.calculateNetMetrics(oldChAcc, oldChRooms, ch.name, hotel);
 
@@ -4076,8 +4551,11 @@
                 totPickupRms += pickupRms;
                 totPickupRev += pickupRev;
 
+                const isOfficial = officialList.includes(segName);
+
                 rows.push({
                     name: segName,
+                    isOfficial: isOfficial,
                     roomsTY: cur.rooms,
                     revTY: cur.rev,
                     adrTY: adrTY,
@@ -4102,9 +4580,9 @@
                 });
             });
 
-            // Actualizar badge de comisiones en la cabecera
             const isNetView = !!window.__seg360NetMode;
             const expandedSegs = window.__seg360ExpandedSegs || new Set();
+            const expandedMonthlyRows = window.__seg360ExpandedMonthlyRows || new Set();
             const totalCommissions = rows.reduce((sum, r) => sum + r.commissionAmountTY, 0);
             const totalNetRevTY = rows.reduce((sum, r) => sum + r.netRevTY, 0);
             const totalNetRevLY = rows.reduce((sum, r) => sum + r.netRevLY, 0);
@@ -4125,7 +4603,6 @@
                 btnNet.style.color = isNetView ? '#fff' : 'var(--text-muted)';
             }
 
-            // Ordenar por ingresos (brutos o netos según modo)
             rows.sort((a, b) => (isNetView ? b.netRevTY - a.netRevTY : b.revTY - a.revTY));
 
             const formatVar = (diffVal, pctVal, isCurrency = false) => {
@@ -4159,13 +4636,24 @@
                 const hasChannels = r.channels && r.channels.length > 1;
                 const isExpanded = expandedSegs.has(r.name);
                 const expandBtn = hasChannels 
-                    ? `<button onclick="toggle360SegmentChannels('${escapeHTML(r.name)}')" style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25); color: var(--primary); padding: 1px 6px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; line-height: 1; margin-right: 6px;" title="Ver canales del segmento">${isExpanded ? '▼' : '▶'}</button>` 
+                    ? `<button type="button" onclick="toggle360SegmentChannels('${escapeHTML(r.name)}')" style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25); color: var(--primary); padding: 1px 6px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; line-height: 1; margin-right: 6px;" title="Ver canales del segmento">${isExpanded ? '▼' : '▶'}</button>` 
+                    : '';
+
+                const isMonthlyOpen = expandedMonthlyRows.has(r.name);
+                const month12Btn = `<button type="button" onclick="toggle360SegmentMonthlyRow('${escapeHTML(r.name)}')" style="background: ${isMonthlyOpen ? 'rgba(16,185,129,0.25)' : 'rgba(255,255,255,0.06)'}; border: 1px solid ${isMonthlyOpen ? '#10b981' : 'var(--border)'}; color: ${isMonthlyOpen ? '#10b981' : 'var(--text-muted)'}; padding: 1px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; cursor: pointer; line-height: 1.2; margin-right: 6px;" title="Ver desglose 12 meses">📅 12M</button>`;
+
+                const unOfficialBadge = !r.isOfficial 
+                    ? `<span style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); border-radius:4px; padding:1px 5px; font-size:0.65rem; font-weight:700; margin-left:6px;">No oficial</span>`
+                    : '';
+
+                const corrBtn = !r.isOfficial || r.name.toUpperCase().includes('PARTIC')
+                    ? `<button type="button" onclick="openSegmentCorrectionModal('${escapeHTML(r.name)}')" title="Reasignar a segmento oficial de ${escapeHTML(hotel)}" style="background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#f59e0b; padding:1px 6px; border-radius:4px; font-size:0.68rem; font-weight:700; cursor:pointer; line-height:1.2; margin-left:6px;">✏️ Corregir</button>`
                     : '';
 
                 const commissionNote = r.commissionAmountTY > 0 ? ` <span style="font-size:0.65rem; color:#ef4444; display:block; font-weight:normal;">(-${fmt(r.commissionAmountTY)})</span>` : '';
 
                 let tanteoAlertBadge = '';
-                if (typeof SegmentAnalysis !== 'undefined' && SegmentAnalysis.canonical && SegmentAnalysis.canonical(r.name) === 'GRTANTEO' && SegmentAnalysis.detectGrtanteoAlerts) {
+                if (typeof SegmentAnalysis !== 'undefined' && SegmentAnalysis.canonical && SegmentAnalysis.canonical(r.name, hotel) === 'GRTANTEO' && SegmentAnalysis.detectGrtanteoAlerts) {
                     try {
                         const tAlert = SegmentAnalysis.detectGrtanteoAlerts({ forecastDB, hotel, year });
                         if (tAlert && tAlert.hasAlert) {
@@ -4179,27 +4667,26 @@
                         <td style="font-weight:700; color:var(--text-main); white-space:nowrap;">
                             <div style="display:flex; align-items:center;">
                                 ${expandBtn}
-                                <span>${r.name}</span>
+                                ${month12Btn}
+                                <span>${escapeHTML(r.name)}</span>
                                 ${hasChannels ? `<span style="font-size:0.68rem; color:var(--text-muted); font-weight:normal; margin-left:4px;">(${r.channels.length} can.)</span>` : ''}
+                                ${unOfficialBadge}
+                                ${corrBtn}
                                 ${tanteoAlertBadge}
                             </div>
                         </td>
-                        <!-- PRODUCCIÓN HABITACIÓN -->
                         <td style="font-weight:700; color:${isNetView ? '#10b981' : 'var(--text-main)'};">
                             ${fmt(dispRevTY)}
                             ${commissionNote}
                         </td>
                         <td style="color:var(--text-muted);">${fmt(dispRevLY)}</td>
                         <td style="border-right: 1px solid var(--border);">${formatVar(dispDeltaRev, dispDeltaRevPct, true)}</td>
-                        <!-- HABITACIONES RN -->
                         <td style="font-weight:700;">${fmtNum(r.roomsTY)} RN</td>
                         <td style="color:var(--text-muted);">${fmtNum(r.roomsLY)} RN</td>
                         <td style="border-right: 1px solid var(--border);">${formatVar(r.deltaRms, r.deltaRmsPct)}</td>
-                        <!-- ADR HABITACIÓN -->
                         <td style="font-weight:700; color:${isNetView ? '#10b981' : 'var(--primary)'};">${fmt(dispAdrTY)}</td>
                         <td style="color:var(--text-muted);">${fmt(dispAdrLY)}</td>
                         <td style="border-right: 1px solid var(--border);">${formatVar(dispDeltaAdr, dispDeltaAdrPct, true)}</td>
-                        <!-- PICK-UP RECIENTE -->
                         <td>${pRmsTag}</td>
                         <td>${pRevTag}</td>
                     </tr>
@@ -4245,7 +4732,54 @@
                     }).join('');
                 }
 
-                segTbody.innerHTML += mainRow + subrows;
+                let monthlyRow = '';
+                if (isMonthlyOpen && groupedMap[r.name]) {
+                    const sMap = groupedMap[r.name];
+                    let monthCards = '';
+                    for (let m = 0; m < 12; m++) {
+                        let cRev = sMap.monthlyCur.rev[m] || 0;
+                        let cRms = sMap.monthlyCur.rooms[m] || 0;
+                        let lRev = sMap.monthlyLy.rev[m] || 0;
+                        let lRms = sMap.monthlyLy.rooms[m] || 0;
+
+                        if (isNetView && typeof SegmentAnalysis !== 'undefined') {
+                            const cNet = SegmentAnalysis.calculateNetMetrics(cRev, cRms, r.name, hotel);
+                            cRev = Math.max(0, cRev - cNet.commissionAmount);
+                            const lNet = SegmentAnalysis.calculateNetMetrics(lRev, lRms, r.name, hotel);
+                            lRev = Math.max(0, lRev - lNet.commissionAmount);
+                        }
+
+                        const cAdr = cRms > 0 ? (cRev / cRms) : 0;
+                        const dRevPct = lRev > 0 ? ((cRev - lRev) / lRev * 100) : 0;
+
+                        monthCards += `
+                            <div style="flex:1; min-width:68px; background:rgba(0,0,0,0.25); border:1px solid var(--border); border-radius:6px; padding:5px 6px; text-align:center;">
+                                <div style="font-size:0.65rem; font-weight:800; color:#818cf8; text-transform:uppercase;">${SEG_MONTHS[m]}</div>
+                                <div style="font-size:0.72rem; font-weight:700; color:var(--text-main); margin-top:2px;">${fmt(cRev)}</div>
+                                <div style="font-size:0.62rem; color:var(--text-muted);">${fmtNum(cRms)} RN · ${fmt(cAdr)}</div>
+                                ${cRev > 0 && lRev > 0 ? `<div style="font-size:0.6rem; font-weight:700; color:${dRevPct >= 0 ? '#10b981' : '#ef4444'}; margin-top:1px;">${dRevPct >= 0 ? '+' : ''}${dRevPct.toFixed(1).replace('.', ',')}%</div>` : ''}
+                            </div>
+                        `;
+                    }
+
+                    monthlyRow = `
+                        <tr style="background:rgba(16,185,129,0.03); border-bottom:1px dashed var(--border);">
+                            <td colspan="11" style="padding:8px 14px 10px 32px; border-left:3px solid #10b981;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                    <span style="font-size:0.72rem; font-weight:800; color:#10b981; text-transform:uppercase; display:flex; align-items:center; gap:6px;">
+                                        <span>📅</span> Desglose 12 Meses: ${escapeHTML(r.name)} (${isNetView ? 'NETO' : 'BRUTO'})
+                                    </span>
+                                    <span style="font-size:0.68rem; color:var(--text-muted);">Producción, RN, ADR y Var % vs Año Anterior mes a mes</span>
+                                </div>
+                                <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:4px;">
+                                    ${monthCards}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                segTbody.innerHTML += mainRow + subrows + monthlyRow;
             });
 
             // Fila Total
@@ -4262,8 +4796,8 @@
 
             segTbody.innerHTML += `
                 <tr style="background: rgba(99, 102, 241, 0.12); font-weight:800; border-top: 2px solid var(--border);">
-                    <td style="color: #a78bfa;">TOTAL TODOS LOS CANALES (${isNetView ? '💎 NETO' : 'BRUTO'})</td>
-                    <td style="color:${isNetView ? '#10b981' : 'inherit'};">${fmt(finalTotRevTY)}</td>
+                    <td style="color: #a78bfa;">TOTAL TODOS LOS CANALES (${isNetView ? '💎 NETO' : 'BRUTO'}${effectiveMonth >= 0 ? ` · ${SEG_MONTHS[effectiveMonth]}` : ''})</td>
+                    <td style="color:${isNetView ? '#10b981' : 'inherit'};尋${fmt(finalTotRevTY)}</td>
                     <td style="color:var(--text-muted);">${fmt(finalTotRevLY)}</td>
                     <td style="border-right: 1px solid var(--border);">${formatVar(totDeltaRev, totDeltaRevPct, true)}</td>
                     <td>${fmtNum(totRmsTY)} RN</td>
@@ -4275,6 +4809,217 @@
                     <td>${totPickupRms > 0 ? `<span style="color:#10b981;">+${totPickupRms} RN</span>` : (totPickupRms < 0 ? `<span style="color:#ef4444;">${totPickupRms} RN</span>` : '● 0')}</td>
                     <td>${totPickupRev > 0 ? `<span style="color:#10b981;">+${fmt(totPickupRev)}</span>` : (totPickupRev < 0 ? `<span style="color:#ef4444;">${fmt(totPickupRev)}</span>` : '● 0 €')}</td>
                 </tr>
+            `.replace(';尋', ';');
+
+            render360SegmentMatrix();
+        }
+
+        function render360SegmentMatrix() {
+            const tbody = document.getElementById('segMatrixBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const groupedMap = window.__seg360GroupedMap;
+            if (!groupedMap || Object.keys(groupedMap).length === 0) {
+                tbody.innerHTML = '<tr><td colspan="14" style="text-align:center; padding:20px; color:var(--text-muted);">No hay datos mensuales cargados</td></tr>';
+                return;
+            }
+
+            const hotel = window.__seg360Hotel || currentHotel;
+            const isNetView = !!window.__seg360NetMode;
+            const metric = window.__seg360MatrixMetric || 'rev';
+            const compMode = window.__seg360MatrixComp || 'TY';
+
+            const officialList = getHotelOfficialSegments(hotel);
+            const sortedKeys = Object.keys(groupedMap).sort((a, b) => {
+                const revA = groupedMap[a].monthlyCur.rev.reduce((sum, v) => sum + v, 0);
+                const revB = groupedMap[b].monthlyCur.rev.reduce((sum, v) => sum + v, 0);
+                return revB - revA;
+            });
+
+            const colTotalsCur = new Array(12).fill(0);
+            const colTotalsLY = new Array(12).fill(0);
+            const colTotalsRmsCur = new Array(12).fill(0);
+            const colTotalsRmsLY = new Array(12).fill(0);
+
+            sortedKeys.forEach(segName => {
+                const seg = groupedMap[segName];
+                const isOfficial = officialList.includes(segName);
+
+                let rowTotalCur = 0;
+                let rowTotalLY = 0;
+                let rowTotalRmsCur = 0;
+                let rowTotalRmsLY = 0;
+
+                let cellsHtml = '';
+
+                for (let m = 0; m < 12; m++) {
+                    let curRev = seg.monthlyCur.rev[m] || 0;
+                    let curRms = seg.monthlyCur.rooms[m] || 0;
+                    let lyRev = seg.monthlyLy.rev[m] || 0;
+                    let lyRms = seg.monthlyLy.rooms[m] || 0;
+
+                    if (isNetView && typeof SegmentAnalysis !== 'undefined') {
+                        const cNet = SegmentAnalysis.calculateNetMetrics(curRev, curRms, segName, hotel);
+                        curRev = Math.max(0, curRev - cNet.commissionAmount);
+                        const lNet = SegmentAnalysis.calculateNetMetrics(lyRev, lyRms, segName, hotel);
+                        lyRev = Math.max(0, lyRev - lNet.commissionAmount);
+                    }
+
+                    rowTotalCur += curRev;
+                    rowTotalLY += lyRev;
+                    rowTotalRmsCur += curRms;
+                    rowTotalRmsLY += lyRms;
+
+                    colTotalsCur[m] += curRev;
+                    colTotalsLY[m] += lyRev;
+                    colTotalsRmsCur[m] += curRms;
+                    colTotalsRmsLY[m] += lyRms;
+
+                    let curVal = (metric === 'rev') ? curRev : ((metric === 'rms') ? curRms : (curRms > 0 ? curRev / curRms : 0));
+                    let lyVal = (metric === 'rev') ? lyRev : ((metric === 'rms') ? lyRms : (lyRms > 0 ? lyRev / lyRms : 0));
+
+                    let displayVal = '--';
+                    if (curVal > 0) {
+                        if (metric === 'rev') displayVal = fmt(curVal);
+                        else if (metric === 'rms') displayVal = fmtNum(curVal);
+                        else if (metric === 'adr') displayVal = fmt(curVal);
+                    }
+
+                    let subTag = '';
+                    if (compMode === 'BOTH' && curVal > 0 && lyVal > 0) {
+                        const diff = curVal - lyVal;
+                        const diffPct = (diff / lyVal) * 100;
+                        const isPos = diff >= 0;
+                        const color = isPos ? '#10b981' : '#ef4444';
+                        const sign = isPos ? '+' : '';
+                        subTag = `<span style="font-size:0.62rem; color:${color}; font-weight:700; display:block; margin-top:2px;">${sign}${diffPct.toFixed(1).replace('.', ',')}%</span>`;
+                    } else if (compMode === 'BOTH' && lyVal > 0 && curVal === 0) {
+                        subTag = `<span style="font-size:0.62rem; color:#ef4444; font-weight:700; display:block; margin-top:2px;">-100%</span>`;
+                    }
+
+                    cellsHtml += `
+                        <td style="text-align:right; font-weight:${curVal > 0 ? '700' : 'normal'}; color:${curVal > 0 ? 'var(--text-main)' : 'var(--text-muted)'}; padding:6px 8px;">
+                            ${displayVal}
+                            ${subTag}
+                        </td>
+                    `;
+                }
+
+                let totCurVal = (metric === 'rev') ? rowTotalCur : ((metric === 'rms') ? rowTotalRmsCur : (rowTotalRmsCur > 0 ? rowTotalCur / rowTotalRmsCur : 0));
+                let totLyVal = (metric === 'rev') ? rowTotalLY : ((metric === 'rms') ? rowTotalRmsLY : (rowTotalRmsLY > 0 ? rowTotalLY / rowTotalRmsLY : 0));
+
+                let totDisplay = '--';
+                if (totCurVal > 0) {
+                    if (metric === 'rev') totDisplay = fmt(totCurVal);
+                    else if (metric === 'rms') totDisplay = fmtNum(totCurVal) + ' RN';
+                    else if (metric === 'adr') totDisplay = fmt(totCurVal);
+                }
+
+                let totSub = '';
+                if (compMode === 'BOTH' && totCurVal > 0 && totLyVal > 0) {
+                    const diff = totCurVal - totLyVal;
+                    const diffPct = (diff / totLyVal) * 100;
+                    const isPos = diff >= 0;
+                    const color = isPos ? '#10b981' : '#ef4444';
+                    const sign = isPos ? '+' : '';
+                    totSub = `<span style="font-size:0.65rem; color:${color}; font-weight:700; display:block; margin-top:2px;">${sign}${diffPct.toFixed(1).replace('.', ',')}%</span>`;
+                }
+
+                const unOfficialBadge = !isOfficial 
+                    ? `<span style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); border-radius:4px; padding:1px 4px; font-size:0.62rem; font-weight:700; margin-left:4px;">No oficial</span>`
+                    : '';
+
+                const corrBtn = !isOfficial || segName.toUpperCase().includes('PARTIC')
+                    ? `<button type="button" onclick="openSegmentCorrectionModal('${escapeHTML(segName)}')" style="background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#f59e0b; padding:1px 5px; border-radius:4px; font-size:0.65rem; font-weight:700; cursor:pointer; margin-left:4px;" title="Reasignar a oficial">✏️</button>`
+                    : '';
+
+                tbody.innerHTML += `
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <td style="font-weight:700; color:var(--text-main); white-space:nowrap; padding:6px 10px;">
+                            <span>${escapeHTML(segName)}</span>
+                            ${unOfficialBadge}
+                            ${corrBtn}
+                        </td>
+                        ${cellsHtml}
+                        <td style="text-align:right; font-weight:800; background:rgba(99,102,241,0.06); color:var(--primary); border-left:1px solid var(--border); padding:6px 10px;">
+                            ${totDisplay}
+                            ${totSub}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Fila Total Hotel
+            let grandTotCur = 0;
+            let grandTotLY = 0;
+            let grandTotRmsCur = 0;
+            let grandTotRmsLY = 0;
+            let totalColsHtml = '';
+
+            for (let m = 0; m < 12; m++) {
+                grandTotCur += colTotalsCur[m];
+                grandTotLY += colTotalsLY[m];
+                grandTotRmsCur += colTotalsRmsCur[m];
+                grandTotRmsLY += colTotalsRmsLY[m];
+
+                let curVal = (metric === 'rev') ? colTotalsCur[m] : ((metric === 'rms') ? colTotalsRmsCur[m] : (colTotalsRmsCur[m] > 0 ? colTotalsCur[m] / colTotalsRmsCur[m] : 0));
+                let lyVal = (metric === 'rev') ? colTotalsLY[m] : ((metric === 'rms') ? colTotalsRmsLY[m] : (colTotalsRmsLY[m] > 0 ? colTotalsLY[m] / colTotalsRmsLY[m] : 0));
+
+                let displayVal = '--';
+                if (curVal > 0) {
+                    if (metric === 'rev') displayVal = fmt(curVal);
+                    else if (metric === 'rms') displayVal = fmtNum(curVal);
+                    else if (metric === 'adr') displayVal = fmt(curVal);
+                }
+
+                let subTag = '';
+                if (compMode === 'BOTH' && curVal > 0 && lyVal > 0) {
+                    const diff = curVal - lyVal;
+                    const diffPct = (diff / lyVal) * 100;
+                    const isPos = diff >= 0;
+                    const color = isPos ? '#10b981' : '#ef4444';
+                    const sign = isPos ? '+' : '';
+                    subTag = `<span style="font-size:0.62rem; color:${color}; font-weight:700; display:block; margin-top:2px;">${sign}${diffPct.toFixed(1).replace('.', ',')}%</span>`;
+                }
+
+                totalColsHtml += `
+                    <td style="text-align:right; font-weight:800; padding:8px 8px;">
+                        ${displayVal}
+                        ${subTag}
+                    </td>
+                `;
+            }
+
+            let grandVal = (metric === 'rev') ? grandTotCur : ((metric === 'rms') ? grandTotRmsCur : (grandTotRmsCur > 0 ? grandTotCur / grandTotRmsCur : 0));
+            let grandLYVal = (metric === 'rev') ? grandTotLY : ((metric === 'rms') ? grandTotRmsLY : (grandTotRmsLY > 0 ? grandTotLY / grandTotRmsLY : 0));
+
+            let grandDisplay = '--';
+            if (grandVal > 0) {
+                if (metric === 'rev') grandDisplay = fmt(grandVal);
+                else if (metric === 'rms') grandDisplay = fmtNum(grandVal) + ' RN';
+                else if (metric === 'adr') grandDisplay = fmt(grandVal);
+            }
+
+            let grandSub = '';
+            if (compMode === 'BOTH' && grandVal > 0 && grandLYVal > 0) {
+                const diff = grandVal - grandLYVal;
+                const diffPct = (diff / grandLYVal) * 100;
+                const isPos = diff >= 0;
+                const color = isPos ? '#10b981' : '#ef4444';
+                const sign = isPos ? '+' : '';
+                grandSub = `<span style="font-size:0.68rem; color:${color}; font-weight:800; display:block; margin-top:2px;">${sign}${diffPct.toFixed(1).replace('.', ',')}%</span>`;
+            }
+
+            tbody.innerHTML += `
+                <tr style="background:rgba(99,102,241,0.12); font-weight:800; border-top:2px solid var(--border);">
+                    <td style="color:#a78bfa; padding:8px 10px;">TOTAL HOTEL (${isNetView ? '💎 NETO' : 'BRUTO'})</td>
+                    ${totalColsHtml}
+                    <td style="text-align:right; font-weight:800; color:var(--primary); font-size:0.85rem; border-left:1px solid var(--border); padding:8px 10px;">
+                        ${grandDisplay}
+                        ${grandSub}
+                    </td>
+                </tr>
             `;
         }
 
@@ -4285,12 +5030,14 @@
             } else {
                 window.__seg360ExpandedSegs.add(segName);
             }
-            renderSegmentPickupAnalysis(currentHotel, currentYear, (typeof currentMonthIdx !== 'undefined' ? currentMonthIdx : -1));
+            const activeM = (typeof window.__seg360SelectedMonth !== 'undefined' && window.__seg360SelectedMonth !== null) ? window.__seg360SelectedMonth : (typeof currentMonthIdx !== 'undefined' ? currentMonthIdx : -1);
+            renderSegmentPickupAnalysis(currentHotel, currentYear, activeM);
         }
 
         function set360SegmentNetMode(enableNet) {
             window.__seg360NetMode = !!enableNet;
-            renderSegmentPickupAnalysis(currentHotel, currentYear, (typeof currentMonthIdx !== 'undefined' ? currentMonthIdx : -1));
+            const activeM = (typeof window.__seg360SelectedMonth !== 'undefined' && window.__seg360SelectedMonth !== null) ? window.__seg360SelectedMonth : (typeof currentMonthIdx !== 'undefined' ? currentMonthIdx : -1);
+            renderSegmentPickupAnalysis(currentHotel, currentYear, activeM);
         }
 
         function switchHotel(h) {

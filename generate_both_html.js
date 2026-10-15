@@ -1,7 +1,11 @@
 const fs = require('fs');
 
 function convertMdToHtml(mdPath, htmlPath, title, downloadDocxName) {
-  const md = fs.readFileSync(mdPath, 'utf8');
+  let resolvedMdPath = mdPath;
+  if (!fs.existsSync(resolvedMdPath) && fs.existsSync('Presupuestos/' + mdPath)) {
+    resolvedMdPath = 'Presupuestos/' + mdPath;
+  }
+  const md = fs.readFileSync(resolvedMdPath, 'utf8');
   let lines = md.split('\n');
   let htmlBody = '';
   let inTable = false;
@@ -134,9 +138,17 @@ li { margin-bottom: 4px; }
 </head>
 <body>
 <div class="actions-bar">
+  <a href="../CalculadoraPresupuesto.html" class="btn" style="background:#4338ca;" id="btnNavBudget" onclick="if(!window.location.pathname.includes('/Presupuestos/')) this.href='CalculadoraPresupuesto.html';">📊 Abrir Presupuesto en CapaSuite</a>
   <button onclick="window.print()" class="btn">📄 Guardar como PDF / Imprimir</button>
 </div>
 <div class="page-container">
+<div class="sync-banner" style="background: rgba(99, 102, 241, 0.08); border: 1.5px solid #6366f1; border-radius: 8px; padding: 12px 18px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+  <div>
+    <span style="font-weight: 800; color: #4338ca; font-size: 0.95rem;">⭐ Presupuesto Oficial Sincronizado con CapaSuite (Opción B: Lógica de Mercado)</span>
+    <div style="font-size: 0.8rem; color: #475569; margin-top: 2px;">Coincidencia exacta mes a mes con las cifras aprobadas para Dirección General.</div>
+  </div>
+  <a href="../CalculadoraPresupuesto.html" class="btn" style="background:#4338ca; padding: 7px 14px; font-size: 0.82rem;" onclick="if(!window.location.pathname.includes('/Presupuestos/')) this.href='CalculadoraPresupuesto.html';">📊 Ver en Calculadora Presupuestaria</a>
+</div>
 ${htmlBody}
 </div>
 </body>

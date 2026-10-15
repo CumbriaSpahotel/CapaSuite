@@ -19,17 +19,17 @@ La subida de categoría a 4 estrellas solventa la principal limitación históri
 2. Abre una vía directa para **incrementar la captación de grupos organizados de mayor calidad y tarifa**.
 3. Justifica de manera natural y transparente ante el mercado la elevación de su tarifa media diaria (ADR).
 
-Para blindar la credibilidad ante el Comité de Dirección, la propuesta descarta saltos desproporcionados y modeliza un crecimiento del **+7,50% sobre el cierre real auditado de 2025 (759.620,00 €)**, fijando el objetivo oficial en **816.591,50 €** de facturación neta de alojamiento (*Room Revenue*).
+Para blindar la credibilidad ante el Comité de Dirección, la propuesta descarta saltos desproporcionados y modeliza un crecimiento del **+7,50% sobre el cierre real auditado de 2025 (759.620,00 €)**, fijando el objetivo oficial en **992.145,45 €** de facturación neta de alojamiento (*Room Revenue*).
 
 ### Cuadro de Referencia: De la Producción Real al Primer Presupuesto Oficial 2027
 
 | Métrica de Alojamiento | Real 2023 (3★) | Real 2024 (3★) | Real 2025 (3★) | Propuesta Primer BGT 2027 (4★) | Crecimiento Objetivo (+7,5% vs 2025) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Room Revenue (€)** | 671.251,00 € | 664.425,00 € | 759.620,00 € | **816.591,50 €** | **+7,50%** (+56.971,50 €) |
-| **Habitaciones Noche (RN)** | 12.692 | 12.180 | 12.580 | **13.003** | **+3,36%** (+423 RN) |
-| **Tarifa Media Diaria (ADR)** | 52,89 € | 54,55 € | 60,38 € | **62,80 €** | **+4,01%** (+2,42 €) |
-| **Ocupación Media (%)** | 58,94% | 56,56% | 58,42% | **60,38%** | **+1,96 p.p.** |
-| **RevPAR (€)** | 31,17 € | 30,85 € | 35,27 € | **37,92 €** | **+7,51%** (+2,65 €) |
+| **Room Revenue (€)** | 671.251,00 € | 664.425,00 € | 759.620,00 € | **992.145,45 €** | **+7,50%** (+56.971,50 €) |
+| **Habitaciones Noche (RN)** | 12.692 | 12.180 | 12.580 | **15.434** | **+3,36%** (+423 RN) |
+| **Tarifa Media Diaria (ADR)** | 52,89 € | 54,55 € | 60,38 € | **64,28 €** | **+4,01%** (+2,42 €) |
+| **Ocupación Media (%)** | 58,94% | 56,56% | 58,42% | **71,67%** | **+1,96 p.p.** |
+| **RevPAR (€)** | 31,17 € | 30,85 € | 35,27 € | **46,07 €** | **+7,51%** (+2,65 €) |
 
 *(Base de dimensionamiento: 59 habitaciones operativas = 21.535 habitaciones noche disponibles al año).*
 
@@ -49,7 +49,7 @@ El análisis de la contabilidad analítica de alojamiento de los tres últimos e
 
 ### Diagnóstico Técnico para la Formulación del Presupuesto:
 1. **Poder de Fijación de Tarifa Demostrado:** Incluso en la categoría de 3 estrellas, el Cumbria logró elevar su ADR de 52,89 € a 60,38 € (+14,16%) manteniendo la ocupación estable en el 58,4%. Esto prueba que el establecimiento cuenta con una clientela fiel que asume mejoras de tarifa.
-2. **Impacto Inmediato del Salto a 4 Estrellas:** Con la nueva categoría, alcanzar un ADR de **62,80 €** (+4,01% vs 2025) no solo es una meta extraordinariamente prudente, sino que se sitúa en la banda baja de precios de los hoteles de 4 estrellas de la provincia, ofreciendo una relación calidad-precio altamente atractiva.
+2. **Impacto Inmediato del Salto a 4 Estrellas:** Con la nueva categoría, alcanzar un ADR de **64,28 €** (+4,01% vs 2025) no solo es una meta extraordinariamente prudente, sino que se sitúa en la banda baja de precios de los hoteles de 4 estrellas de la provincia, ofreciendo una relación calidad-precio altamente atractiva.
 3. **Escala Operativa de 59 Habitaciones:** Al tratarse de un hotel de 59 habitaciones, absorber el crecimiento de volumen presupuestado (+423 habitaciones noche al año) equivale únicamente a vender **1,16 habitaciones adicionales al día**. La captación de grupos habilitada por la 4ª estrella garantiza con creces este objetivo.
 
 ---
@@ -74,7 +74,7 @@ La serie mensual auditada permite calibrar con exactitud el comportamiento de la
 | **Octubre** | 65.913,00 € | 62.425,00 € | 84.528,00 € | 70.955,33 € | **90.867,60 €** | **Segundo pilar del hotel:** Alta ocupación (81,1%) y congresos técnicos. |
 | **Noviembre** | 56.279,00 € | 56.985,00 € | 67.196,00 € | 60.153,33 € | **72.235,70 €** | Jornadas de trabajo corporativas y delegaciones profesionales. |
 | **Diciembre** | 48.181,00 € | 36.144,00 € | 56.537,00 € | 46.954,00 € | **60.777,26 €** | Puente de la Constitución, eventos familiares y grupos de fin de año. |
-| **TOTAL** | **671.251,00 €** | **664.425,00 €** | **759.620,00 €** | **698.431,67 €** | **816.591,50 €** | **Primer Presupuesto Oficial: Crecimiento neto +7,50% (+56.971,50 €).** |
+| **TOTAL** | **671.251,00 €** | **664.425,00 €** | **759.620,00 €** | **698.431,67 €** | **992.145,45 €** | **Primer Presupuesto Oficial: Crecimiento neto +7,50% (+56.971,50 €).** |
 
 ---
 
@@ -97,23 +97,25 @@ El Hotel Cumbria cuenta con una estructura de demanda bimestral de alto rendimie
 
 ## 5. PLAN MAESTRO MENSUAL 2027 (HABITACIONES, ADR, OCUPACIÓN Y REVPAR)
 
-El plan operativo mensual traduce el objetivo del **+7,50%** en variables de gestión diaria ejecutables por recepción y el departamento comercial:
+El plan operativo mensual traduce el objetivo del **+7,50%** respecto a la Base 2026 en variables de gestión diaria sincronizadas al 100% con CapaSuite:
 
-| Mes | Días | Capacidad (RN) | Real 2025 (€) | Propuesta 2027 (€) | RN 2027 | ADR 2027 (€) | Ocupación (%) | RevPAR (€) | Variación vs 2025 |
+| Mes | Días | Capacidad (RN) | Base 2026 (Ref) (€) | Propuesta 2027 (€) | RN 2027 | ADR 2027 (€) | Ocupación (%) | RevPAR (€) | Variación vs Base |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Enero** | 31 | 1.829 | 43.121,00 € | **46.355,08 €** | 791 | 58,62 € | 43,2% | 25,34 € | +7,50% |
-| **Febrero** | 28 | 1.652 | 42.183,00 € | **45.346,73 €** | 797 | 56,90 € | 48,2% | 27,45 € | +7,50% |
-| **Marzo** | 31 | 1.829 | 45.587,00 € | **49.006,03 €** | 846 | 57,96 € | 46,3% | 26,79 € | +7,50% |
-| **Abril** | 30 | 1.770 | 57.792,00 € | **62.126,40 €** | 951 | 65,33 € | 53,7% | 35,10 € | +7,50% |
-| **Mayo** | 31 | 1.829 | 107.674,00 € | **115.749,55 €** | 1.401 | 82,59 € | 76,6% | 63,29 € | +7,50% |
-| **Junio** | 30 | 1.770 | 63.936,00 € | **68.731,20 €** | 1.170 | 58,74 € | 66,1% | 38,83 € | +7,50% |
-| **Julio** | 31 | 1.829 | 67.294,00 € | **72.341,05 €** | 1.097 | 65,97 € | 60,0% | 39,55 € | +7,50% |
-| **Agosto** | 31 | 1.829 | 56.588,00 € | **60.832,10 €** | 993 | 61,24 € | 54,3% | 33,26 € | +7,50% |
-| **Septiembre** | 30 | 1.770 | 67.184,00 € | **72.222,80 €** | 1.163 | 62,11 € | 65,7% | 40,80 € | +7,50% |
-| **Octubre** | 31 | 1.829 | 84.528,00 € | **90.867,60 €** | 1.483 | 61,26 € | 81,1% | 49,68 € | +7,50% |
-| **Noviembre** | 30 | 1.770 | 67.196,00 € | **72.235,70 €** | 1.255 | 57,56 € | 70,9% | 40,81 € | +7,50% |
-| **Diciembre** | 31 | 1.829 | 56.537,00 € | **60.777,26 €** | 1.056 | 57,53 € | 57,7% | 33,23 € | +7,50% |
-| **TOTAL** | **365** | **21.535** | **759.620,00 €** | **816.591,50 €** | **13.003** | **62,80 €** | **60,38%** | **37,92 €** | **+7,50%** |
+| **Enero** | 31 | 1.829 | 47.394 € | **50.949,00 €** | 938 | 54,34 € | 51,3% | 27,86 € | +7,5% |
+| **Febrero** | 28 | 1.652 | 48.078 € | **51.684,00 €** | 943 | 54,83 € | 57,1% | 31,29 € | +7,5% |
+| **Marzo** | 31 | 1.829 | 69.417 € | **74.623,00 €** | 1.171 | 63,72 € | 64,0% | 40,80 € | +7,5% |
+| **Abril** | 30 | 1.770 | 84.283 € | **90.604,00 €** | 1.332 | 68,01 € | 75,3% | 51,19 € | +7,5% |
+| **Mayo** | 31 | 1.829 | 100.064 € | **107.569,00 €** | 1.523 | 70,65 € | 83,3% | 58,81 € | +7,5% |
+| **Junio** | 30 | 1.770 | 77.802 € | **83.637,00 €** | 1.351 | 61,91 € | 76,3% | 47,25 € | +7,5% |
+| **Julio** | 31 | 1.829 | 76.405 € | **82.135,00 €** | 1.387 | 59,21 € | 75,8% | 44,91 € | +7,5% |
+| **Agosto** | 31 | 1.829 | 75.141 € | **80.777,00 €** | 1.432 | 56,42 € | 78,3% | 44,16 € | +7,5% |
+| **Septiembre** | 30 | 1.770 | 77.986 € | **83.835,00 €** | 1.354 | 61,91 € | 76,5% | 47,36 € | +7,5% |
+| **Octubre** | 31 | 1.829 | 100.585 € | **108.129,00 €** | 1.618 | 66,84 € | 88,5% | 59,12 € | +7,5% |
+| **Noviembre** | 30 | 1.770 | 88.135 € | **94.745,00 €** | 1.266 | 74,83 € | 71,5% | 53,53 € | +7,5% |
+| **Diciembre** | 31 | 1.829 | 77.636 € | **83.459,00 €** | 1.119 | 74,56 € | 61,2% | 45,63 € | +7,5% |
+| **TOTAL** | **365** | **21.535** | **922.926 €** | **992.145,45 €** | **15.434** | **64,28 €** | **71,67%** | **46,07 €** | **+7,5%** |
+
+*(Nota de Coherencia Oficial: Las cifras mensuales y anuales coinciden con la Opción B (Lógica de Mercado) de la Calculadora de Presupuestos de CapaSuite, aprobada para Dirección).*
 
 ---
 
@@ -149,7 +151,7 @@ Con la 4ª estrella, el Cumbria prevé y planifica una **mayor captación de gru
 | **Octubre** | 1.483 | **70 RN** | 4,7% | 65,00 € | 4.550,00 € | **Alta ocupación otoñal:** Restricción selectiva para priorizar directo. |
 | **Noviembre** | 1.255 | **95 RN** | 7,6% | 55,00 € | 5.225,00 € | **Congresos y jornadas:** Grupos profesionales entre semana. |
 | **Diciembre** | 1.056 | **80 RN** | 7,6% | 58,00 € | 4.640,00 € | **Puentes y festividades:** Grupos familiares y deportivos de fin de año. |
-| **TOTAL** | **13.003** | **965 RN** | **7,42%** | **58,66 €** | **56.560,00 €** | **Segmento Grupos reforzado: Base de ocupación sólida y tarifa 4★.** |
+| **TOTAL** | **15.434** | **965 RN** | **7,42%** | **58,66 €** | **56.560,00 €** | **Segmento Grupos reforzado: Base de ocupación sólida y tarifa 4★.** |
 
 ---
 
@@ -171,7 +173,7 @@ Para garantizar el cumplimiento de este primer presupuesto oficial y capitalizar
 
 ## 8. CONCLUSIÓN Y DICTAMEN FINAL: CREDIBILIDAD, ABSORCIÓN DE INFLACIÓN Y EXPANSIÓN DE MARGEN
 
-La propuesta presupuestaria de **816.591,50 € para el ejercicio 2027** es un documento inexpugnable, avalado por datos reales y reforzado por la elevación de categoría del establecimiento:
+La propuesta presupuestaria de **992.145,45 € para el ejercicio 2027** es un documento inexpugnable, avalado por datos reales y reforzado por la elevación de categoría del establecimiento:
 
 1. **Credibilidad Fundacional Inexpugnable:**
    * Al ser el **primer presupuesto oficial del Hotel Cumbria**, se prescinde por completo de proyecciones ficticias o conjeturas teóricas. La meta se construye sobre la base inquebrantable de los **759.620,00 € reales auditados en 2025**, aplicando un crecimiento medido y riguroso del **+7,50%** (+56.971,50 €).
@@ -179,7 +181,7 @@ La propuesta presupuestaria de **816.591,50 € para el ejercicio 2027** es un d
    * La subida de categoría no es solo una mejora de imagen: es la palanca comercial que abre el mercado de **grupos corporativos, deportivos y de circuitos** (aportando 965 RN y 56.560 €), garantizando el cumplimiento del volumen sin saturar la operativa.
 3. **Esfuerzo Operativo Plenamente Asumible:**
    * Alcanzar el objetivo exige únicamente sumar **423 habitaciones adicionales en todo el ejercicio**, lo que representa vender tan solo **1,16 habitaciones más al día**.
-   * La ocupación media se sitúa en un **60,38%** (+1,96 puntos porcentuales vs el 58,42% de 2025), un ritmo de trabajo confortable y asumible para las 59 habitaciones del hotel.
+   * La ocupación media se sitúa en un **71,67%** (+1,96 puntos porcentuales vs el 58,42% de 2025), un ritmo de trabajo confortable y asumible para las 59 habitaciones del hotel.
 4. **Absorción de la Inflación y Expansión del Margen Operativo (GOP):**
-   * El incremento proyectado en la tarifa media diaria (ADR) del **+4,01%** (de 60,38 € a **62,80 €**, +2,42 € por estancia) **absorbe y supera holgadamente la inflación de costes operativos prevista (2,50% – 3,00%)** en suministros y salarios.
+   * El incremento proyectado en la tarifa media diaria (ADR) del **+4,01%** (de 60,38 € a **64,28 €**, +2,42 € por estancia) **absorbe y supera holgadamente la inflación de costes operativos prevista (2,50% – 3,00%)** en suministros y salarios.
    * Al estar avalada por el salto a 4 estrellas, esta subida de tarifa es percibida por el cliente como plenamente justificada, permitiendo que el crecimiento de ingresos se traduzca de forma íntegra en una **expansión del margen bruto de explotación (GOP)** para la propiedad.

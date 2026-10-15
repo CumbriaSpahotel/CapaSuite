@@ -889,6 +889,7 @@
             let underpricedDates = [];
             let highDemandYieldDates = [];
             let soldOutDates = [];
+            let flatRateDates = [];
             let consecutiveFlatPriceCount = 0;
             let prevPrice = null;
             let hasFlatRateWarning = false;
@@ -945,7 +946,19 @@
                         // Check flat rate consecutive
                         if (prevPrice !== null && Math.abs(my.price - prevPrice) < 0.5) {
                             consecutiveFlatPriceCount++;
-                            if (consecutiveFlatPriceCount >= 12) hasFlatRateWarning = true;
+                            flatRateDates.push({
+                                dateISO: dateStr,
+                                dayOfWeek: dayInfo.dayOfWeek,
+                                dayLabel: dayInfo.dayLabel,
+                                isWeekend: dayInfo.isWeekend,
+                                myPrice: my.price,
+                                compAvg: Math.round(compAvg),
+                                diff: compAvg > 0 ? Math.round(compAvg - my.price) : 0,
+                                tactic: dayInfo.isWeekend 
+                                    ? 'Subir tarifa +15€ a +20€ en fin de semana para romper la linealidad.' 
+                                    : 'Ajustar tarifa dinámica según demanda corporativa.'
+                            });
+                            if (consecutiveFlatPriceCount >= 10) hasFlatRateWarning = true;
                         } else {
                             consecutiveFlatPriceCount = 1;
                         }
@@ -1295,10 +1308,14 @@
                     priority: 'warning',
                     badge: '💡 PRECIOS DINÁMICOS',
                     title: 'Alerta de Tarifa Plana Estática (Falta de Yield Dinámico)',
-                    diagnostic: 'Se detecta una estructura de precios estática y homogénea a lo largo de varias semanas consecutivas sin apenas variación entre días laborales y fines de semana.',
+                    diagnostic: `Se detecta una estructura de precios estática y homogénea a lo largo de <b>${flatRateDates.length} fechas</b> sin apenas variación entre días laborales y fines de semana.`,
                     strategy: `<b>Estrategia Revenue Experta:</b><br>
 • <b>Romper la Tarifa Plana:</b> Establece una política de precios dinámica: aplica un suplemento natural de <b>+15€ a +25€ en fines de semana</b> y prima los martes/miércoles corporativos, reduciendo la tarifa únicamente los domingos para capturar estancias puente.<br>
 • <b>Segmentación por Ventana:</b> Las reservas a más de 30 días vista deben tener una tarifa de apertura más firme que las de última hora en temporada valle.`,
+                    dates: flatRateDates,
+                    datesTitle: 'Fechas con Tarifa Plana Estática',
+                    datesSubtitle: `Detalle de ${flatRateDates.length} fechas con precios estáticos y recomendación de dinamismo`,
+                    datesBtnText: `💡 Ver Fechas Afectadas (${flatRateDates.length}) 🔍`,
                     actionUrl: 'AnalisisCalendario.html'
                 });
             }
@@ -1325,6 +1342,7 @@
                     dates: rivalAnomalies,
                     datesTitle: 'Anomalías de Precio en Competidores del CompSet',
                     datesSubtitle: `Detalle de ${rivalAnomalies.length} fechas con picos alcistas extraordinarios o caídas anómalas en rivales directos`,
+                    datesBtnText: `🚨 Ver Fechas con Anomalías (${rivalAnomalies.length}) 🔍`,
                     actionUrl: 'AnalisisCompetencia.html'
                 });
             }
@@ -1351,6 +1369,7 @@
                     dates: rivalStrategicChanges,
                     datesTitle: 'Evolución y Cambios Estratégicos de Competidores',
                     datesSubtitle: `Seguimiento de ${rivalStrategicChanges.length} modificaciones de precio detectadas entre cargas del CompSet`,
+                    datesBtnText: `📈 Ver Fechas con Movimientos (${rivalStrategicChanges.length}) 🔍`,
                     actionUrl: 'AnalisisCompetencia.html'
                 });
             }
@@ -1359,6 +1378,23 @@
             // AUDIT 4D: Radiografía de Estrategias y Perfiles Competitivos
             // ============================================================
             if (rivalStats && Object.keys(rivalStats).length > 0) {
+                const compProfileItems = Object.entries(rivalStats).map(([compName, st]) => {
+                    return {
+                        competitor: compName,
+                        avgPrice: Math.round(st.avg),
+                        weekdayAvg: Math.round(st.weekdayAvg),
+                        weekendAvg: Math.round(st.weekendAvg),
+                        range: `${Math.round(st.min)}€ - ${Math.round(st.max)}€`,
+                        profile: st.strategyProfile,
+                        description: st.strategyDesc,
+                        tactic: st.strategyProfile.includes('Yield') 
+                            ? 'Atacar tarifas corporativas entre semana y liderar tarifa en ocio.' 
+                            : (st.strategyProfile.includes('Fin de Sem') 
+                                ? 'Ofrecer paquetes gastronómicos para desviar demanda de ocio.' 
+                                : 'Competidor con tarifa plana; capturar cuota con dinamismo comercial.')
+                    };
+                });
+
                 const profileCards = Object.entries(rivalStats).map(([compName, st]) => {
                     return `• <b>${compName}:</b> Tarifa Media: <b>${Math.round(st.avg)}€</b> (Laboral: ${Math.round(st.weekdayAvg)}€ · Fin de Sem: ${Math.round(st.weekendAvg)}€ · Rango: ${Math.round(st.min)}€-${Math.round(st.max)}€). <i>Perfil:</i> <b>${st.strategyProfile}</b> — ${st.strategyDesc}`;
                 }).join('<br>');
@@ -1374,6 +1410,10 @@
 • <b>Diferenciación por Segmento:</b> Frente a hoteles con recargo agresivo de fin de semana, ofrece paquetes experienciales de valor (gastronomía, bienestar/spa).<br>
 • <b>Ataque a Rivales con Tarifa Plana:</b> Los hoteles con tarifa plana no optimizan ingresos ni en picos ni en valles; captura a sus clientes corporativos entre semana con tarifas competitivas y lidera el precio en fechas de ocio.<br>
 • <b>Benchmarking Continuo:</b> Contrasta semanalmente tu posicionamiento en la pantalla de <b>Análisis de Competencia</b> para mantener el liderazgo en RevPAR Index.`,
+                    dates: compProfileItems,
+                    datesTitle: 'Radiografía Estratégica del CompSet',
+                    datesSubtitle: `Comportamiento de precios, medias laboral/fin de semana y perfiles de los ${compProfileItems.length} rivales analizados`,
+                    datesBtnText: `🕵️ Ver Comparativa de Competidores (${compProfileItems.length}) 🔍`,
                     actionUrl: 'AnalisisCompetencia.html'
                 });
             }
@@ -1440,6 +1480,36 @@
             // Shift savings estimation: moving 10% of OTA volume to Direct Online (18% vs 3% = 15% net gain)
             const shift10PctSavings = Math.round(otaRev * 0.10 * 0.15);
 
+            const otaChannelItems = [];
+            if (Object.values(channelAggMap).length > 0) {
+                Object.values(channelAggMap).sort((a,b) => b.revenue - a.revenue).forEach(ch => {
+                    otaChannelItems.push({
+                        channel: ch.name,
+                        revenue: fmtEuro(ch.revenue),
+                        rooms: ch.rooms,
+                        commission: fmtEuro(ch.commissionAmount) + (ch.commissionRate ? ` (${ch.commissionRate}%)` : ''),
+                        tactic: (ch.name.toUpperCase().includes('OTA') || ch.name.toUpperCase().includes('BOOKING') || ch.name.toUpperCase().includes('EXPEDIA'))
+                            ? 'Coste de intermediación alto. Fomentar reserva directa en recepción y motor web.'
+                            : 'Canal de distribución eficiente. Proteger cuota con ventajas directas.'
+                    });
+                });
+            } else {
+                otaChannelItems.push({
+                    channel: 'Canales Online OTA (Booking / Expedia)',
+                    revenue: fmtEuro(otaRev),
+                    rooms: '-',
+                    commission: fmtEuro(commCostEst) + ' (~18%)',
+                    tactic: 'Ring-fencing en fechas pico y limitar cupos con tarifas descuento.'
+                });
+                otaChannelItems.push({
+                    channel: 'Venta Directa Online (Web Oficial)',
+                    revenue: fmtEuro(dirOnlineRev),
+                    rooms: '-',
+                    commission: '0 € (Canal Propio)',
+                    tactic: 'Ofrecer late check-out y upgrade para incentivar reserva directa.'
+                });
+            }
+
             if (otaShare >= 40 || commCostEst > 5000) {
                 // Top channels summary if available
                 const topChannelsStr = Object.values(channelAggMap).length > 0
@@ -1462,12 +1532,26 @@
 • <b>Paridad de Tarifa Neta:</b> Dota a tu web oficial de ventajas de valor real que la OTA no ofrece: desayuno con 50% descuento, late check-out garantizado hasta las 13:00 o upgrade de habitación gratuito sujeto a disponibilidad.<br>
 • <b>Inventario Estratégico y Ring-fencing:</b> Cierra en Booking/Expedia las habitaciones superiores o suites en fechas de alta demanda, manteniéndolas en exclusiva en el canal directo.<br>
 • <b>Protocolo de Conversión en Recepción:</b> Implanta en el check-in y check-out el registro en el club directo con un código de fidelización exclusivo para su próxima estancia.`,
+                    dates: otaChannelItems,
+                    datesTitle: 'Desglose de Canales de Distribución & Comisiones',
+                    datesSubtitle: `Auditoría de ingresos netos y coste de intermediación comercial por canal`,
+                    datesBtnText: `👥 Ver Desglose de Canales (${otaChannelItems.length}) 🔍`,
                     actionUrl: 'AnalisisSegmentos.html'
                 });
             }
 
             // AUDIT 6: Canibalización Corporativa
             if (corpShare >= 15) {
+                const corpItems = [
+                    {
+                        channel: 'Segmento Corporativo & Negociadas',
+                        revenue: fmtEuro(corpRev),
+                        rooms: '-',
+                        commission: 'Convenios Directos (0%)',
+                        tactic: 'Aplicar cláusulas blackout en eventos y migrar a 10% descuento dinámico sobre BAR.'
+                    }
+                ];
+
                 insights.push({
                     id: 'ins_corporate',
                     category: 'distribution',
@@ -1478,6 +1562,10 @@
                     strategy: `<b>Estrategia Revenue Experta:</b><br>
 • <b>Cláusulas de Blackout Dates:</b> Asegura que todos los acuerdos corporativos tengan fechas cerradas en ferias, eventos o congresos de la plaza, impidiendo que habitaciones a tarifa fija de 65€ desplacen a clientes de ocio que pagan 120€.<br>
 • <b>Migración a Descuento Dinámico:</b> Para los próximos contratos de ${parseInt(lastYear)+1}, sustituye las tarifas fijas lineales por un descuento dinámico del <b>10% sobre la tarifa BAR del día</b>.`,
+                    dates: corpItems,
+                    datesTitle: 'Segmento Corporativo & Convenios',
+                    datesSubtitle: 'Rendimiento y directrices de contratación para cuentas de empresa',
+                    datesBtnText: '🏢 Ver Detalle Corporativo 🔍',
                     actionUrl: 'AnalisisSegmentos.html'
                 });
             }
@@ -1497,11 +1585,27 @@
                 const monthlyPickup = [];
                 for (let m = 0; m < 12; m++) {
                     const p = (otbRev[m] || 0) - (prevOTBRev[m] || 0);
-                    if (Math.abs(p) > 20) {
-                        monthlyPickup.push({ monthIdx: m, monthName: monthNames[m], pickup: p, curOTB: otbRev[m] });
+                    if (Math.abs(p) > 20 || (otbRev[m] || 0) > 0) {
+                        monthlyPickup.push({ monthIdx: m, monthName: monthNames[m], pickup: p, curOTB: otbRev[m] || 0 });
                     }
                 }
                 monthlyPickup.sort((a,b) => b.pickup - a.pickup);
+
+                const pickupDates = monthlyPickup.map(m => {
+                    const isGain = m.pickup >= 0;
+                    return {
+                        dateISO: `${budgetYr}-${String(m.monthIdx + 1).padStart(2, '0')}-01`,
+                        monthName: m.monthName,
+                        curOTB: fmtEuro(m.curOTB),
+                        prevOTB: fmtEuro(prevOTBRev[m.monthIdx] || 0),
+                        pickupEuro: (isGain ? '+' : '') + fmtEuro(m.pickup),
+                        habEquiv: avgAdr > 0 ? Math.round(Math.abs(m.pickup) / avgAdr) : 0,
+                        status: isGain ? 'Aceleración Positiva' : 'Desaceleración / Cancelación',
+                        tactic: isGain 
+                            ? 'Fuerte ritmo de entrada: Elevar tarifa BAR de apertura +8€ a +12€ para proteger el ADR.' 
+                            : 'Ritmo ralentizado: Activar venta privada flash 48h o flexibilizar políticas de cancelación.'
+                    };
+                });
 
                 if (pickup > 0) {
                     const topMStr = monthlyPickup.slice(0, 2).map(m => `<b>${m.monthName} (+${fmtEuro(m.pickup)})</b>`).join(', ');
@@ -1515,6 +1619,10 @@
                         strategy: `<b>Estrategia Revenue Experta:</b><br>
 • <b>Subida de Escalón de Tarifa:</b> El ritmo acelerado confirma tracción de mercado. En los meses que lideran el pick-up, sube de inmediato la tarifa base <b>+8€ a +12€</b> para no colmatar el inventario a precios prematuros.<br>
 • <b>Control de Lead Time:</b> Monitorea con qué anticipación entran estas reservas; si son a más de 60 días vista, protege el ADR de los meses venideros.`,
+                        dates: pickupDates,
+                        datesTitle: 'Variación de Pick-up y Ritmo de Cartera por Mes',
+                        datesSubtitle: `Comparativa entre el informe actual y el snapshot anterior (${yearData.otb_prev.snapshotDate || 'corte previo'})`,
+                        datesBtnText: `🚀 Ver Meses y Pick-up Afectado (${pickupDates.length}) 🔍`,
                         actionUrl: 'AnalisisProduccion.html'
                     });
                 } else if (pickup < 0) {
@@ -1528,6 +1636,10 @@
                         strategy: `<b>Estrategia Revenue Experta:</b><br>
 • <b>Revisión de Política de Cancelación:</b> Si las cancelaciones se concentran a menos de 7 días, endurece la política a cancelación gratuita solo hasta 48h o 72h antes.<br>
 • <b>Activación de Campañas Flash:</b> Lanza una promoción opaca temporal (48h) en canales directos y OTAs para reponer el volumen perdido sin alterar la tarifa oficial.`,
+                        dates: pickupDates,
+                        datesTitle: 'Variación de Pick-up y Ajustes en Cartera',
+                        datesSubtitle: `Detalle de meses con desaceleración o cancelaciones netas desde el corte anterior`,
+                        datesBtnText: `📉 Ver Meses Afectados por Pick-up (${pickupDates.length}) 🔍`,
                         actionUrl: 'AnalisisProduccion.html'
                     });
                 }
@@ -1549,6 +1661,15 @@
                 if (gapCurM > 0) {
                     const dailyNeeded = Math.round(gapCurM / daysRemaining);
                     const adrNeeded = freeRoomsRemaining > 0 ? (gapCurM / freeRoomsRemaining) : 0;
+                    const budgetCurrentDates = [
+                        {
+                            dateISO: `${curYear}-${String(curMonth + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
+                            dayLabel: `Plan de Cierre: ${monthNames[curMonth]}`,
+                            status: 'Gap Pendiente',
+                            metrics: `Faltan ${fmtEuro(gapCurM)} (${daysRemaining} días restantes)`,
+                            tactic: `Facturación requerida de ${fmtEuro(dailyNeeded)}/día a ADR mínimo de ${Math.min(140, Math.max(60, Math.round(adrNeeded)))}€. Proteger fines de semana a tarifa alta.`
+                        }
+                    ];
 
                     insights.push({
                         id: 'ins_budget_current',
@@ -1561,9 +1682,23 @@
 • <b>Ritmo Diario Requerido:</b> Necesitas generar una facturación media de <b>${fmtEuro(dailyNeeded)}/día</b> hasta fin de mes.<br>
 • <b>Viabilidad de Inventario Físico:</b> El hotel dispone de ${freeRoomsRemaining} habitaciones libres en estos ${daysRemaining} días. Para cumplir presupuesto sin depender de una ocupación irreal (>90%), el ADR de venta debe situarse en un mínimo de <b>${Math.min(140, Math.max(60, Math.round(adrNeeded)))} €</b>.<br>
 • <b>Yield en Fines de Semana Restantes:</b> Maximiza la tarifa en los viernes y sábados que restan para compensar los valles de entre semana.`,
+                        dates: budgetCurrentDates,
+                        datesTitle: `Plan de Cierre Presupuestario para ${monthNames[curMonth]}`,
+                        datesSubtitle: `Auditoría de días restantes, inventario libre y ritmo de facturación diario requerido`,
+                        datesBtnText: `🎯 Ver Plan Diario y Fechas (${daysRemaining} días) 🔍`,
                         actionUrl: `CalculadoraPresupuesto.html?openPacing=true&pacingMonth=${curMonth}`
                     });
                 } else if (targetRevCurM > 0) {
+                    const budgetSuperavitDates = [
+                        {
+                            dateISO: `${curYear}-${String(curMonth + 1).padStart(2, '0')}-01`,
+                            dayLabel: `Mes de ${monthNames[curMonth]}`,
+                            status: 'Objetivo Cumplido',
+                            metrics: `${fmtEuro(soldCurM)} vs ${fmtEuro(targetRevCurM)} (+${fmtEuro(Math.abs(gapCurM))})`,
+                            tactic: 'Con la meta garantizada, situar la tarifa BAR a nivel premium y eliminar tarifas con descuento.'
+                        }
+                    ];
+
                     insights.push({
                         id: 'ins_budget_superavit',
                         category: 'budget',
@@ -1573,6 +1708,10 @@
                         diagnostic: `El hotel ya ha alcanzado <b>${fmtEuro(soldCurM)}</b> superando la meta presupuestada de <b>${fmtEuro(targetRevCurM)}</b> con un superávit de <b>+${fmtEuro(Math.abs(gapCurM))}</b> (${((soldCurM/targetRevCurM)*100).toFixed(1)}% cumplimiento).`,
                         strategy: `<b>Estrategia Revenue Experta:</b><br>
 • <b>Optimización Máxima de ADR:</b> Con el presupuesto garantizado, sube la tarifa BAR a nivel premium en todas las fechas restantes para maximizar el margen de beneficio por habitación vendida sin estrés de ocupación.`,
+                        dates: budgetSuperavitDates,
+                        datesTitle: `Superávit Presupuestario en ${monthNames[curMonth]}`,
+                        datesSubtitle: `Detalle del cumplimiento y rendimiento comercial del mes`,
+                        datesBtnText: `🎉 Ver Detalle de Cumplimiento 🔍`,
                         actionUrl: 'CalculadoraPresupuesto.html'
                     });
                 }
@@ -1591,6 +1730,14 @@
                 const worst = gapByMonth.filter(m => m.gap < 0).slice(0, 2);
                 if (worst.length > 0) {
                     const worstTxt = worst.map(m => `<b>${m.name}</b> (${fmtEuro(m.gap)})`).join(', ');
+                    const historicalGapDates = worst.map(w => ({
+                        dateISO: `${lastYear}-${String(w.i + 1).padStart(2, '0')}-01`,
+                        dayLabel: `Mes de ${w.name}`,
+                        status: 'Déficit Histórico',
+                        metrics: `Brecha de ${fmtEuro(w.gap)} (${w.pct.toFixed(1)}%)`,
+                        tactic: 'Planificar acciones comerciales con 90 días de antelación y asegurar contratos corporativos de base.'
+                    }));
+
                     insights.push({
                         id: 'ins_historical_gap',
                         category: 'budget',
@@ -1600,6 +1747,10 @@
                         diagnostic: `Los meses con peor desempeño relativo frente a presupuesto fueron ${worstTxt}.`,
                         strategy: `<b>Estrategia Revenue Experta:</b><br>
 • <b>Anticipación en Calendario:</b> Planifica con al menos 90 días de antelación las acciones comerciales en esos mismos periodos para ${parseInt(lastYear)+1}, renegociando contingentes de grupos y cerrando acuerdos corporativos tempranos para asegurar una base mínima antes de abrir el inventario general.`,
+                        dates: historicalGapDates,
+                        datesTitle: 'Meses con Déficit Histórico vs Presupuesto',
+                        datesSubtitle: `Lecciones de desviación y acciones correctoras para el nuevo ejercicio`,
+                        datesBtnText: `📉 Ver Meses Desviados (${historicalGapDates.length}) 🔍`,
                         actionUrl: 'AnalisisProduccion.html'
                     });
                 }
@@ -1746,6 +1897,7 @@
                     dates: complianceGoodDates,
                     datesTitle: 'Fechas y Meses con Rendimiento Favorable',
                     datesSubtitle: `Auditoría de ${complianceGoodDates.length} periodos donde el hotel supera objetivos o compresión de mercado`,
+                    datesBtnText: `🟢 Ver Meses y Fechas en Superávit (${complianceGoodDates.length}) 🔍`,
                     actionUrl: 'AnalisisProduccion.html'
                 });
             }
@@ -1771,6 +1923,7 @@
                     dates: complianceRiskDates,
                     datesTitle: 'Fechas y Meses en Riesgo de Incumplimiento',
                     datesSubtitle: `Auditoría de ${complianceRiskDates.length} periodos con déficit o necesidad de estímulo de demanda`,
+                    datesBtnText: `🔴 Ver Meses y Fechas en Riesgo (${complianceRiskDates.length}) 🔍`,
                     actionUrl: `CalculadoraPresupuesto.html?openPacing=true&pacingMonth=${curMonth}`
                 });
             }
@@ -1904,12 +2057,13 @@
                 }
 
                 container.innerHTML = insights.map(ins => {
+                    const dateBtnText = ins.datesBtnText || (ins.dates ? `📅 Ver ${ins.dates.length} Fechas Afectadas 🔍` : '');
                     const dateBtn = (ins.dates && ins.dates.length > 0)
-                        ? `<button onclick="openDatesModal('${ins.datesTitle}', '${ins.datesSubtitle}', '${ins.id}')" class="action-btn" style="background:#e0e7ff; color:#4338ca; border:1px solid #c7d2fe; padding:7px 15px; border-radius:8px; font-size:0.76rem; font-weight:700; cursor:pointer;">📅 Ver ${ins.dates.length} Fechas Afectadas 🔍</button>`
+                        ? `<button onclick="openDatesModal('${ins.datesTitle || ins.title}', '${ins.datesSubtitle || ''}', '${ins.id}')" class="action-btn" style="background:#4338ca; color:white; border:none; padding:8px 16px; border-radius:8px; font-size:0.78rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(67,56,202,0.22); transition:transform 0.15s ease;">${dateBtnText}</button>`
                         : '';
 
                     const linkBtn = ins.actionUrl
-                        ? `<a href="${ins.actionUrl}" class="action-btn" style="background:var(--primary); color:white; text-decoration:none; padding:7px 16px; border-radius:8px; font-size:0.76rem; font-weight:700; white-space:nowrap;">Ir a Pantalla →</a>`
+                        ? `<a href="${ins.actionUrl}" target="_blank" class="action-btn" style="background:rgba(0,0,0,0.04); color:var(--text-main); border:1px solid var(--border); text-decoration:none; padding:7px 14px; border-radius:8px; font-size:0.75rem; font-weight:600; white-space:nowrap; display:inline-flex; align-items:center; gap:5px;" title="Abrir pantalla en nueva pestaña"><span>Ir a Pantalla</span> <span style="font-size:0.85rem;">↗</span></a>`
                         : '';
 
                     return `
@@ -1971,7 +2125,10 @@
             const isSoldOut = (insightId === 'ins_soldout');
             const isCompAnomalies = (insightId === 'ins_comp_anomalies');
             const isCompChanges = (insightId === 'ins_comp_changes');
-            const isCompliance = (insightId === 'ins_compliance_good' || insightId === 'ins_compliance_risk');
+            const isCompProfiles = (insightId === 'ins_comp_profiles');
+            const isPickup = (insightId === 'ins_pickup_accel' || insightId === 'ins_pickup_decel');
+            const isDistribution = (insightId === 'ins_otadep' || insightId === 'ins_corporate');
+            const isCompliance = (insightId === 'ins_compliance_good' || insightId === 'ins_compliance_risk' || insightId === 'ins_budget_current' || insightId === 'ins_budget_superavit' || insightId === 'ins_historical_gap');
 
             if (tableContainer) {
                 let headerHtml = '';
@@ -2016,6 +2173,44 @@
                             <th style="padding: 10px 12px; text-align: right;">Tarifa Actual</th>
                             <th style="padding: 10px 12px; text-align: right;">Tu Tarifa</th>
                             <th style="padding: 10px 12px;">Lectura Revenue</th>
+                        </tr>
+                    </thead>
+                    `;
+                } else if (isCompProfiles) {
+                    headerHtml = `
+                    <thead>
+                        <tr style="background: rgba(0,0,0,0.03); border-bottom: 2px solid var(--border); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted);">
+                            <th style="padding: 10px 12px;">Competidor CompSet</th>
+                            <th style="padding: 10px 12px; text-align: right;">Tarifa Media</th>
+                            <th style="padding: 10px 12px; text-align: right;">Laboral</th>
+                            <th style="padding: 10px 12px; text-align: right;">Fin de Sem</th>
+                            <th style="padding: 10px 12px; text-align: center;">Rango Precios</th>
+                            <th style="padding: 10px 12px;">Perfil & Estrategia Recomendada</th>
+                        </tr>
+                    </thead>
+                    `;
+                } else if (isPickup) {
+                    headerHtml = `
+                    <thead>
+                        <tr style="background: rgba(0,0,0,0.03); border-bottom: 2px solid var(--border); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted);">
+                            <th style="padding: 10px 12px;">Mes / Periodo</th>
+                            <th style="padding: 10px 12px; text-align: right;">Cartera Previa</th>
+                            <th style="padding: 10px 12px; text-align: right;">Cartera Actual</th>
+                            <th style="padding: 10px 12px; text-align: right;">Variación Pick-up</th>
+                            <th style="padding: 10px 12px; text-align: center;">Estado</th>
+                            <th style="padding: 10px 12px;">Táctica Revenue Recomendada</th>
+                        </tr>
+                    </thead>
+                    `;
+                } else if (isDistribution) {
+                    headerHtml = `
+                    <thead>
+                        <tr style="background: rgba(0,0,0,0.03); border-bottom: 2px solid var(--border); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted);">
+                            <th style="padding: 10px 12px;">Canal / Segmento</th>
+                            <th style="padding: 10px 12px; text-align: right;">Producción Cartera</th>
+                            <th style="padding: 10px 12px; text-align: center;">Habitaciones</th>
+                            <th style="padding: 10px 12px; text-align: right;">Comisión Est.</th>
+                            <th style="padding: 10px 12px;">Estrategia & Desintermediación</th>
                         </tr>
                     </thead>
                     `;
@@ -2154,8 +2349,84 @@
                         `;
                     }
 
+                    if (isCompProfiles) {
+                        return `
+                            <tr style="border-bottom: 1px solid var(--border); font-size: 0.83rem;">
+                                <td style="padding: 10px 12px; font-weight: 800; color: #1e293b; white-space: nowrap;">
+                                    🏨 ${d.competitor}
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 800; color: #4338ca; white-space: nowrap;">
+                                    ${d.avgPrice} €
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 600; color: #475569; white-space: nowrap;">
+                                    ${d.weekdayAvg} €
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 700; color: #b45309; white-space: nowrap;">
+                                    ${d.weekendAvg} €
+                                </td>
+                                <td style="padding: 10px 12px; text-align: center; font-size: 0.75rem; color: #64748b; white-space: nowrap;">
+                                    ${d.range}
+                                </td>
+                                <td style="padding: 10px 12px; font-size: 0.78rem; color: #0f172a;">
+                                    <span style="display:inline-block; background:#e0e7ff; color:#3730a3; padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.72rem; margin-bottom:3px;">${d.profile}</span><br>
+                                    ${d.tactic}
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    if (isPickup) {
+                        const isGain = d.pickupEuro && d.pickupEuro.startsWith('+');
+                        return `
+                            <tr style="border-bottom: 1px solid var(--border); font-size: 0.83rem;">
+                                <td style="padding: 10px 12px; font-weight: 800; color: #1e293b; white-space: nowrap;">
+                                    📅 ${d.monthName}
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 600; color: #64748b; white-space: nowrap;">
+                                    ${d.prevOTB}
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 700; color: #1e293b; white-space: nowrap;">
+                                    ${d.curOTB}
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 800; color: ${isGain ? '#15803d' : '#b91c1c'}; font-size: 0.88rem; white-space: nowrap;">
+                                    ${d.pickupEuro}
+                                </td>
+                                <td style="padding: 10px 12px; text-align: center;">
+                                    <span style="background:${isGain ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)'}; color:${isGain ? '#059669' : '#dc2626'}; padding:3px 8px; border-radius:6px; font-size:0.72rem; font-weight:700; white-space:nowrap;">
+                                        ${d.status}
+                                    </span>
+                                </td>
+                                <td style="padding: 10px 12px; font-size: 0.78rem; color: #0f172a;">
+                                    ${d.tactic}
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    if (isDistribution) {
+                        return `
+                            <tr style="border-bottom: 1px solid var(--border); font-size: 0.83rem;">
+                                <td style="padding: 10px 12px; font-weight: 800; color: #1e293b;">
+                                    👥 ${d.channel}
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 800; color: #4338ca; white-space: nowrap;">
+                                    ${d.revenue}
+                                </td>
+                                <td style="padding: 10px 12px; text-align: center; font-weight: 600; color: #64748b; white-space: nowrap;">
+                                    ${d.rooms || '-'}
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 700; color: ${d.commission && d.commission.includes('0 €') ? '#15803d' : '#b91c1c'}; white-space: nowrap;">
+                                    ${d.commission}
+                                </td>
+                                <td style="padding: 10px 12px; font-size: 0.78rem; color: #0f172a;">
+                                    ${d.tactic}
+                                </td>
+                            </tr>
+                        `;
+                    }
+
                     if (isCompliance) {
-                        const isGood = insightId === 'ins_compliance_good';
+                        const isGood = (insightId === 'ins_compliance_good' || insightId === 'ins_budget_superavit');
                         const statusBg = isGood ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)';
                         const statusColor = isGood ? '#059669' : '#dc2626';
                         return `
@@ -2222,39 +2493,17 @@
         }
 
         function copyDatesModalData() {
-            if (!currentActiveInsightDates || currentActiveInsightDates.length === 0) return;
-            const first = currentActiveInsightDates[0];
-            const isSoldOut = first && first.competitorsList !== undefined;
-            const isCompAnomalies = first && first.normalPrice !== undefined;
-            const isCompChanges = first && first.prevPrice !== undefined;
-
-            let header = "FECHA\tDÍA\tTU TARIFA\tCOMPSET\tDIFERENCIA\tTÁCTICA\n";
-            if (isSoldOut) {
-                header = "FECHA\tDÍA\tRIVAL SOLD OUT\tTU TARIFA\tCOMPSET DISPONIBLE\tDIFERENCIA\tTÁCTICA\n";
-            } else if (isCompAnomalies) {
-                header = "FECHA\tDÍA\tRIVAL\tTIPO\tTARIFA RIVAL\tMEDIA HABITUAL\tTU TARIFA\tRECOMENDACIÓN\n";
-            } else if (isCompChanges) {
-                header = "FECHA\tDÍA\tRIVAL\tVARIACIÓN\tTARIFA PREVIA\tTARIFA ACTUAL\tTU TARIFA\tLECTURA REVENUE\n";
-            }
-
-            const text = header + currentActiveInsightDates.map(d => {
-                const dateStr = formatSpanishDate(d.dateISO || d.date);
-                const dayStr = `${d.dayOfWeek || ''} ${d.isWeekend ? '(Fin Sem)' : '(Laboral)'}`;
-                if (isSoldOut) {
-                    return `${dateStr}\t${dayStr}\t${d.competitor || ''}\t${d.myPrice || 0} €\t${d.compAvg ? d.compAvg + ' €' : '-'}\t${d.diff ? (d.diff > 0 ? '-' : '+') + Math.abs(d.diff) + ' €' : '-'}\t${d.tactic || ''}`;
-                }
-                if (isCompAnomalies) {
-                    return `${dateStr}\t${dayStr}\t${d.competitor || ''}\t${d.badgeText || ''}\t${d.rivalPrice || 0} €\t${d.normalPrice || 0} €\t${d.myPrice || 0} €\t${d.tactic || ''}`;
-                }
-                if (isCompChanges) {
-                    return `${dateStr}\t${dayStr}\t${d.competitor || ''}\t${d.diff > 0 ? '+' : ''}${d.diff || 0} €\t${d.prevPrice || 0} €\t${d.rivalPrice || 0} €\t${d.myPrice || 0} €\t${d.tactic || ''}`;
-                }
-                return `${dateStr}\t${dayStr}\t${d.myPrice || 0} €\t${d.compAvg ? d.compAvg + ' €' : '-'}\t${d.diff ? (d.diff > 0 ? '-' : '+') + Math.abs(d.diff) + ' €' : '-'}\t${d.tactic || ''}`;
-            }).join("\n");
+            const table = document.querySelector('#datesModalTableContent table');
+            if (!table) return;
+            const rows = Array.from(table.querySelectorAll('tr'));
+            const text = rows.map(r => {
+                const cells = Array.from(r.querySelectorAll('th, td'));
+                return cells.map(c => c.innerText.replace(/\s+/g, ' ').trim()).join('\t');
+            }).join('\n');
 
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
-                    alert("📋 Tabla de fechas copiada al portapapeles.");
+                    alert("📋 Tabla copiada al portapapeles.");
                 });
             } else {
                 const ta = document.createElement("textarea");
@@ -2263,7 +2512,7 @@
                 ta.select();
                 document.execCommand("copy");
                 document.body.removeChild(ta);
-                alert("📋 Tabla de fechas copiada al portapapeles.");
+                alert("📋 Tabla copiada al portapapeles.");
             }
         }
 

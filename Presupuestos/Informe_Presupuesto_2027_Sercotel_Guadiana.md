@@ -88,9 +88,9 @@ El histórico de habitaciones noche de los últimos años confirma por qué **OC
   * Octubre 2024: 1.951 RN
   * **Octubre 2025: 2.693 RN (Récord histórico mensual de ocupación)**
   * **Octubre 2026 (BGT Oficial): 2.637 RN (83,40% ocupación presupuestada)**
-  * **Octubre 2027 (Propuesta): 2.905 RN (86,8% ocupación / 184.821,89 €)**
+  * **Octubre 2027 (Propuesta Oficial): 2.942 RN (87,9% ocupación / 175.939,00 €)**
 
-### ¿Por qué Octubre tiene margen para alcanzar los 184.822 €?
+### ¿Por qué Octubre lidera la ocupación con 2.942 RN y 175.939 €?
 En octubre confluyen simultáneamente:
 1. **La máxima ocupación corporativa entre semana de Ciudad Real:** De martes a jueves la plaza opera por encima del 95%, lo que permite aplicar restricciones de estancia y elevar la tarifa media individual por encima de los **80 €–85 €**.
 2. **Turismo institucional y académico:** Actividad plena de las consejerías autonómicas, la Diputación Provincial y las facultades del campus de la UCLM.
@@ -100,23 +100,23 @@ En octubre confluyen simultáneamente:
 
 ## 5. PLAN MAESTRO MENSUAL 2027 (DETALLE POR HABITACIONES, ADR Y REVPAR)
 
-| Mes | Días | Capacidad (RN) | BGT 2026 (€) | Propuesta 2027 (€) | RN 2027 | ADR 2027 (€) | Ocupación (%) | RevPAR (€) | Variación vs 2026 |
+| Mes | Días | Capacidad (RN) | Base 2026 (Ref) (€) | Propuesta 2027 (€) | RN 2027 | ADR 2027 (€) | Ocupación (%) | RevPAR (€) | Variación vs Base |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Enero** | 31 | 3.348 | 57.715 € | **75.309,58 €** | 1.197 | 62,94 € | 35,8% | 22,49 € | +30,5% |
-| **Febrero** | 28 | 3.024 | 68.021 € | **80.555,06 €** | 1.274 | 63,24 € | 42,1% | 26,64 € | +18,4% |
-| **Marzo** | 31 | 3.348 | 89.561 € | **120.509,54 €** | 1.570 | 76,75 € | 46,9% | 35,99 € | +34,6% |
-| **Abril** | 30 | 3.240 | 126.055 € | **146.867,73 €** | 2.041 | 71,97 € | 63,0% | 45,33 € | +16,5% |
-| **Mayo** | 31 | 3.348 | 167.691 € | **141.294,13 €** | 1.986 | 71,13 € | 59,3% | 42,20 € | -15,7% |
-| **Junio** | 30 | 3.240 | 114.464 € | **133.788,99 €** | 1.854 | 72,15 € | 57,2% | 41,29 € | +16,9% |
-| **Julio** | 31 | 3.348 | 118.640 € | **137.521,26 €** | 1.945 | 70,71 € | 58,1% | 41,08 € | +15,9% |
-| **Agosto** | 31 | 3.348 | 131.039 € | **147.756,26 €** | 2.363 | 62,52 € | 70,6% | 44,13 € | +12,8% |
-| **Septiembre** | 30 | 3.240 | 148.593 € | **167.549,70 €** | 2.602 | 64,39 € | 80,3% | 51,71 € | +12,8% |
-| **Octubre** | 31 | 3.348 | 163.911 € | **184.821,89 €** | 2.905 | 63,62 € | 86,8% | 55,20 € | **+12,8%** |
-| **Noviembre** | 30 | 3.240 | 114.738 € | **129.375,66 €** | 1.967 | 65,78 € | 60,7% | 39,93 € | +12,8% |
-| **Diciembre** | 31 | 3.348 | 94.586 € | **108.036,31 €** | 1.689 | 63,96 € | 50,4% | 32,27 € | +14,2% |
-| **TOTAL** | **365** | **39.420** | **1.395.014 €** | **1.573.386,12 €** | **23.393** | **67,30 €** | **59,34%** | **39,91 €** | **+12,79%** |
+| **Enero** | 31 | 3.348 | 63.750 € | **68.531,00 €** | 1.072 | 63,94 € | 32,0% | 20,47 € | +7,5% |
+| **Febrero** | 28 | 3.024 | 77.834 € | **83.672,00 €** | 1.344 | 62,26 € | 44,4% | 27,67 € | +7,5% |
+| **Marzo** | 31 | 3.348 | 110.147 € | **118.408,00 €** | 1.660 | 71,32 € | 49,6% | 35,37 € | +7,5% |
+| **Abril** | 30 | 3.240 | 142.275 € | **152.946,00 €** | 2.298 | 66,56 € | 70,9% | 47,21 € | +7,5% |
+| **Mayo** | 31 | 3.348 | 171.804 € | **184.689,00 €** | 2.420 | 76,33 € | 72,3% | 55,16 € | +7,5% |
+| **Junio** | 30 | 3.240 | 126.492 € | **135.979,00 €** | 1.891 | 71,93 € | 58,4% | 41,97 € | +7,5% |
+| **Julio** | 31 | 3.348 | 113.348 € | **121.849,00 €** | 1.799 | 67,75 € | 53,7% | 36,39 € | +7,5% |
+| **Agosto** | 31 | 3.348 | 142.492 € | **153.179,00 €** | 2.209 | 69,35 € | 66,0% | 45,75 € | +7,5% |
+| **Septiembre** | 30 | 3.240 | 143.895 € | **154.687,00 €** | 2.328 | 66,46 € | 71,9% | 47,74 € | +7,5% |
+| **Octubre** | 31 | 3.348 | 163.664 € | **175.939,00 €** | 2.942 | 59,81 € | 87,9% | 52,55 € | +7,5% |
+| **Noviembre** | 30 | 3.240 | 113.087 € | **121.569,00 €** | 1.845 | 65,88 € | 56,9% | 37,52 € | +7,5% |
+| **Diciembre** | 31 | 3.348 | 94.827 € | **101.939,00 €** | 1.585 | 64,33 € | 47,3% | 30,45 € | +7,5% |
+| **TOTAL** | **365** | **39.420** | **1.463.615 €** | **1.573.386,12 €** | **23.393** | **67,26 €** | **59,34%** | **39,91 €** | **+7,5%** |
 
-*(Nota: En Mayo se corrige el objetivo sobredimensionado del BGT 2026 de 167 k€ que exigía un ADR de 81,68 € poco sostenible, normalizándolo a 71,13 € y trasladando ese potencial a meses de mayor tracción real como Septiembre, Octubre y Marzo).*
+*(Nota de Coherencia Oficial: Las cifras mensuales y anuales de este plan coinciden al 100% con la Opción B: Lógica de Mercado configurada y aprobada en CapaSuite).*
 
 ---
 
@@ -165,17 +165,17 @@ Esto demuestra que **un 32,3% del presupuesto anual total (y un 38,1% del period
 
 | Mes | En Cartera 2027 (OTB €) | RN en Libros | ADR Cartera (€) | Objetivo 2027 (€) | % Ya Asegurado | Pickup Pendiente (€) | Valoración Comercial |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **Enero** | **44.055,89 €** | 722 | 61,02 € | 75.309,58 € | **58,5%** | 31.253,69 € | **Excelente base:** Enero tiene más de la mitad cubierto. |
-| **Febrero** | **34.784,42 €** | 462 | 75,29 € | 80.555,06 € | **43,2%** | 45.770,64 € | **Tarifa alta:** ADR en cartera muy potente (75,29 €). |
-| **Marzo** | **54.914,94 €** | 973 | 56,44 € | 120.509,54 € | **45,6%** | 65.594,60 € | Buena anticipación de primavera. |
-| **Abril** | **66.924,15 €** | 1.204 | 55,58 € | 146.867,73 € | **45,6%** | 79.943,58 € | Fuerte demanda de Semana Santa / puentes ya en libros. |
-| **Mayo** | **115.355,43 €** | 1.380 | **83,59 €** | 141.294,13 € | **81,6%** | **25.938,70 €** | **Prácticamente cerrado:** Mayo tiene el 82% garantizado a 83,59 € ADR. |
-| **Junio** | **70.279,39 €** | 1.069 | 65,74 € | 133.788,99 € | **52,5%** | 63.509,60 € | Más de la mitad del mes contratado. |
-| **Julio** | **30.368,83 €** | 600 | 50,61 € | 137.521,26 € | 22,1% | 107.152,43 € | Ritmo habitual de verano (reserva más tardía). |
-| **Agosto** | **32.773,61 €** | 653 | 50,19 € | 147.756,26 € | 22,2% | 114.982,65 € | Curva normal de reservas estivales. |
-| **Septiembre** | **41.966,76 €** | 806 | 52,07 € | 167.549,70 € | 25,0% | 125.582,94 € | Arranque de cartera corporativa de otoño. |
-| **Octubre** | **16.954,59 €** | 310 | 54,69 € | 184.821,89 € | 9,2% | 167.867,30 € | Mayor recorrido de yield (máxima ventana de venta directa). |
-| **TOTAL (Ene-Oct)**| **508.378,01 €**| **8.179** | **62,16 €** | **1.336.004,15 €** | **38,1%** | **827.626,14 €** | **Medio millón de euros ya asegurado.** |
+| **Enero** | **44.055,89 €** | 722 | 61,02 € | 68.531,00 € | **64,3%** | 24.475,11 € | **Excelente base:** Dos tercios de enero ya contratados. |
+| **Febrero** | **34.784,42 €** | 462 | 75,29 € | 83.672,00 € | **41,6%** | 48.887,58 € | **Tarifa alta:** ADR en cartera muy potente (75,29 €). |
+| **Marzo** | **54.914,94 €** | 973 | 56,44 € | 118.408,00 € | **46,4%** | 63.493,06 € | Buena anticipación de primavera. |
+| **Abril** | **66.924,15 €** | 1.204 | 55,58 € | 152.946,00 € | **43,8%** | 86.021,85 € | Fuerte demanda de Semana Santa ya en libros. |
+| **Mayo** | **115.355,43 €** | 1.380 | **83,59 €** | 184.689,00 € | **62,5%** | **69.333,57 €** | **Solidez extraordinaria:** 115 k€ ya garantizados a 83,59 € ADR. |
+| **Junio** | **70.279,39 €** | 1.069 | 65,74 € | 135.979,00 € | **51,7%** | 65.699,61 € | Más de la mitad del mes contratado. |
+| **Julio** | **30.368,83 €** | 600 | 50,61 € | 121.849,00 € | 24,9% | 91.480,17 € | Ritmo habitual de verano (reserva más tardía). |
+| **Agosto** | **32.773,61 €** | 653 | 50,19 € | 153.179,00 € | 21,4% | 120.405,39 € | Curva normal de reservas estivales. |
+| **Septiembre** | **41.966,76 €** | 806 | 52,07 € | 154.687,00 € | 27,1% | 112.720,24 € | Arranque de cartera corporativa de otoño. |
+| **Octubre** | **16.954,59 €** | 310 | 54,69 € | 175.939,00 € | 9,6% | 158.984,41 € | Mayor recorrido de yield (máxima ventana de venta directa). |
+| **TOTAL (Ene-Oct)**| **508.378,01 €**| **8.179** | **62,16 €** | **1.449.879,00 €** | **35,1%** | **941.500,99 €** | **Medio millón de euros ya asegurado físicamente.**
 
 ### Tres Argumentos Clave para la Dirección:
 1. **Riesgo Operativo Mínimo:** No estamos presupuestando sobre un papel en blanco; **más de medio millón de euros (508 k€)** ya está firmado y en los libros del hotel.

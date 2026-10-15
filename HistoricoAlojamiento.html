@@ -769,15 +769,32 @@
                             Visualice al instante la intensidad mensual de cada ejercicio para detectar patrones y picos estacionales.
                         </p>
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">Métrica:</span>
-                        <select id="heatmapMetricSelect" class="filter-select" onchange="renderHeatmapMatrix()">
-                            <option value="rev">Prod. Alojamiento (€)</option>
-                            <option value="occ">Ocupación (%)</option>
-                            <option value="adr">ADR (€)</option>
-                            <option value="revpar">RevPAR (€)</option>
-                            <option value="rn">Room Nights (RN)</option>
-                        </select>
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <div id="heatmapMinMaxLegend" style="display:inline-flex; align-items:center; gap:8px;">
+                            <span style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.4); padding:4px 8px; border-radius:6px; font-size:0.73rem; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+                                <span style="display:inline-block; width:8px; height:8px; background:#10b981; border-radius:50%;"></span> Mes que más (Máx)
+                            </span>
+                            <span style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.4); padding:4px 8px; border-radius:6px; font-size:0.73rem; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+                                <span style="display:inline-block; width:8px; height:8px; background:#ef4444; border-radius:50%;"></span> Mes que menos (Mín)
+                            </span>
+                        </div>
+                        <div style="display:inline-flex; align-items:center; gap:4px;">
+                            <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">Enfoque:</span>
+                            <select id="heatmapScopeSelect" class="filter-select" onchange="renderHeatmapMatrix()" style="font-size:0.76rem; padding:4px 8px;">
+                                <option value="global" selected>🌐 Todo el Histórico</option>
+                                <option value="yearly">📅 Por Cada Año</option>
+                            </select>
+                        </div>
+                        <div style="display:inline-flex; align-items:center; gap:4px;">
+                            <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted);">Métrica:</span>
+                            <select id="heatmapMetricSelect" class="filter-select" onchange="renderHeatmapMatrix()">
+                                <option value="rev">Prod. Alojamiento (€)</option>
+                                <option value="occ">Ocupación (%)</option>
+                                <option value="adr" selected>ADR (€)</option>
+                                <option value="revpar">RevPAR (€)</option>
+                                <option value="rn">Room Nights (RN)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -1566,7 +1583,8 @@
             const table = document.getElementById('heatmapMatrixTable');
             table.innerHTML = '';
 
-            const metric = document.getElementById('heatmapMetricSelect')?.value || 'rev';
+            const metric = document.getElementById('heatmapMetricSelect')?.value || 'adr';
+            const scope = document.getElementById('heatmapScopeSelect')?.value || 'global';
 
             // Gather all values across all years and months to determine min and max for color scale
             const allValues = [];
@@ -1585,8 +1603,8 @@
                 }
             });
 
-            const maxVal = allValues.length ? Math.max(...allValues) : 1;
-            const minVal = allValues.length ? Math.min(...allValues) : 0;
+            const globalMax = allValues.length ? Math.max(...allValues) : 1;
+            const globalMin = allValues.length ? Math.min(...allValues) : 0;
 
             // Header: Month names
             const thead = document.createElement('thead');
@@ -1606,6 +1624,26 @@
 
             reversedYears.forEach(y => {
                 const tr = document.createElement('tr');
+
+                // Determine this year's values and year-level min/max
+                const yearVals = [];
+                for (let m = 0; m < 12; m++) {
+                    const rev = y.monthlyRevenue[m] || 0;
+                    const rn = y.monthlyRN[m] || 0;
+                    const avail = y.monthlyAvail[m] || 1;
+                    let val = 0;
+                    if (metric === 'rev') val = rev;
+                    else if (metric === 'rn') val = rn;
+                    else if (metric === 'adr') val = rn > 0 ? rev / rn : 0;
+                    else if (metric === 'occ') val = (rn / avail) * 100;
+                    else if (metric === 'revpar') val = rev / avail;
+                    if (val > 0) yearVals.push(val);
+                }
+                const yearMax = yearVals.length ? Math.max(...yearVals) : globalMax;
+                const yearMin = yearVals.length ? Math.min(...yearVals) : globalMin;
+
+                const targetMax = (scope === 'yearly') ? yearMax : globalMax;
+                const targetMin = (scope === 'yearly') ? yearMin : globalMin;
 
                 let annualVal = 0;
                 const totRev = y.monthlyRevenue.reduce((a, b) => a + b, 0);
@@ -1631,11 +1669,6 @@
                     else if (metric === 'occ') val = (rn / avail) * 100;
                     else if (metric === 'revpar') val = rev / avail;
 
-                    // Compute heatmap background intensity (0 to 1)
-                    const ratio = maxVal > minVal ? Math.max(0, Math.min(1, (val - minVal) / (maxVal - minVal))) : 0.5;
-                    const alpha = val === 0 ? 0.04 : 0.12 + (ratio * 0.75);
-                    const textColor = ratio > 0.55 ? '#ffffff' : 'var(--text-main)';
-
                     let displayStr = '--';
                     if (val > 0) {
                         if (metric === 'rev') displayStr = fmtNum(val) + '€';
@@ -1644,10 +1677,34 @@
                         else if (metric === 'occ') displayStr = fmtDec(val, 0) + '%';
                     }
 
+                    let cellStyle = '';
+                    let badge = '';
+
+                    const isMax = (val > 0 && Math.abs(val - targetMax) < 0.001);
+                    const isMin = (val > 0 && Math.abs(val - targetMin) < 0.001 && targetMin < targetMax);
+
+                    if (isMax) {
+                        // Mes que más: Fondo Verde vibrante, texto blanco, sombra destacada
+                        cellStyle = 'background: #10b981; color: #ffffff; font-weight: 800; border: 2px solid #059669; box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);';
+                        badge = ' <span style="font-size:0.6rem; vertical-align:super; opacity:0.9;">▲</span>';
+                    } else if (isMin) {
+                        // Mes que menos: Fondo Rojo vibrante, texto blanco, sombra destacada
+                        cellStyle = 'background: #ef4444; color: #ffffff; font-weight: 800; border: 2px solid #dc2626; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);';
+                        badge = ' <span style="font-size:0.6rem; vertical-align:super; opacity:0.9;">▼</span>';
+                    } else {
+                        // Intensidad normal de calor (púrpura/índigo)
+                        const ratio = globalMax > globalMin ? Math.max(0, Math.min(1, (val - globalMin) / (globalMax - globalMin))) : 0.5;
+                        const alpha = val === 0 ? 0.04 : 0.12 + (ratio * 0.75);
+                        const textColor = ratio > 0.55 ? '#ffffff' : 'var(--text-main)';
+                        cellStyle = `background: rgba(99, 102, 241, ${alpha}); color: ${textColor};`;
+                    }
+
+                    const tooltipExtra = isMax ? ' (Mes MÁXIMO)' : (isMin ? ' (Mes MÍNIMO)' : '');
+
                     rowHtml += `
                         <td>
-                            <div class="heatmap-cell" style="background: rgba(99, 102, 241, ${alpha}); color: ${textColor};" title="${MONTH_NAMES[m]} ${y.year}: ${displayStr}">
-                                ${displayStr}
+                            <div class="heatmap-cell" style="${cellStyle}" title="${MONTH_NAMES[m]} ${y.year}: ${displayStr}${tooltipExtra}">
+                                ${displayStr}${badge}
                             </div>
                         </td>
                     `;

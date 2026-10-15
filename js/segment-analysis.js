@@ -108,9 +108,20 @@
         'BONO ONLINE',
         'BONO SPA'
     ];
-    const isRoomMetric = value => /^(HAB|HABI|RN|RMS|NOCHES|HABITACIONES|UNIDADES)$/.test(norm(value));
-    const canonical = value => aliases[norm(value)] || norm(value);
-    const isTotalName = value => /^(TOTAL|TOTAL GENERAL|TOTAL MASTER|RESUMEN)$/.test(norm(value));
+    const canonical = (value, hotel = '') => {
+        const n = norm(value);
+        try {
+            const rawStored = (typeof CapaStorage !== 'undefined' ? CapaStorage.getItem('custom_segment_mapping_v2') : (typeof localStorage !== 'undefined' ? localStorage.getItem('custom_segment_mapping_v2') : null));
+            if (rawStored) {
+                const mapObj = JSON.parse(rawStored) || {};
+                const hotelKey = String(hotel || '').toLowerCase().includes('cumbria') ? 'Cumbria' : 'Guadiana';
+                if (mapObj[hotelKey] && mapObj[hotelKey][n]) {
+                    return mapObj[hotelKey][n];
+                }
+            }
+        } catch(e) {}
+        return aliases[n] || n;
+    };
 
     const SEGMENT_NAMES_AND_ALIASES = new Set([
         // Segmentos maestros / canónicos

@@ -16,7 +16,11 @@ const {
 } = require('docx');
 
 function generateHotelDocx(mdPath, docxName) {
-  const md = fs.readFileSync(mdPath, 'utf8');
+  let resolvedMd = mdPath;
+  if (!fs.existsSync(resolvedMd) && fs.existsSync('Presupuestos/' + mdPath)) {
+    resolvedMd = 'Presupuestos/' + mdPath;
+  }
+  const md = fs.readFileSync(resolvedMd, 'utf8');
   const lines = md.split('\n');
   const docChildren = [];
 
