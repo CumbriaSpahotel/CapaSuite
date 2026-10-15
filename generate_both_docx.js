@@ -319,9 +319,15 @@ function generateHotelDocx(mdPath, docxName) {
   });
 
   Packer.toBuffer(doc).then(buffer => {
-    fs.writeFileSync(docxName, buffer);
-    fs.writeFileSync('C:/Users/comun/Downloads/' + docxName, buffer);
-    console.log(docxName + ' generated successfully in workspace and Downloads!');
+    const paths = [docxName, 'Presupuestos/' + docxName, 'C:/Users/comun/Downloads/' + docxName];
+    paths.forEach(p => {
+      try {
+        fs.writeFileSync(p, buffer);
+        console.log(`[OK] Saved ${docxName} to ${p}`);
+      } catch (err) {
+        console.warn(`[LOCKED] Could not write to ${p} (file may be open in Word): ${err.message}`);
+      }
+    });
   });
 }
 

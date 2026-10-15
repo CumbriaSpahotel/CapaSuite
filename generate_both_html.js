@@ -142,9 +142,15 @@ ${htmlBody}
 </body>
 </html>`;
 
-  fs.writeFileSync(htmlPath, fullHtml, 'utf8');
-  fs.writeFileSync('C:/Users/comun/Downloads/' + htmlPath, fullHtml, 'utf8');
-  console.log(htmlPath + ' written successfully to workspace and Downloads!');
+  const paths = [htmlPath, 'Presupuestos/' + htmlPath, 'C:/Users/comun/Downloads/' + htmlPath];
+  paths.forEach(p => {
+    try {
+      fs.writeFileSync(p, fullHtml, 'utf8');
+      console.log(`[OK] Saved ${htmlPath} to ${p}`);
+    } catch (err) {
+      console.warn(`[LOCKED] Could not write to ${p}: ${err.message}`);
+    }
+  });
 }
 
 convertMdToHtml('Informe_Presupuesto_2027_Sercotel_Guadiana.md', 'Informe_Presupuesto_2027_Sercotel_Guadiana.html', 'Informe Presupuesto 2027 - Sercotel Guadiana');

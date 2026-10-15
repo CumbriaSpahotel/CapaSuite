@@ -885,22 +885,18 @@
             }
 
             // Extract all 4-digit years
-            const years = Object.keys(hotelData)
+            const rawYears = Object.keys(hotelData)
                 .filter(k => /^(20\d{2})$/.test(k))
                 .sort((a, b) => parseInt(a) - parseInt(b));
 
-            if (years.length === 0) {
+            if (rawYears.length === 0) {
                 showNoData();
                 return;
             }
 
-            document.getElementById('historical-content').style.display = 'block';
-            document.getElementById('no-data-msg').style.display = 'none';
-            document.getElementById('yearsCountBadge').innerHTML = `✅ ${years.length} años analizados: <strong>${years[0]} - ${years[years.length - 1]}</strong>`;
-
             const hotelRooms = HOTELS[currentHotel]?.rooms || 108;
 
-            years.forEach(yearStr => {
+            rawYears.forEach(yearStr => {
                 const yearInt = parseInt(yearStr);
                 const yData = hotelData[yearStr];
                 if (!yData) return;
@@ -979,6 +975,12 @@
                     recordedDaysCount = Object.keys(yData.daily).length;
                 }
 
+                // EXCLUIR SI NO HAY DATOS DE ALOJAMIENTO (si no hay datos, que no salgan)
+                const hasAccommodationData = monthlyRevenue.some(v => (v || 0) > 0) || monthlyRN.some(v => (v || 0) > 0);
+                if (!hasAccommodationData) {
+                    return;
+                }
+
                 yearlyAccommodationData.push({
                     year: yearInt,
                     yearStr: yearStr,
@@ -989,6 +991,17 @@
                     recordedDaysCount
                 });
             });
+
+            if (yearlyAccommodationData.length === 0) {
+                showNoData();
+                return;
+            }
+
+            document.getElementById('historical-content').style.display = 'block';
+            document.getElementById('no-data-msg').style.display = 'none';
+            const firstYear = yearlyAccommodationData[0].year;
+            const lastYear = yearlyAccommodationData[yearlyAccommodationData.length - 1].year;
+            document.getElementById('yearsCountBadge').innerHTML = `✅ ${yearlyAccommodationData.length} años con datos: <strong>${firstYear} - ${lastYear}</strong>`;
 
             updateHistoricalView();
         }
@@ -1051,12 +1064,21 @@
                 };
             });
 
+            // Filtrar estrictamente solo años con datos positivos en el periodo
+            const validYears = processedYears.filter(y => y.revenue > 0 || y.rn > 0);
+
+            if (validYears.length === 0) {
+                showNoData();
+                return;
+            }
+
             // Compute YoY variations
-            for (let i = 0; i < processedYears.length; i++) {
-                const current = processedYears[i];
-                const prev = i > 0 ? processedYears[i - 1] : null;
+            for (let i = 0; i < validYears.length; i++) {
+                const current = validYears[i];
+                const prev = i > 0 ? validYears[i - 1] : null;
 
                 if (prev) {
+                    current.prevYear = prev.year;
                     current.varRevenue = current.revenue - prev.revenue;
                     current.pctRevenue = prev.revenue > 0 ? (current.varRevenue / prev.revenue) * 100 : null;
 
@@ -1071,6 +1093,7 @@
                     current.varRevpar = current.revpar - prev.revpar;
                     current.pctRevpar = prev.revpar > 0 ? (current.varRevpar / prev.revpar) * 100 : null;
                 } else {
+                    current.prevYear = null;
                     current.varRevenue = null;
                     current.pctRevenue = null;
                     current.varRN = null;
@@ -1083,9 +1106,9 @@
                 }
             }
 
-            renderTopKpis(processedYears);
-            renderTable(processedYears);
-            renderCharts(processedYears);
+            renderTopKpis(validYears);
+            renderTable(validYears);
+            renderCharts(validYears);
             renderHeatmapMatrix();
         }
 
@@ -1146,7 +1169,8 @@
 
                 const formatYoY = (diff, pct, unit = '€', isPp = false) => {
                     if (diff === null || diff === undefined) return '<span class="trend-flat">--</span>';
-                    const isPos = diff >= 0;
+                    if (Math.abs(diff) < 0.005) return `<span class="trend-flat">= 0 ${isPp ? 'pp' : unit}</span>`;
+                    const isPos = diff > 0;
                     const sign = isPos ? '+' : '';
                     const cls = isPos ? 'trend-up' : 'trend-down';
                     const arrow = isPos ? '▲' : '▼';
