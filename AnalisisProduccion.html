@@ -517,6 +517,7 @@
         <div class="nav-links">
             <a href="index.html">Inicio</a>
             <a href="AnalisisProduccion.html" class="active">Producción</a>
+            <a href="HistoricoAlojamiento.html">Histórico Alojamiento</a>
             <a href="AnalisisSegmentos.html">Segmentos</a>
             <a href="AnalisisCompetencia.html">Competencia</a>
             <a href="AnalisisCalendario.html">Calendario</a>
@@ -552,7 +553,10 @@
                     </div>
                 </div>
             </div>
-            <div style="display:flex; gap:12px; align-items:center;">
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                <a href="HistoricoAlojamiento.html" class="btn" style="padding:9px 14px; border-radius:8px; background:var(--primary, #6366f1); color:white; text-decoration:none; font-weight:700; font-size:0.82rem; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 8px rgba(99,102,241,0.25);" title="Ver comparativa de todos los años disponibles (exclusivo habitaciones)">
+                    <span>📈</span> Ver Histórico Anual (Alojamiento)
+                </a>
                 <select id="yearSelector" onchange="updateView()"
                     style="padding:10px; border-radius:8px; border:1px solid #e2e8f0;"></select>
                 <select id="monthSelector" onchange="updateView()"

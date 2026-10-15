@@ -120,32 +120,35 @@ En octubre confluyen simultáneamente:
 
 ---
 
-## 6. MODELIZACIÓN Y ESTRATEGIA DEL SEGMENTO GRUPOS
+## 6. MODELIZACIÓN Y ESTRATEGIA DEL SEGMENTO GRUPOS: COTIZACIÓN PRINCIPALMENTE DINÁMICA
 
-Para que el hotel alcance los 1,57 M€ sin canibalizar ingresos individuales, el segmento **Grupos** se planifica con una cuota anual del **6,3%** (**1.467 habitaciones noche** y **95.516 €** de facturación):
+Fruto del proceso de modernización tecnológica y de la implantación de la nueva disciplina de Revenue Management compartida con el Hotel Cumbria, **la tarifa del segmento grupos será PRINCIPALMENTE DINÁMICA**. 
+
+Se abandonan de forma definitiva los acuerdos a tarifas planas o estáticas del pasado. A partir de 2027, toda cotización para grupos se tarifica de manera dinámica e indexada a la ocupación proyectada, a la curva de reserva y a los tramos de precio del cliente individual. Esta estrategia permite rentabilizar al máximo los periodos valle y proteger el RevPAR en fechas punta, asegurando que el segmento **Grupos** aporte una cuota anual controlada del **6,3%** (**1.467 habitaciones noche** y **95.516 €** de facturación a un ADR ponderado de **65,11 €**):
 
 ### Desglose Mensual del Segmento Grupos 2027
 
 | Mes | Total RN Hotel | RN Grupos | Cuota Grupos (% RN) | ADR Grupos (€) | Facturación Grupos (€) | Directriz Comercial de Contratación |
 | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **Enero** | 1.197 | **108 RN** | 9,0% | 56,00 € | 6.048 € | **Relleno base:** Grupos deportivos / circuitos de invierno. |
-| **Febrero** | 1.274 | **108 RN** | 8,5% | 57,50 € | 6.210 € | **Ocupación valle:** Culturales y escapadas. |
-| **Marzo** | 1.570 | **94 RN** | 6,0% | 68,00 € | 6.392 € | **Filtro tarifario:** Solo grupos con tarifa media alta. |
-| **Abril** | 2.041 | **133 RN** | 6,5% | 69,50 € | 9.243 € | **Semana Santa / Puentes:** Cupos limitados a tarifa premium. |
-| **Mayo** | 1.986 | **109 RN** | 5,5% | 71,00 € | 7.739 € | **Selectividad:** Grupos de paso solo si no desplazan individual. |
-| **Junio** | 1.854 | **111 RN** | 6,0% | 68,00 € | 7.548 € | **Cierre escolar/asociativo:** Tarifa controlada. |
+| **Enero** | 1.197 | **108 RN** | 9,0% | 56,00 € | 6.048 € | **Relleno base:** Grupos deportivos / circuitos de invierno con tarifa dinámica valle. |
+| **Febrero** | 1.274 | **108 RN** | 8,5% | 57,50 € | 6.210 € | **Ocupación valle:** Culturales y escapadas indexadas a demanda. |
+| **Marzo** | 1.570 | **94 RN** | 6,0% | 68,00 € | 6.392 € | **Filtro tarifario:** Cotización dinámica con suelo elevado. |
+| **Abril** | 2.041 | **133 RN** | 6,5% | 69,50 € | 9.243 € | **Semana Santa / Puentes:** Cupos controlados a precio dinámico premium. |
+| **Mayo** | 1.986 | **109 RN** | 5,5% | 71,00 € | 7.739 € | **Selectividad:** Grupos admitidos solo a precio medio dinámico de temporada alta. |
+| **Junio** | 1.854 | **111 RN** | 6,0% | 68,00 € | 7.548 € | **Cierre escolar/asociativo:** Tarifa dinámica con yield activo. |
 | **Julio** | 1.945 | **136 RN** | 7,0% | 64,00 € | 8.704 € | **Turismo estival:** Grupos vacacionales en tránsito. |
-| **Agosto** | 2.363 | **189 RN** | 8,0% | 60,00 € | 11.340 € | **Volumen veraniego:** Ocupación familiar/grupos. |
-| **Septiembre** | 2.602 | **117 RN** | 4,5% | 70,00 € | 8.190 € | **Contención:** Priorizar corporativo individual sobre grupos. |
-| **Octubre** | **2.905** | **116 RN** | **4,0%** | **74,00 €** | **8.584 €** | **Yield Máximo:** Suelo estricto (>74 €); máx. 10-12 hab/noche. |
-| **Noviembre** | 1.967 | **128 RN** | 6,5% | 65,00 € | 8.320 € | **Equilibrio:** Grupos técnicos y asociativos de fin de semana. |
-| **Diciembre** | 1.689 | **118 RN** | 7,0% | 61,00 € | 7.198 € | **Puentes y escapadas:** Grupos senior / culturales. |
-| **TOTAL AÑO** | **23.393** | **1.467 RN** | **6,3%** | **65,11 €** | **95.516 €** | **Aporte Grupos: 1.467 habitaciones y 95.516 €** |
+| **Agosto** | 2.363 | **189 RN** | 8,0% | 60,00 € | 11.340 € | **Volumen veraniego:** Ocupación familiar y grupos a tarifa dinámica competitiva. |
+| **Septiembre** | 2.602 | **117 RN** | 4,5% | 70,00 € | 8.190 € | **Contención:** Tarifa dinámica alta para no desplazar corporativo directo. |
+| **Octubre** | **2.905** | **116 RN** | **4,0%** | **74,00 €** | **8.584 €** | **Yield Máximo:** Tarifa dinámica alineada con individual (>74 €–80 €). |
+| **Noviembre** | 1.967 | **128 RN** | 6,5% | 65,00 € | 8.320 € | **Equilibrio:** Grupos técnicos y asociativos indexados a pick-up. |
+| **Diciembre** | 1.689 | **118 RN** | 7,0% | 61,00 € | 7.198 € | **Puentes y escapadas:** Grupos senior / culturales de fin de año. |
+| **TOTAL AÑO** | **23.393** | **1.467 RN** | **6,3%** | **65,11 €** | **95.516 €** | **Aporte Grupos: 1.467 habitaciones y 95.516 € bajo tarifa dinámica.** |
 
 ### Reglas Comerciales Obligatorias para el Equipo de Ventas:
-1. **En meses pico (Octubre y Septiembre):** Queda prohibida la aceptación de grupos por debajo de **72 €–74 €** de ADR. Las cotizaciones se limitarán a un cupo máximo de 12 habitaciones por noche para reservar el resto al cliente corporativo directo (>80 € ADR).
-2. **En meses valle (Enero, Febrero, Diciembre):** Se lanzará una campaña comercial anticipada para asegurar pernoctaciones de clubes deportivos y colectivos a tarifas suelo (56 €–60 €) que cubran los costes fijos de mantenimiento.
-3. **Sincronización:** Estas metas mensuales quedan cargadas como los techos y suelos oficiales en nuestro cotizador de grupos (Nexus Groups).
+1. **Cotización Principalmente Dinámica:** Ninguna cotización de grupo se emitirá a tarifa fija sin consultar la disponibilidad y el precio medio dinámico sugerido por el RMS / cotizador (Nexus Groups).
+2. **En meses pico (Octubre y Septiembre):** La cotización dinámica no bajará en ningún caso de **72 €–74 €** de ADR para evitar el desplazamiento de clientes individuales que pagan por encima de 85 €.
+3. **En meses valle (Enero, Febrero, Diciembre):** Se autorizan tarifas dinámicas promocionales para asegurar el volumen de clubes deportivos y colectivos que cubran costes fijos sin degradar el precio de venta individual.
+4. **Sincronización:** Las curvas de precio dinámico quedan integradas como techos y suelos oficiales en el sistema de ventas.
 
 ---
 

@@ -21,6 +21,13 @@
         const page = window.location.pathname.split('/').pop() || 'index.html';
         nav.querySelectorAll('.nav-links a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === page));
         const links = nav.querySelector('.nav-links');
+        if (links && !links.querySelector('a[href="HistoricoAlojamiento.html"]')) {
+            const prodLink = links.querySelector('a[href="AnalisisProduccion.html"]');
+            const hLink = document.createElement('a'); hLink.href = 'HistoricoAlojamiento.html'; hLink.textContent = 'Histórico Alojamiento';
+            hLink.classList.toggle('active', page === 'HistoricoAlojamiento.html');
+            if (prodLink && prodLink.nextSibling) links.insertBefore(hLink, prodLink.nextSibling);
+            else links.append(hLink);
+        }
         if (links && !links.querySelector('a[href="SeguimientoRevenue.html"]')) {
             const link = document.createElement('a'); link.href = 'SeguimientoRevenue.html'; link.textContent = 'Seguimiento';
             link.classList.toggle('active', page === 'SeguimientoRevenue.html'); links.append(link);
