@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Informe Presupuesto 2027 - Sercotel Guadiana</title>
+<style>
+@page { size: A4; margin: 12mm 15mm 15mm 15mm; }
+body { font-family: "Segoe UI", -apple-system, Roboto, Helvetica, Arial, sans-serif; color: #1e293b; background: #f8fafc; margin: 0; padding: 24px; font-size: 10pt; line-height: 1.5; }
+.actions-bar { position: sticky; top: 12px; max-width: 900px; margin: 0 auto 16px auto; display: flex; gap: 12px; justify-content: flex-end; z-index: 100; }
+.btn { background: #2563eb; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(37,99,235,0.3); text-decoration: none; }
+.btn:hover { background: #1d4ed8; }
+.btn-word { background: #0f766e; }
+.btn-word:hover { background: #115e59; }
+.page-container { background: #fff; max-width: 900px; margin: 0 auto; padding: 40px 48px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+.doc-title { color: #0f172a; font-size: 1.6rem; font-weight: 800; border-bottom: 3px solid #2563eb; padding-bottom: 8px; margin-top: 0; }
+.section-title { color: #1e40af; font-size: 1.15rem; font-weight: 700; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 5px; margin-top: 24px; margin-bottom: 12px; }
+.subsection-title { color: #334155; font-size: 1rem; font-weight: 700; margin-top: 16px; margin-bottom: 8px; }
+.report-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 8.5pt; }
+.report-table th, .report-table td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
+.report-table th { background: #f1f5f9; font-weight: 700; color: #0f172a; text-align: center; }
+.report-table tr:nth-child(even) td { background: #f8fafc; }
+.box-code { background: #0f172a; color: #f8fafc; padding: 12px; border-radius: 8px; font-family: Consolas, monospace; font-size: 8pt; line-height: 1.4; overflow-x: auto; }
+.divider { border: none; border-top: 1px solid #e2e8f0; margin: 20px 0; }
+li { margin-bottom: 4px; }
+@media print {
+  body { background: #fff; padding: 0; margin: 0; font-size: 9pt; }
+  .actions-bar { display: none !important; }
+  .page-container { box-shadow: none; border: none; padding: 0; max-width: 100%; }
+  .section-title { page-break-after: avoid; }
+  .report-table { page-break-inside: auto; }
+  tr { page-break-inside: avoid; page-break-after: auto; }
+}
+</style>
+</head>
+<body>
+<div class="actions-bar">
+  <button onclick="window.print()" class="btn">📄 Guardar como PDF / Imprimir</button>
+  <button onclick="exportToWord()" class="btn btn-word">📝 Descargar para Word (.doc)</button>
+</div>
+<div class="page-container" id="docContent">
+<h1 class="doc-title">PROPUESTA Y JUSTIFICACIÓN DEL PRESUPUESTO OFICIAL 2027: OBJETIVO +7,5%</h1>
+<h2 class="section-title">Departamento de Revenue Management y Dirección Comercial</h2>
+<p><strong>Hotel:</strong> Sercotel Guadiana (Ciudad Real – 108 habitaciones / 39.420 RN disponibles)</p>
+<p><strong>Fecha:</strong> Octubre 2026</p>
+<p><strong>Documento:</strong> Informe Ejecutivo y Memoria Técnica de Justificación Presupuestaria 2027</p>
+<hr class="divider" />
+<h2 class="section-title">1. RESUMEN EJECUTIVO Y OBJETIVOS CLAVE</h2>
+<p>Tras auditar la serie histórica consolidada de producción real del hotel (<strong>2016 – 2025</strong>), el Presupuesto Oficial Aprobado de <strong>2026</strong> (1.395.014 €) y el ritmo de cierre acumulado (*pace* de demanda del ejercicio en curso), presento formalmente la propuesta de presupuesto de <strong>Alojamiento (Room Revenue) para el ejercicio 2027</strong>.</p>
+<p>El objetivo central se establece en un <strong>crecimiento de ingresos del +7,50%</strong> respecto a la base de cierre del ejercicio actual, fijando la meta presupuestaria de Alojamiento en <strong>1.573.386,12 €</strong> (+109.771 € de incremento neto). Esta meta consolida la senda de crecimiento demostrada por el hotel y aplica una gestión tarifaria selectiva por estacionalidad.</p>
+<h3 class="subsection-title">Cuadro Resumen de Indicadores Clave (KPIs)</h3>
+<table class="report-table">
+<thead>
+<tr><th>Métrica</th><th>Presupuesto 2026 Oficial</th><th>Cierre Estimado 2026</th><th>Propuesta 2027</th><th>Variación vs BGT 2026</th><th>Variación vs Cierre Est.</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Room Revenue (€)</strong></td><td><strong>1.395.014 €</strong></td><td>1.463.615 €</td><td><strong>1.573.386,12 €</strong></td><td><strong>+12,79%</strong> (+178.372 €)</td><td><strong>+7,50%</strong> (+109.771 €)</td></tr>
+<tr><td><strong>Habitaciones Noche (RN)</strong></td><td>21.240</td><td>22.618</td><td><strong>23.393</strong></td><td><strong>+10,14%</strong> (+2.153 RN)</td><td><strong>+3,43%</strong> (+775 RN)</td></tr>
+<tr><td><strong>Tarifa Media Diaria (ADR)</strong></td><td>65,68 €</td><td>64,71 €</td><td><strong>67,30 €</strong></td><td><strong>+2,47%</strong> (+1,62 €)</td><td><strong>+4,00%</strong> (+2,59 €)</td></tr>
+<tr><td><strong>Ocupación Media (%)</strong></td><td>56,96%</td><td>57,38%</td><td><strong>59,34%</strong></td><td><strong>+2,38 p.p.</strong></td><td><strong>+1,96 p.p.</strong></td></tr>
+<tr><td><strong>RevPAR Estimado (€)</strong></td><td>37,47 €</td><td>37,13 €</td><td><strong>39,91 €</strong></td><td><strong>+6,51%</strong></td><td><strong>+7,50%</strong></td></tr>
+</tbody>
+</table>
+<hr class="divider" />
+<h2 class="section-title">2. AUDITORÍA HISTÓRICA MULTIANUAL (2016 – 2025): EVIDENCIA DEL CRECIMIENTO</h2>
+<p>Para justificar con solvencia los <strong>1,57 M€</strong> ante la Dirección, no nos basamos en una proyección aislada, sino en la <strong>curva real de transformación del hotel durante la última década</strong>.</p>
+<p>Los datos de producción real extraídos de nuestro histórico muestran una aceleración sostenida tanto en ingresos como en poder de fijación de precio (*pricing power*):</p>
+<h3 class="subsection-title">Serie Histórica Consolidada 2016 – 2025 (Exclusivo Alojamiento)</h3>
+<table class="report-table">
+<thead>
+<tr><th>Ejercicio</th><th>Room Revenue (€)</th><th>Habitaciones (RN)</th><th>ADR (€)</th><th>Ocupación (%)</th><th>RevPAR (€)</th><th>Contexto de Mercado (Alojamiento)</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>2016</strong></td><td>899.135 €</td><td>21.346</td><td>42,12 €</td><td>54,1%</td><td>22,81 €</td><td>Etapa base tarifaria baja.</td></tr>
+<tr><td><strong>2017</strong></td><td>1.032.432 €</td><td>22.607</td><td>45,67 €</td><td>57,3%</td><td>26,19 €</td><td>Primer umbral del millón de euros en habitaciones.</td></tr>
+<tr><td><strong>2018</strong></td><td>1.058.646 €</td><td>22.822</td><td>46,39 €</td><td>57,9%</td><td>26,86 €</td><td>Estabilidad de volumen pre-pandemia.</td></tr>
+<tr><td><strong>2019</strong></td><td>1.047.019 €</td><td>20.200</td><td>51,83 €</td><td>51,2%</td><td>26,56 €</td><td>Salto inicial de ADR (>50 €).</td></tr>
+<tr><td><strong>2020</strong></td><td>517.991 €</td><td>10.161</td><td>50,98 €</td><td>25,8%</td><td>13,14 €</td><td>Ejercicio COVID-19.</td></tr>
+<tr><td><strong>2021</strong></td><td>915.712 €</td><td>18.345</td><td>49,92 €</td><td>46,5%</td><td>23,23 €</td><td>Recuperación gradual de pernoctaciones.</td></tr>
+<tr><td><strong>2022</strong></td><td>1.010.330 €</td><td>18.236</td><td>55,40 €</td><td>46,3%</td><td>25,63 €</td><td>Consolidación de tarifa post-pandemia.</td></tr>
+<tr><td><strong>2023</strong></td><td>1.035.549 €</td><td>17.627</td><td>58,75 €</td><td>44,7%</td><td>26,27 €</td><td>Reposicionamiento hacia cliente corporativo directo.</td></tr>
+<tr><td><strong>2024</strong></td><td>1.234.818 €</td><td>20.765</td><td>59,47 €</td><td>52,7%</td><td>31,32 €</td><td>Fuerte expansión de demanda (+19,2% en Room Rev).</td></tr>
+<tr><td><strong>2025</strong></td><td>1.318.860 €</td><td>21.031</td><td>62,71 €</td><td>53,4%</td><td>33,46 €</td><td>Récord histórico consolidado de habitaciones.</td></tr>
+<tr><td><strong>2026 (Est.)</strong></td><td>1.463.615 €</td><td>22.618</td><td>64,71 €</td><td>57,4%</td><td>37,13 €</td><td>Cierre proyectado en curso.</td></tr>
+<tr><td><strong>2027 (Prop.)</strong></td><td><strong>1.573.386 €</strong></td><td><strong>23.393</strong></td><td><strong>67,30 €</strong></td><td><strong>59,3%</strong></td><td><strong>39,91 €</strong></td><td><strong>Objetivo Presupuestario de Habitaciones.</strong></td></tr>
+</tbody>
+</table>
+<h3 class="subsection-title">Conclusiones Clave de la Serie Histórica de Alojamiento:</h3>
+<li class="numbered"><strong>El ADR de alojamiento se ha incrementado un +48,9% desde 2016</strong> (pasando de 42,12 € a 62,71 € en 2025 y 64,71 € en 2026). El objetivo de <strong>67,30 €</strong> para 2027 representa una subida moderada de <strong>+2,59 € (+4,0%)</strong>, perfectamente alineada con la progresión del hotel.</li>
+<li class="numbered"><strong>El hotel ya demostró capacidad física de absorber más de 22.800 habitaciones al año</strong> (22.822 RN en 2018 y 22.607 RN en 2017). Comercializar <strong>23.393 RN</strong> en 2027 supone recuperar ese volumen histórico de pernoctaciones pero capturando <strong>+21 € más de tarifa por habitación</strong> que en 2018.</li>
+<li class="numbered"><strong>El RevPAR crece de forma constante hasta los 39,91 €</strong>, garantizando la máxima rentabilidad por habitación disponible de la historia del establecimiento.</li>
+<hr class="divider" />
+<h2 class="section-title">3. COMPORTAMIENTO ESTACIONAL HISTÓRICO: ANÁLISIS 2022 – 2025</h2>
+<p>Al auditar la serie mensual de los últimos 4 ejercicios cerrados, la estacionalidad de Ciudad Real refleja patrones estructurales muy claros que sustentan nuestro reparto de 2027:</p>
+<h3 class="subsection-title">Comparativa de Room Revenue (€) Mes a Mes (2022 – 2025)</h3>
+<table class="report-table">
+<thead>
+<tr><th>Mes</th><th>2022 (€)</th><th>2023 (€)</th><th>2024 (€)</th><th>2025 (€)</th><th>Media 4 Años (€)</th><th>Propuesta 2027 (€)</th><th>Justificación de Crecimiento</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Enero</strong></td><td>53.221 €</td><td>49.845 €</td><td>41.029 €</td><td>46.594 €</td><td>47.672 €</td><td><strong>75.310 €</strong></td><td>Captación activa de grupos y eventos deportivos base.</td></tr>
+<tr><td><strong>Febrero</strong></td><td>92.867 €</td><td>81.304 €</td><td>59.827 €</td><td>65.276 €</td><td>74.819 €</td><td><strong>80.555 €</strong></td><td>Retorno al nivel medio de demanda de febrero.</td></tr>
+<tr><td><strong>Marzo</strong></td><td>58.393 €</td><td>71.543 €</td><td>125.581 €</td><td>85.752 €</td><td>85.317 €</td><td><strong>120.510 €</strong></td><td>Efecto congresos primavera + Semana Santa / ferias.</td></tr>
+<tr><td><strong>Abril</strong></td><td>82.924 €</td><td>107.118 €</td><td>130.668 €</td><td>112.422 €</td><td>108.283 €</td><td><strong>146.868 €</strong></td><td>Alta demanda corporativa y puentes primaverales.</td></tr>
+<tr><td><strong>Mayo</strong></td><td>143.835 €</td><td>127.007 €</td><td>124.149 €</td><td>161.051 €</td><td>139.011 €</td><td><strong>141.294 €</strong></td><td>Estabilización de ADR tras pico atípico de 2025.</td></tr>
+<tr><td><strong>Junio</strong></td><td>85.069 €</td><td>80.273 €</td><td>105.104 €</td><td>107.233 €</td><td>94.420 €</td><td><strong>133.789 €</strong></td><td>Cierre corporativo y eventos formativos.</td></tr>
+<tr><td><strong>Julio</strong></td><td>82.766 €</td><td>86.808 €</td><td>129.310 €</td><td>129.649 €</td><td>107.133 €</td><td><strong>137.521 €</strong></td><td>Consolidación del turismo estival en tránsito.</td></tr>
+<tr><td><strong>Agosto</strong></td><td>81.625 €</td><td>89.013 €</td><td>121.359 €</td><td>124.448 €</td><td>104.111 €</td><td><strong>147.756 €</strong></td><td>Volumen familiar y paso vacacional hacia el sur.</td></tr>
+<tr><td><strong>Septiembre</strong></td><td>89.156 €</td><td>110.396 €</td><td>102.697 €</td><td>143.034 €</td><td>111.321 €</td><td><strong>167.550 €</strong></td><td>Reactivación corporativa otoñal a pleno rendimiento.</td></tr>
+<tr><td><strong>Octubre</strong></td><td><strong>100.195 €</strong></td><td><strong>107.855 €</strong></td><td><strong>117.252 €</strong></td><td><strong>146.243 €</strong></td><td><strong>117.886 €</strong></td><td><strong>184.822 €</strong></td><td><strong>Mes líder absoluto: compresión empresarial y AVE.</strong></td></tr>
+<tr><td><strong>Noviembre</strong></td><td>73.495 €</td><td>50.767 €</td><td>103.299 €</td><td>106.319 €</td><td>83.470 €</td><td><strong>129.376 €</strong></td><td>Continuidad de tráfico institucional y jornadas.</td></tr>
+<tr><td><strong>Diciembre</strong></td><td>66.784 €</td><td>73.620 €</td><td>74.543 €</td><td>90.839 €</td><td>76.447 €</td><td><strong>108.036 €</strong></td><td>Puentes de diciembre y ocio navideño familiar.</td></tr>
+<tr><td><strong>TOTAL</strong></td><td><strong>1.010.330 €</strong></td><td><strong>1.035.549 €</strong></td><td><strong>1.234.818 €</strong></td><td><strong>1.318.860 €</strong></td><td><strong>1.149.889 €</strong></td><td><strong>1.573.386 €</strong></td><td><strong>Crecimiento respaldado por la tendencia real.</strong></td></tr>
+</tbody>
+</table>
+<hr class="divider" />
+<h2 class="section-title">4. ANÁLISIS DE PRECISIÓN DEL MES LÍDER: OCTUBRE</h2>
+<p>El histórico de habitaciones noche de los últimos años confirma por qué <strong>OCTUBRE</strong> es el motor financiero del Sercotel Guadiana:</p>
+<li><strong>Evolución Real de Habitaciones Vendidas en Octubre:</strong></li>
+<li>Octubre 2022: 1.855 RN</li>
+<li>Octubre 2023: 1.730 RN</li>
+<li>Octubre 2024: 1.951 RN</li>
+<li><strong>Octubre 2025: 2.693 RN (Récord histórico mensual de ocupación)</strong></li>
+<li><strong>Octubre 2026 (BGT Oficial): 2.637 RN (83,40% ocupación presupuestada)</strong></li>
+<li><strong>Octubre 2027 (Propuesta): 2.905 RN (86,8% ocupación / 184.821,89 €)</strong></li>
+<h3 class="subsection-title">¿Por qué Octubre tiene margen para alcanzar los 184.822 €?</h3>
+<p>En octubre confluyen simultáneamente:</p>
+<li class="numbered"><strong>La máxima ocupación corporativa entre semana de Ciudad Real:</strong> De martes a jueves la plaza opera por encima del 95%, lo que permite aplicar restricciones de estancia y elevar la tarifa media individual por encima de los <strong>80 €–85 €</strong>.</li>
+<li class="numbered"><strong>Turismo institucional y académico:</strong> Actividad plena de las consejerías autonómicas, la Diputación Provincial y las facultades del campus de la UCLM.</li>
+<li class="numbered"><strong>El Puente del Pilar y turismo otoñal:</strong> Evita la caída de ocupación de los fines de semana.</li>
+<hr class="divider" />
+<h2 class="section-title">5. PLAN MAESTRO MENSUAL 2027 (DETALLE POR HABITACIONES, ADR Y REVPAR)</h2>
+<table class="report-table">
+<thead>
+<tr><th>Mes</th><th>Días</th><th>Capacidad (RN)</th><th>BGT 2026 (€)</th><th>Propuesta 2027 (€)</th><th>RN 2027</th><th>ADR 2027 (€)</th><th>Ocupación (%)</th><th>RevPAR (€)</th><th>Variación vs 2026</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Enero</strong></td><td>31</td><td>3.348</td><td>57.715 €</td><td><strong>75.309,58 €</strong></td><td>1.197</td><td>62,94 €</td><td>35,8%</td><td>22,49 €</td><td>+30,5%</td></tr>
+<tr><td><strong>Febrero</strong></td><td>28</td><td>3.024</td><td>68.021 €</td><td><strong>80.555,06 €</strong></td><td>1.274</td><td>63,24 €</td><td>42,1%</td><td>26,64 €</td><td>+18,4%</td></tr>
+<tr><td><strong>Marzo</strong></td><td>31</td><td>3.348</td><td>89.561 €</td><td><strong>120.509,54 €</strong></td><td>1.570</td><td>76,75 €</td><td>46,9%</td><td>35,99 €</td><td>+34,6%</td></tr>
+<tr><td><strong>Abril</strong></td><td>30</td><td>3.240</td><td>126.055 €</td><td><strong>146.867,73 €</strong></td><td>2.041</td><td>71,97 €</td><td>63,0%</td><td>45,33 €</td><td>+16,5%</td></tr>
+<tr><td><strong>Mayo</strong></td><td>31</td><td>3.348</td><td>167.691 €</td><td><strong>141.294,13 €</strong></td><td>1.986</td><td>71,13 €</td><td>59,3%</td><td>42,20 €</td><td>-15,7%</td></tr>
+<tr><td><strong>Junio</strong></td><td>30</td><td>3.240</td><td>114.464 €</td><td><strong>133.788,99 €</strong></td><td>1.854</td><td>72,15 €</td><td>57,2%</td><td>41,29 €</td><td>+16,9%</td></tr>
+<tr><td><strong>Julio</strong></td><td>31</td><td>3.348</td><td>118.640 €</td><td><strong>137.521,26 €</strong></td><td>1.945</td><td>70,71 €</td><td>58,1%</td><td>41,08 €</td><td>+15,9%</td></tr>
+<tr><td><strong>Agosto</strong></td><td>31</td><td>3.348</td><td>131.039 €</td><td><strong>147.756,26 €</strong></td><td>2.363</td><td>62,52 €</td><td>70,6%</td><td>44,13 €</td><td>+12,8%</td></tr>
+<tr><td><strong>Septiembre</strong></td><td>30</td><td>3.240</td><td>148.593 €</td><td><strong>167.549,70 €</strong></td><td>2.602</td><td>64,39 €</td><td>80,3%</td><td>51,71 €</td><td>+12,8%</td></tr>
+<tr><td><strong>Octubre</strong></td><td>31</td><td>3.348</td><td>163.911 €</td><td><strong>184.821,89 €</strong></td><td>2.905</td><td>63,62 €</td><td>86,8%</td><td>55,20 €</td><td><strong>+12,8%</strong></td></tr>
+<tr><td><strong>Noviembre</strong></td><td>30</td><td>3.240</td><td>114.738 €</td><td><strong>129.375,66 €</strong></td><td>1.967</td><td>65,78 €</td><td>60,7%</td><td>39,93 €</td><td>+12,8%</td></tr>
+<tr><td><strong>Diciembre</strong></td><td>31</td><td>3.348</td><td>94.586 €</td><td><strong>108.036,31 €</strong></td><td>1.689</td><td>63,96 €</td><td>50,4%</td><td>32,27 €</td><td>+14,2%</td></tr>
+<tr><td><strong>TOTAL</strong></td><td><strong>365</strong></td><td><strong>39.420</strong></td><td><strong>1.395.014 €</strong></td><td><strong>1.573.386,12 €</strong></td><td><strong>23.393</strong></td><td><strong>67,30 €</strong></td><td><strong>59,34%</strong></td><td><strong>39,91 €</strong></td><td><strong>+12,79%</strong></td></tr>
+</tbody>
+</table>
+<p>*(Nota: En Mayo se corrige el objetivo sobredimensionado del BGT 2026 de 167 k€ que exigía un ADR de 81,68 € poco sostenible, normalizándolo a 71,13 € y trasladando ese potencial a meses de mayor tracción real como Septiembre, Octubre y Marzo).*</p>
+<hr class="divider" />
+<h2 class="section-title">6. MODELIZACIÓN Y ESTRATEGIA DEL SEGMENTO GRUPOS</h2>
+<p>Para que el hotel alcance los 1,57 M€ sin canibalizar ingresos individuales, el segmento <strong>Grupos</strong> se planifica con una cuota anual del <strong>6,3%</strong> (<strong>1.467 habitaciones noche</strong> y <strong>95.516 €</strong> de facturación):</p>
+<h3 class="subsection-title">Desglose Mensual del Segmento Grupos 2027</h3>
+<table class="report-table">
+<thead>
+<tr><th>Mes</th><th>Total RN Hotel</th><th>RN Grupos</th><th>Cuota Grupos (% RN)</th><th>ADR Grupos (€)</th><th>Facturación Grupos (€)</th><th>Directriz Comercial de Contratación</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Enero</strong></td><td>1.197</td><td><strong>108 RN</strong></td><td>9,0%</td><td>56,00 €</td><td>6.048 €</td><td><strong>Relleno base:</strong> Grupos deportivos / circuitos de invierno.</td></tr>
+<tr><td><strong>Febrero</strong></td><td>1.274</td><td><strong>108 RN</strong></td><td>8,5%</td><td>57,50 €</td><td>6.210 €</td><td><strong>Ocupación valle:</strong> Culturales y escapadas.</td></tr>
+<tr><td><strong>Marzo</strong></td><td>1.570</td><td><strong>94 RN</strong></td><td>6,0%</td><td>68,00 €</td><td>6.392 €</td><td><strong>Filtro tarifario:</strong> Solo grupos con tarifa media alta.</td></tr>
+<tr><td><strong>Abril</strong></td><td>2.041</td><td><strong>133 RN</strong></td><td>6,5%</td><td>69,50 €</td><td>9.243 €</td><td><strong>Semana Santa / Puentes:</strong> Cupos limitados a tarifa premium.</td></tr>
+<tr><td><strong>Mayo</strong></td><td>1.986</td><td><strong>109 RN</strong></td><td>5,5%</td><td>71,00 €</td><td>7.739 €</td><td><strong>Selectividad:</strong> Grupos de paso solo si no desplazan individual.</td></tr>
+<tr><td><strong>Junio</strong></td><td>1.854</td><td><strong>111 RN</strong></td><td>6,0%</td><td>68,00 €</td><td>7.548 €</td><td><strong>Cierre escolar/asociativo:</strong> Tarifa controlada.</td></tr>
+<tr><td><strong>Julio</strong></td><td>1.945</td><td><strong>136 RN</strong></td><td>7,0%</td><td>64,00 €</td><td>8.704 €</td><td><strong>Turismo estival:</strong> Grupos vacacionales en tránsito.</td></tr>
+<tr><td><strong>Agosto</strong></td><td>2.363</td><td><strong>189 RN</strong></td><td>8,0%</td><td>60,00 €</td><td>11.340 €</td><td><strong>Volumen veraniego:</strong> Ocupación familiar/grupos.</td></tr>
+<tr><td><strong>Septiembre</strong></td><td>2.602</td><td><strong>117 RN</strong></td><td>4,5%</td><td>70,00 €</td><td>8.190 €</td><td><strong>Contención:</strong> Priorizar corporativo individual sobre grupos.</td></tr>
+<tr><td><strong>Octubre</strong></td><td><strong>2.905</strong></td><td><strong>116 RN</strong></td><td><strong>4,0%</strong></td><td><strong>74,00 €</strong></td><td><strong>8.584 €</strong></td><td><strong>Yield Máximo:</strong> Suelo estricto (>74 €); máx. 10-12 hab/noche.</td></tr>
+<tr><td><strong>Noviembre</strong></td><td>1.967</td><td><strong>128 RN</strong></td><td>6,5%</td><td>65,00 €</td><td>8.320 €</td><td><strong>Equilibrio:</strong> Grupos técnicos y asociativos de fin de semana.</td></tr>
+<tr><td><strong>Diciembre</strong></td><td>1.689</td><td><strong>118 RN</strong></td><td>7,0%</td><td>61,00 €</td><td>7.198 €</td><td><strong>Puentes y escapadas:</strong> Grupos senior / culturales.</td></tr>
+<tr><td><strong>TOTAL AÑO</strong></td><td><strong>23.393</strong></td><td><strong>1.467 RN</strong></td><td><strong>6,3%</strong></td><td><strong>65,11 €</strong></td><td><strong>95.516 €</strong></td><td><strong>Aporte Grupos: 1.467 habitaciones y 95.516 €</strong></td></tr>
+</tbody>
+</table>
+<h3 class="subsection-title">Reglas Comerciales Obligatorias para el Equipo de Ventas:</h3>
+<li class="numbered"><strong>En meses pico (Octubre y Septiembre):</strong> Queda prohibida la aceptación de grupos por debajo de <strong>72 €–74 €</strong> de ADR. Las cotizaciones se limitarán a un cupo máximo de 12 habitaciones por noche para reservar el resto al cliente corporativo directo (>80 € ADR).</li>
+<li class="numbered"><strong>En meses valle (Enero, Febrero, Diciembre):</strong> Se lanzará una campaña comercial anticipada para asegurar pernoctaciones de clubes deportivos y colectivos a tarifas suelo (56 €–60 €) que cubran los costes fijos de mantenimiento.</li>
+<li class="numbered"><strong>Sincronización:</strong> Estas metas mensuales quedan cargadas como los techos y suelos oficiales en nuestro cotizador de grupos (Nexus Groups).</li>
+<hr class="divider" />
+<hr class="divider" />
+<h2 class="section-title">7. ANÁLISIS DE CARTERA REAL (OTB 2027 EN LIBROS): GRADO DE COBERTURA</h2>
+<p>A fecha actual, el sistema registra ya una <strong>cartera contratada (*On-The-Books / OTB*) de 508.378,01 € y 8.179 habitaciones noche</strong> para el ejercicio 2027 (de enero a octubre).</p>
+<p>Esto demuestra que <strong>un 32,3% del presupuesto anual total (y un 38,1% del periodo analizado) ya está físicamente asegurado con más de un año de antelación</strong>, lo que reduce drásticamente el riesgo de cumplimiento y aporta una solidez excepcional a la propuesta:</p>
+<h3 class="subsection-title">Cobertura de Cartera 2027 vs. Objetivo Presupuestario</h3>
+<table class="report-table">
+<thead>
+<tr><th>Mes</th><th>En Cartera 2027 (OTB €)</th><th>RN en Libros</th><th>ADR Cartera (€)</th><th>Objetivo 2027 (€)</th><th>% Ya Asegurado</th><th>Pickup Pendiente (€)</th><th>Valoración Comercial</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Enero</strong></td><td><strong>44.055,89 €</strong></td><td>722</td><td>61,02 €</td><td>75.309,58 €</td><td><strong>58,5%</strong></td><td>31.253,69 €</td><td><strong>Excelente base:</strong> Enero tiene más de la mitad cubierto.</td></tr>
+<tr><td><strong>Febrero</strong></td><td><strong>34.784,42 €</strong></td><td>462</td><td>75,29 €</td><td>80.555,06 €</td><td><strong>43,2%</strong></td><td>45.770,64 €</td><td><strong>Tarifa alta:</strong> ADR en cartera muy potente (75,29 €).</td></tr>
+<tr><td><strong>Marzo</strong></td><td><strong>54.914,94 €</strong></td><td>973</td><td>56,44 €</td><td>120.509,54 €</td><td><strong>45,6%</strong></td><td>65.594,60 €</td><td>Buena anticipación de primavera.</td></tr>
+<tr><td><strong>Abril</strong></td><td><strong>66.924,15 €</strong></td><td>1.204</td><td>55,58 €</td><td>146.867,73 €</td><td><strong>45,6%</strong></td><td>79.943,58 €</td><td>Fuerte demanda de Semana Santa / puentes ya en libros.</td></tr>
+<tr><td><strong>Mayo</strong></td><td><strong>115.355,43 €</strong></td><td>1.380</td><td><strong>83,59 €</strong></td><td>141.294,13 €</td><td><strong>81,6%</strong></td><td><strong>25.938,70 €</strong></td><td><strong>Prácticamente cerrado:</strong> Mayo tiene el 82% garantizado a 83,59 € ADR.</td></tr>
+<tr><td><strong>Junio</strong></td><td><strong>70.279,39 €</strong></td><td>1.069</td><td>65,74 €</td><td>133.788,99 €</td><td><strong>52,5%</strong></td><td>63.509,60 €</td><td>Más de la mitad del mes contratado.</td></tr>
+<tr><td><strong>Julio</strong></td><td><strong>30.368,83 €</strong></td><td>600</td><td>50,61 €</td><td>137.521,26 €</td><td>22,1%</td><td>107.152,43 €</td><td>Ritmo habitual de verano (reserva más tardía).</td></tr>
+<tr><td><strong>Agosto</strong></td><td><strong>32.773,61 €</strong></td><td>653</td><td>50,19 €</td><td>147.756,26 €</td><td>22,2%</td><td>114.982,65 €</td><td>Curva normal de reservas estivales.</td></tr>
+<tr><td><strong>Septiembre</strong></td><td><strong>41.966,76 €</strong></td><td>806</td><td>52,07 €</td><td>167.549,70 €</td><td>25,0%</td><td>125.582,94 €</td><td>Arranque de cartera corporativa de otoño.</td></tr>
+<tr><td><strong>Octubre</strong></td><td><strong>16.954,59 €</strong></td><td>310</td><td>54,69 €</td><td>184.821,89 €</td><td>9,2%</td><td>167.867,30 €</td><td>Mayor recorrido de yield (máxima ventana de venta directa).</td></tr>
+<tr><td><strong>TOTAL (Ene-Oct)</strong></td><td><strong>508.378,01 €</strong></td><td><strong>8.179</strong></td><td><strong>62,16 €</strong></td><td><strong>1.336.004,15 €</strong></td><td><strong>38,1%</strong></td><td><strong>827.626,14 €</strong></td><td><strong>Medio millón de euros ya asegurado.</strong></td></tr>
+</tbody>
+</table>
+<h3 class="subsection-title">Tres Argumentos Clave para la Dirección:</h3>
+<li class="numbered"><strong>Riesgo Operativo Mínimo:</strong> No estamos presupuestando sobre un papel en blanco; <strong>más de medio millón de euros (508 k€)</strong> ya está firmado y en los libros del hotel.</li>
+<li class="numbered"><strong>Mayo está prácticamente hecho al 82%:</strong> Con <strong>115.355 €</strong> ya contratados a una tarifa media récord de <strong>83,59 €</strong>, solo faltan ~25 k€ para completar el mes.</li>
+<li class="numbered"><strong>El primer semestre (Ene - Jun) tiene un 54,6% de cobertura:</strong> Contar con 386 k€ ya asegurados en la primera mitad del año da total tranquilidad de tesorería y valida la viabilidad del crecimiento.</li>
+<h2 class="section-title">8. CONCLUSIÓN Y DICTAMEN FINAL: VIABILIDAD DEL OBJETIVO +7,5%</h2>
+<p>La propuesta de alcanzar <strong>1.573.386,12 € (+7,50% de crecimiento)</strong> en 2027 no es una hipótesis voluntarista, sino un objetivo técnico medido y de máxima solidez para el Sercotel Guadiana:</p>
+<li class="numbered"><strong>Defensa Directa Frente a la Inflación y Protección del Margen Operativo (GOP):</strong></li>
+<li>El objetivo combina una subida de tarifa media del <strong>+4,00% (ADR de 67,30 €)</strong> y un incremento moderado de pernoctaciones del <strong>+3,43% (+775 RN al año)</strong>.</li>
+<li>Este aumento del ADR (+2,59 € netos por habitación ocupada) <strong>absorbe con creces la inflación estructural esperada de costes (convenios colectivos, energía, suministros y lavandería)</strong>, proyectada en el entorno del 2,5%–3,0%.</li>
+<li>Cada euro adicional captado vía tarifa media impacta directamente en el beneficio neto (*bottom-line*), asegurando la <strong>expansión del margen bruto de explotación (GOP)</strong> sin incrementar proporcionalmente los costes variables de servicio.</li>
+<li class="numbered"><strong>Respaldo Incontestable de la Serie Histórica de 10 Años (2016 – 2025):</strong></li>
+<li>El hotel ha demostrado una progresión sólida de tarifa (+48,9% desde 2016) y cuenta con capacidad contrastada para absorber más de 22.800 habitaciones al año (como ya ocurrió en 2017 y 2018).</li>
+<li>La meta de <strong>23.393 habitaciones</strong> representa un nivel de ocupación equilibrado (<strong>59,34%</strong>), perfectamente asumible para la operativa interna sin generar saturación de plantilla ni caídas en la satisfacción del huésped.</li>
+<li class="numbered"><strong>Garantía de Cartera Real: Más de Medio Millón de Euros Ya Asegurado:</strong></li>
+<li>La existencia de <strong>508.378,01 € en cartera cerrada (*On-The-Books*)</strong> para 2027 con más de un año de antelación otorga un grado de certidumbre excepcional: <strong>el 38,1% del periodo de enero a octubre ya está físicamente vendido</strong>.</li>
+<li>Meses estratégicos como Mayo (81,6% de cobertura con un ADR de 83,59 €) reducen al mínimo el riesgo de desviación, permitiendo concentrar los esfuerzos de *yield management* en maximizar el precio de las habitaciones restantes.</li>
+<p>En conclusión, el objetivo de <strong>1.573.386,12 € (+7,5%)</strong> maximiza el valor patrimonial y operativo del hotel, blinda su cuenta de resultados frente al escenario macroeconómico y sitúa el RevPAR en <strong>39,91 €</strong>, el rendimiento por habitación más alto en la historia del establecimiento.</p>
+
+</div>
+<script>
+function exportToWord() {
+  const content = document.getElementById("docContent").innerHTML;
+  const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Informe Presupuesto 2027</title><style>body{font-family:Arial,sans-serif;font-size:10pt;} table{border-collapse:collapse;width:100%;} th,td{border:1px solid #999;padding:5px;} th{background:#eee;}</style></head><body>";
+  const footer = "</body></html>";
+  const blob = new Blob([header + content + footer], { type: "application/msword" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Informe_Presupuesto_2027_Sercotel_Guadiana.doc";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+</script>
+</body>
+</html>
