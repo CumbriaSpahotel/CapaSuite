@@ -22,7 +22,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/firebase-auth.js?v=20261001-sync3"></script>
-    <script src="js/segment-analysis.js?v=20261002-adr-fix"></script>
+    <script src="js/segment-analysis.js?v=20261016-v3"></script>
     <script src="js/theme-manager.js"></script>
 
     <style>
@@ -714,10 +714,10 @@
                 <div class="select-wrapper">
                     <select id="blendSelector" onchange="switchHotel()" title="Ponderación del Histórico Almacenado"
                         style="min-width: 220px; background-color: #fff; font-size: 0.8rem; font-weight: 500;">
-                        <option value="0.20" selected>⚖️ 80% Año Ant. + 20% Hist.</option>
+                        <option value="0" selected>⚖️ 100% Año Anterior</option>
+                        <option value="0.20">⚖️ 80% Año Ant. + 20% Hist.</option>
                         <option value="0.15">⚖️ 85% Año Ant. + 15% Hist.</option>
                         <option value="0.30">⚖️ 70% Año Ant. + 30% Hist.</option>
-                        <option value="0">⚖️ 100% Año Anterior</option>
                     </select>
                 </div>
             </div>
@@ -2069,7 +2069,7 @@
             currentHotel = document.getElementById('hotelSelector').value;
             currentYear = document.getElementById('yearSelector').value;
             const blendSelectEl = document.getElementById('blendSelector');
-            const blendWeight = (blendSelectEl && !isNaN(parseFloat(blendSelectEl.value))) ? parseFloat(blendSelectEl.value) : 0.20;
+            const blendWeight = (blendSelectEl && !isNaN(parseFloat(blendSelectEl.value))) ? parseFloat(blendSelectEl.value) : 0;
 
             const h = hotelData[currentHotel];
             document.getElementById('hotelLogo').src = h.logo;

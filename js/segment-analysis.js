@@ -108,6 +108,10 @@
         'BONO ONLINE',
         'BONO SPA'
     ];
+    const isRoomMetric = value => /^(HAB|HABI|RN|RMS|NOCHES|HABITACIONES|UNIDADES)$/.test(norm(value));
+    function isTotalName(value) {
+        return /^(TOTAL|TOTAL GENERAL|TOTAL MASTER|RESUMEN)$/.test(norm(value));
+    }
     const canonical = (value, hotel = '') => {
         const n = norm(value);
         try {
@@ -1263,7 +1267,8 @@
         scope, 
         getHotelMappings: getStoredHotelMappings, 
         saveHotelMappings: saveStoredHotelMappings, 
-        formatChannelName, 
+        formatChannelName,
+        isTotalName, 
         isSegment,
         isKnownChannel,
         getSegmentChannels,

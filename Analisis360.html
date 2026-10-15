@@ -21,7 +21,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/firebase-auth.js?v=20261001-sync3"></script>
-    <script src="js/segment-analysis.js?v=20261002-adr-fix"></script>
+    <script src="js/segment-analysis.js?v=20261016-fix"></script>
     <script src="js/theme-manager.js"></script>
     <script src="js/production-groups.js?v=20261001-exclude-segments"></script>
 
@@ -5538,33 +5538,93 @@
                             badgeStyle = 'background: rgba(245, 158, 11, 0.15); color: #f59e0b;';
                         }
                     } else {
-                        // Future month
-                        const paceRatio = prevRev > 0 ? (sold / (prevRev * 0.45)) : 1;
-                        if (paceRatio >= 0.9) {
+                        // Future month: ponderar según lo que falta para la fecha (lead time en meses)
+                        const monthDist = (yInt - curY) * 12 + (m - curM);
+                        let expectedRatio = 0.35;
+                        if (monthDist === 1) expectedRatio = 0.35; // Próximo mes: ~35%
+                        else if (monthDist === 2) expectedRatio = 0.22; // A 2 meses: ~22%
+                        else if (monthDist <= 4) expectedRatio = 0.15; // A 3-4 meses: ~15%
+                        else expectedRatio = 0.08; // >4 meses: ~8%
+
+                        const expectedPace = target * expectedRatio;
+                        if (sold >= expectedPace) {
                             status = 'good';
                             goodCount++;
-                            statusLabel = `En Ritmo (${pct.toFixed(0)}%)`;
-                            badgeStyle = 'background: rgba(99, 102, 241, 0.15); color: var(--primary);';
-                        } else {
+                            statusLabel = (sold >= target * 0.40) 
+                                ? `Alta Cobertura (${pct.toFixed(0)}%)` 
+                                : `En Ritmo (${pct.toFixed(0)}%)`;
+                            badgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #10b981;';
+                        } else if (monthDist <= 1) {
+                            // Solo alarmar con riesgo si es el mes siguiente y está rezagado
                             status = 'risk';
                             riskCount++;
-                            totalDeficit += (target - sold);
-                            statusLabel = `Rezago OTB (-${fmtNum(target - sold)}€)`;
+                            totalDeficit += (expectedPace - sold);
+                            statusLabel = `Rezago 30d (-${fmtNum(expectedPace - sold)}€)`;
                             statusClass = 'border-color: rgba(239, 68, 68, 0.4);';
                             badgeStyle = 'background: rgba(239, 68, 68, 0.15); color: #ef4444;';
+                        } else {
+                            // Meses lejanos (M+2 en adelante): En evolución normal
+                            status = 'neutral';
+                            statusLabel = `Anticipación: ${pct.toFixed(0)}%`;
+                            badgeStyle = 'background: rgba(148, 163, 184, 0.15); color: var(--text-muted);';
                         }
                     }
                 } else if (prevRev > 0) {
-                    if (sold >= prevRev) {
-                        status = 'good';
-                        goodCount++;
-                        statusLabel = `+${((sold-prevRev)/prevRev*100).toFixed(0)}% vs ${prevYear}`;
-                        badgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #10b981;';
+                    if (isPassed) {
+                        if (sold >= prevRev) {
+                            status = 'good';
+                            goodCount++;
+                            statusLabel = `+${((sold-prevRev)/prevRev*100).toFixed(0)}% vs ${prevYear}`;
+                            badgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #10b981;';
+                        } else {
+                            status = 'risk';
+                            riskCount++;
+                            statusLabel = `-${((prevRev-sold)/prevRev*100).toFixed(0)}% vs ${prevYear}`;
+                            badgeStyle = 'background: rgba(239, 68, 68, 0.15); color: #ef4444;';
+                        }
+                    } else if (isCurrent) {
+                        const daysLeft = Math.max(1, daysInM - now.getDate());
+                        const gap = prevRev - sold;
+                        if (gap <= 0) {
+                            status = 'good';
+                            goodCount++;
+                            statusLabel = `Supera ${prevYear}`;
+                            badgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #10b981;';
+                        } else {
+                            const dailyNeed = Math.round(gap / daysLeft);
+                            status = 'risk';
+                            riskCount++;
+                            totalDeficit += gap;
+                            statusLabel = `${fmtNum(dailyNeed)}€/día (${daysLeft}d)`;
+                            statusClass = 'border-color: rgba(245, 158, 11, 0.5);';
+                            badgeStyle = 'background: rgba(245, 158, 11, 0.15); color: #f59e0b;';
+                        }
                     } else {
-                        status = 'risk';
-                        riskCount++;
-                        statusLabel = `-${((prevRev-sold)/prevRev*100).toFixed(0)}% vs ${prevYear}`;
-                        badgeStyle = 'background: rgba(239, 68, 68, 0.15); color: #ef4444;';
+                        // Mes futuro sin presupuesto custom: usar curva de anticipación frente a prevRev
+                        const monthDist = (yInt - curY) * 12 + (m - curM);
+                        let expectedRatio = 0.35;
+                        if (monthDist === 1) expectedRatio = 0.35;
+                        else if (monthDist === 2) expectedRatio = 0.22;
+                        else if (monthDist <= 4) expectedRatio = 0.15;
+                        else expectedRatio = 0.08;
+
+                        const expectedPace = prevRev * expectedRatio;
+                        if (sold >= expectedPace) {
+                            status = 'good';
+                            goodCount++;
+                            statusLabel = `En Ritmo (${((sold/prevRev)*100).toFixed(0)}%)`;
+                            badgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #10b981;';
+                        } else if (monthDist <= 1) {
+                            status = 'risk';
+                            riskCount++;
+                            statusLabel = `Rezago 30d vs ${prevYear}`;
+                            statusClass = 'border-color: rgba(239, 68, 68, 0.4);';
+                            badgeStyle = 'background: rgba(239, 68, 68, 0.15); color: #ef4444;';
+                        } else {
+                            status = 'neutral';
+                            statusLabel = `Cartera: ${((sold/prevRev)*100).toFixed(0)}%`;
+                            badgeStyle = 'background: rgba(148, 163, 184, 0.15); color: var(--text-muted);';
+                        }
                     }
                 }
 
@@ -5661,30 +5721,65 @@
                 } catch(e) {}
 
                 if (compData && Array.isArray(compData.data)) {
+                    const hotelRoomsCount = (hotel === 'Cumbria') ? 59 : 108;
                     compData.data.slice(0, 30).forEach(d => {
                         const dateStr = d.dateISO || d.date;
                         const my = d.hotels?.[hotel];
                         const compAvg = d.compAvg || 0;
+
+                        // Disponibilidad para esta fecha
+                        const targetY = (dateStr || '').split('-')[0];
+                        const yData = db[hotel]?.[targetY];
+                        let bookedRooms = 0;
+                        if (yData) {
+                            if (yData.daily_otb && yData.daily_otb[dateStr]) bookedRooms = yData.daily_otb[dateStr].rooms || 0;
+                            else if (yData.daily && yData.daily[dateStr]) bookedRooms = yData.daily[dateStr].rooms || 0;
+                        }
+                        const availRooms = Math.max(0, hotelRoomsCount - bookedRooms);
+                        const occPct = hotelRoomsCount > 0 ? Math.round((bookedRooms / hotelRoomsCount) * 100) : 0;
+
                         if (my && !my.sold && my.price > 0 && compAvg > 0) {
                             const diff = compAvg - my.price;
                             if (diff > 15) {
-                                dailyAlerts.push({
-                                    type: 'opportunity',
-                                    date: dateStr,
-                                    label: `🟢 Oportunidad Fuerte (${dateStr})`,
-                                    desc: `Tu precio (${my.price}€) está -${Math.round(diff)}€ por debajo del CompSet (${Math.round(compAvg)}€). Subir tarifa BAR para maximizar ADR.`,
-                                    badge: `Subir +15€`,
-                                    color: '#10b981'
-                                });
+                                if (availRooms > hotelRoomsCount * 0.60) {
+                                    dailyAlerts.push({
+                                        type: 'opportunity',
+                                        date: dateStr,
+                                        label: `🟢 Volumen Válido (${dateStr})`,
+                                        desc: `Tienes ${availRooms} habs disponibles (${occPct}% ocup). Estar un poco por debajo del mercado (-${Math.round(diff)}€) estimula el pick-up base. Ajuste táctico leve (+5€) si el ritmo responde.`,
+                                        badge: `Volumen (${availRooms} disp)`,
+                                        color: '#3b82f6'
+                                    });
+                                } else {
+                                    dailyAlerts.push({
+                                        type: 'opportunity',
+                                        date: dateStr,
+                                        label: `🔥 Oportunidad Yield (${dateStr})`,
+                                        desc: `Solo quedan ${availRooms} habs disponibles (${occPct}% ocup). Tu precio (${my.price}€) está -${Math.round(diff)}€ por debajo del CompSet (${Math.round(compAvg)}€). Subir BAR +15€ de inmediato.`,
+                                        badge: `Subir +15€ (Bajo Cupo)`,
+                                        color: '#10b981'
+                                    });
+                                }
                             } else if (diff < -15) {
-                                dailyAlerts.push({
-                                    type: 'risk',
-                                    date: dateStr,
-                                    label: `🔴 Alerta de Demanda (${dateStr})`,
-                                    desc: `Tu precio (${my.price}€) supera en +${Math.round(Math.abs(diff))}€ la media de mercado (${Math.round(compAvg)}€). Riesgo de perder volumen si no hay compresión.`,
-                                    badge: `Revisar BAR`,
-                                    color: '#ef4444'
-                                });
+                                if (availRooms > hotelRoomsCount * 0.60) {
+                                    dailyAlerts.push({
+                                        type: 'risk',
+                                        date: dateStr,
+                                        label: `🔴 Riesgo de Desmarque (${dateStr})`,
+                                        desc: `Tu precio (${my.price}€) supera en +${Math.round(Math.abs(diff))}€ la media con ${availRooms} habs disponibles (${occPct}% ocup). Riesgo de frenar la captación.`,
+                                        badge: `Ajustar BAR`,
+                                        color: '#ef4444'
+                                    });
+                                } else {
+                                    dailyAlerts.push({
+                                        type: 'opportunity',
+                                        date: dateStr,
+                                        label: `💎 Posicionamiento Premium (${dateStr})`,
+                                        desc: `Precio premium (${my.price}€ vs ${Math.round(compAvg)}€) respaldado por baja disponibilidad: solo te quedan ${availRooms} habs disponibles (${occPct}% ocup).`,
+                                        badge: `Premium (${availRooms} disp)`,
+                                        color: '#10b981'
+                                    });
+                                }
                             }
                         }
                     });

@@ -17,7 +17,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/firebase-auth.js?v=20261001-sync3"></script>
-    <script src="js/segment-analysis.js?v=20261002-adr-fix"></script>
+    <script src="js/segment-analysis.js?v=20261016-fix"></script>
 
     <link rel="stylesheet" href="css/tokens.css">
     <link rel="stylesheet" href="css/nav.css">
@@ -903,12 +903,31 @@
                 if (rawIgnored) ignoredComps = new Set(JSON.parse(rawIgnored));
             } catch(e) {}
 
+            const hotelRooms = getHotelRoomsCount(currentHotel);
+
             if (compData && compData.data && compData.data.length > 0) {
                 compData.data.forEach(d => {
                     if (!d.hotels) return;
                     const dateStr = d.dateISO || d.date;
                     const dayInfo = getDayInfo(dateStr);
                     const my = d.hotels[currentHotel];
+
+                    // Disponibilidad e inventario para la fecha
+                    const targetYear = (dateStr || '').split('-')[0];
+                    const yObj = db[currentHotel]?.[targetYear];
+                    let bookedRooms = 0;
+                    if (yObj) {
+                        if (yObj.daily_otb && yObj.daily_otb[dateStr]) {
+                            bookedRooms = yObj.daily_otb[dateStr].rooms || 0;
+                        } else if (yObj.daily && yObj.daily[dateStr]) {
+                            bookedRooms = yObj.daily[dateStr].rooms || 0;
+                        }
+                    }
+                    const availRooms = Math.max(0, hotelRooms - bookedRooms);
+                    const occPct = hotelRooms > 0 ? Math.round((bookedRooms / hotelRooms) * 100) : 0;
+                    const dObj = parseDateRobust(dateStr);
+                    const now = new Date();
+                    const daysAhead = dObj ? Math.round((dObj.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : 999;
 
                     // Helper to strictly identify external rivals (excludes Cumbria and Guadiana)
                     const isExternalRival = (name) => {
@@ -968,9 +987,54 @@
                             const diff = compAvg - my.price;
                             const diffPct = (diff / compAvg) * 100;
 
-                            // FILTRO ESTRATÉGICO: Ignorar oscilaciones triviales de +/- 10€.
-                            // Solo alertar si la brecha es verdaderamente estratégica: > 10€ Y > 15% por debajo.
+                            // FILTRO ESTRATÉGICO CON DISPONIBILIDAD:
+                            // "tiene que tener en cuenta cuantas habitaciones tenemos disponibles,
+                            // igual si tengo muchas disponible puede estar un poco por debajo de la media"
                             if (diff > 10 && my.price < compAvg * 0.85) {
+                                let occStatus = 'medium';
+                                let occBadgeBg = '#fef3c7';
+                                let occBadgeColor = '#b45309';
+                                let occBadgeBorder = '#fde68a';
+                                let tactic = '';
+                                let isRealLeak = false;
+
+                                if (daysAhead > 90 && occPct < 35) {
+                                    occStatus = 'early';
+                                    occBadgeBg = '#f1f5f9';
+                                    occBadgeColor = '#475569';
+                                    occBadgeBorder = '#cbd5e1';
+                                    tactic = `📅 Preventa a ${daysAhead} días: Con ${availRooms} habs disponibles (${occPct}% ocup), tarifa competitiva (${my.price}€ vs ${Math.round(compAvg)}€) adecuada para captar tracción inicial. Monitorizar pick-up antes de forzar subidas.`;
+                                } else if (availRooms > hotelRooms * 0.60 || occPct < 40) {
+                                    if (diff <= 20) {
+                                        occStatus = 'volume';
+                                        occBadgeBg = '#ecfdf5';
+                                        occBadgeColor = '#047857';
+                                        occBadgeBorder = '#a7f3d0';
+                                        tactic = `💡 Táctica de Volumen Válida: Tienes ${availRooms} habs disponibles (${occPct}% ocup). Estar un poco por debajo del CompSet (-${Math.round(diff)}€) es coherente para ganar reservas y asentar base. Mantener precio o subida leve (+4€ a +6€) si el ritmo responde.`;
+                                    } else {
+                                        occStatus = 'high_avail_excess_gap';
+                                        occBadgeBg = '#e0f2fe';
+                                        occBadgeColor = '#0369a1';
+                                        occBadgeBorder = '#bae6fd';
+                                        isRealLeak = true;
+                                        tactic = `⚠️ Brecha Excesiva con Alta Disp.: Tienes ${availRooms} habs libres (${occPct}% ocup), pero vender a ${my.price}€ frente a los ${Math.round(compAvg)}€ de mercado (-${Math.round(diff)}€) cede demasiado margen. Reposicionar BAR +${Math.min(15, Math.round(diff * 0.5))}€ manteniendo atractivo competitivo.`;
+                                    }
+                                } else if (occPct >= 70 || availRooms <= Math.round(hotelRooms * 0.30)) {
+                                    occStatus = 'critical_leak';
+                                    occBadgeBg = '#fee2e2';
+                                    occBadgeColor = '#991b1b';
+                                    occBadgeBorder = '#fecaca';
+                                    isRealLeak = true;
+                                    tactic = `🔥 Fuga Crítica de Ingresos: Solo quedan ${availRooms} habs disponibles (${occPct}% ocup). Con inventario escaso, mantener ${my.price}€ frente a los ${Math.round(compAvg)}€ del CompSet es regalar el poco producto disponible. Elevar BAR de inmediato (+15€ a +25€), cerrar promociones y fijar MLOS 2 noches.`;
+                                } else {
+                                    occStatus = 'consolidating';
+                                    occBadgeBg = '#fef3c7';
+                                    occBadgeColor = '#b45309';
+                                    occBadgeBorder = '#fde68a';
+                                    if (diff > 14) isRealLeak = true;
+                                    tactic = `⚖️ Ocupación en Progreso: Con ${availRooms} habs disponibles (${occPct}% ocup), la base está encauzada. El mercado absorbe ${Math.round(compAvg)}€. Subir escalón BAR (+8€ a +12€) para converger con la media y proteger ADR en la recta final.`;
+                                }
+
                                 underpricedDates.push({
                                     dateISO: dateStr,
                                     dayOfWeek: dayInfo.dayOfWeek,
@@ -980,9 +1044,16 @@
                                     compAvg: Math.round(compAvg),
                                     diff: Math.round(diff),
                                     diffPct: diffPct.toFixed(1),
-                                    tactic: dayInfo.isWeekend 
-                                        ? `Brecha de -${Math.round(diff)}€ en fin de semana: el mercado absorbe tarifas superiores; subir escalón BAR +15€ y exigir MLOS 2 noches.`
-                                        : `Brecha de -${Math.round(diff)}€ en laboral: la plaza sostiene precio más alto; reposicionar BAR +${Math.min(15, Math.round(diff * 0.7))}€ protegiendo ADR corporativo.`
+                                    availRooms: availRooms,
+                                    bookedRooms: bookedRooms,
+                                    occPct: occPct,
+                                    daysAhead: daysAhead,
+                                    occStatus: occStatus,
+                                    occBadgeBg: occBadgeBg,
+                                    occBadgeColor: occBadgeColor,
+                                    occBadgeBorder: occBadgeBorder,
+                                    isRealLeak: isRealLeak,
+                                    tactic: tactic
                                 });
                             }
 
@@ -996,7 +1067,16 @@
                                     compAvg: Math.round(compAvg),
                                     diff: Math.round(diff),
                                     diffPct: diffPct.toFixed(1),
-                                    tactic: '⚡ Compresión alta: Subir tramo +18% y cerrar tarifas con descuento'
+                                    availRooms: availRooms,
+                                    bookedRooms: bookedRooms,
+                                    occPct: occPct,
+                                    daysAhead: daysAhead,
+                                    occBadgeBg: occPct >= 65 ? '#fee2e2' : '#ecfdf5',
+                                    occBadgeColor: occPct >= 65 ? '#991b1b' : '#047857',
+                                    occBadgeBorder: occPct >= 65 ? '#fecaca' : '#a7f3d0',
+                                    tactic: occPct >= 65
+                                        ? `🔥 Compresión alta y pocas habs libres (${availRooms} disp, ${occPct}% ocup): Subir BAR +20% a +25% de inmediato y cerrar cupos promocionales.`
+                                        : `⚡ Compresión alta con disponibilidad (${availRooms} disp, ${occPct}% ocup): Subida escalonada (+12% a +15%) para capturar margen sin cortar el flujo.`
                                 });
                             }
                         }
@@ -1045,8 +1125,15 @@
                             compAvg: roundedCompAvg,
                             diff: diff,
                             diffPct: diffPct,
+                            availRooms: availRooms,
+                            bookedRooms: bookedRooms,
+                            occPct: occPct,
+                            daysAhead: daysAhead,
+                            occBadgeBg: occPct >= 65 ? '#fee2e2' : '#ecfdf5',
+                            occBadgeColor: occPct >= 65 ? '#991b1b' : '#047857',
+                            occBadgeBorder: occPct >= 65 ? '#fecaca' : '#a7f3d0',
                             strategyType: strategyType,
-                            tactic: tactic
+                            tactic: tactic + (availRooms !== undefined ? ` (Tienes ${availRooms} habs disponibles • ${occPct}% ocup).` : '')
                         });
                     }
                 });
@@ -1129,7 +1216,8 @@
                     }
                 });
 
-                // 2. Detect Abnormal Behaviors (Spikes & Dumping)
+                // 2. Detect Abnormal Behaviors (Spikes & Dumping) with Market Consensus Intelligence
+                // "igual puede tratarse de algo puntual de este hotel, se más inteligente para prever posibles subidas de ocupación en la ciudad"
                 rivalAnomalies = [];
                 rivalStrategicChanges = [];
 
@@ -1140,58 +1228,115 @@
                     const my = d.hotels[currentHotel];
                     const myPrice = (my && !my.sold && my.price > 0) ? my.price : 0;
 
+                    // A. Pre-auditar el comportamiento de TODOS los rivales externos en esta fecha
+                    const dateSpikes = [];
+                    const dateSoldOuts = [];
+                    const dateNormals = [];
+                    const dateDumpings = [];
+
                     Object.keys(d.hotels).forEach(hKey => {
                         if (!isExternalRival(hKey)) return;
                         const hObj = d.hotels[hKey];
                         if (!hObj) return;
 
+                        if (hObj.sold) {
+                            dateSoldOuts.push(hKey);
+                            return;
+                        }
+                        if (!hObj.price || hObj.price <= 0) return;
+
                         const rStat = rivalStats[hKey];
                         const normalBase = dayInfo.isWeekend ? (rStat?.weekendAvg || rStat?.avg || 75) : (rStat?.weekdayAvg || rStat?.avg || 70);
+                        const diffNormal = hObj.price - normalBase;
+                        const isSpike = (hObj.price >= normalBase * 1.30 && diffNormal >= 18) || hObj.price >= 125;
+                        const isDumping = (hObj.price <= normalBase * 0.72 && diffNormal <= -18);
 
-                        // Price anomaly detection
-                        if (!hObj.sold && hObj.price > 0 && rStat && rStat.prices.length >= 3) {
-                            const diffNormal = hObj.price - normalBase;
-                            const isSpike = (hObj.price >= normalBase * 1.30 && diffNormal >= 18) || hObj.price >= 125;
-                            const isDumping = (hObj.price <= normalBase * 0.72 && diffNormal <= -18);
-
-                            if (isSpike) {
-                                rivalAnomalies.push({
-                                    dateISO: dateStr,
-                                    dayOfWeek: dayInfo.dayOfWeek,
-                                    dayLabel: dayInfo.dayLabel,
-                                    isWeekend: dayInfo.isWeekend,
-                                    competitor: hKey,
-                                    rivalPrice: hObj.price,
-                                    normalPrice: Math.round(normalBase),
-                                    diff: Math.round(diffNormal),
-                                    type: 'spike',
-                                    badgeText: '🔺 PICO ANÓMALO',
-                                    badgeColor: '#dc2626',
-                                    myPrice: myPrice,
-                                    diagnosis: `Tarifa ${hObj.price}€ (+${Math.round(diffNormal)}€ sobre su media habitual de ${Math.round(normalBase)}€).`,
-                                    tactic: myPrice > 0 && myPrice < hObj.price
-                                        ? `Elevar tu BAR (+15€ a +25€) de inmediato. El rival detecta alta demanda o evento en la plaza.`
-                                        : `Monitorear disponibilidad. Posible evento local o pico de demanda cerrado.`
-                                });
-                            } else if (isDumping) {
-                                rivalAnomalies.push({
-                                    dateISO: dateStr,
-                                    dayOfWeek: dayInfo.dayOfWeek,
-                                    dayLabel: dayInfo.dayLabel,
-                                    isWeekend: dayInfo.isWeekend,
-                                    competitor: hKey,
-                                    rivalPrice: hObj.price,
-                                    normalPrice: Math.round(normalBase),
-                                    diff: Math.round(diffNormal),
-                                    type: 'dumping',
-                                    badgeText: '🔻 CAÍDA ANÓMALA',
-                                    badgeColor: '#ea580c',
-                                    myPrice: myPrice,
-                                    diagnosis: `Tarifa ${hObj.price}€ (${Math.round(diffNormal)}€ bajo su media habitual de ${Math.round(normalBase)}€).`,
-                                    tactic: `No entrar en guerra de precios hacia abajo. Proteger ADR corporativo o exigir estancia mínima.`
-                                });
-                            }
+                        if (isSpike) {
+                            dateSpikes.push({ hotel: hKey, price: hObj.price, normal: Math.round(normalBase), diff: Math.round(diffNormal), obj: hObj });
+                        } else if (isDumping) {
+                            dateDumpings.push({ hotel: hKey, price: hObj.price, normal: Math.round(normalBase), diff: Math.round(diffNormal), obj: hObj });
+                        } else {
+                            dateNormals.push({ hotel: hKey, price: hObj.price, normal: Math.round(normalBase) });
                         }
+                    });
+
+                    // B. Discernir: Consenso de Ciudad Real (Evento de Plaza) vs Caso Aislado de 1 Hotel
+                    const marketPressureCount = dateSpikes.length + dateSoldOuts.length;
+                    const isCityWideEvent = marketPressureCount >= 2;
+
+                    // C. Registrar picos alcistas
+                    dateSpikes.forEach(sp => {
+                        const hKey = sp.hotel;
+                        const hPrice = sp.price;
+                        const normalBase = sp.normal;
+                        const diffNormal = sp.diff;
+
+                        let badgeText = '';
+                        let badgeColor = '';
+                        let diagnosis = '';
+                        let tactic = '';
+
+                        if (isCityWideEvent) {
+                            const otherHotels = [...dateSpikes.map(s => s.hotel), ...dateSoldOuts].filter(h => h !== hKey);
+                            badgeText = '🏛️ EVENTO EN LA CIUDAD';
+                            badgeColor = '#7c3aed';
+                            diagnosis = `Tarifa ${hPrice}€ (+${diffNormal}€ sobre media de ${normalBase}€). <b>Evento de Plaza Confirmado:</b> ${marketPressureCount} hoteles del CompSet (${[hKey, ...otherHotels].join(', ')}) disparan precios o están en Sold Out.`;
+                            tactic = myPrice > 0 && myPrice < hPrice
+                                ? `🔥 Alta Ocupación de Ciudad Real confirmada: Múltiples rivales confirman presión de plaza. Elevar de inmediato tu tarifa BAR (+18€ a +28€) y exigir MLOS 2 noches. La demanda es inelástica.`
+                                : `🔥 Plaza en compresión generalizada. Demanda desplazada de alta rentabilidad; reservar últimas unidades para canal directo a precio premium.`;
+                        } else {
+                            const normalsText = dateNormals.slice(0, 2).map(n => `${n.hotel}: ${n.price}€`).join(', ');
+                            badgeText = '⚠️ CASO PUNTUAL RIVAL';
+                            badgeColor = '#ea580c';
+                            diagnosis = `Tarifa ${hPrice}€ (+${diffNormal}€ sobre habitual). <b>Caso aislado:</b> Los demás rivales cotizan en niveles estándar${normalsText ? ` (${normalsText})` : ''}.`;
+                            tactic = `👁️ Posible circunstancia interna de ${hKey} (grupo corporativo cerrado, bloqueo de habitaciones o última suite disponible). NO sobre-reaccionar ni subir tu BAR bruscamente: el resto de Ciudad Real está en precios normales. Mantener tarifa competitiva o subida moderada (+4€) para capturar las reservas que este rival rechace por precio.`;
+                        }
+
+                        rivalAnomalies.push({
+                            dateISO: dateStr,
+                            dayOfWeek: dayInfo.dayOfWeek,
+                            dayLabel: dayInfo.dayLabel,
+                            isWeekend: dayInfo.isWeekend,
+                            competitor: hKey,
+                            rivalPrice: hPrice,
+                            normalPrice: normalBase,
+                            diff: diffNormal,
+                            type: 'spike',
+                            isCityWide: isCityWideEvent,
+                            badgeText: badgeText,
+                            badgeColor: badgeColor,
+                            myPrice: myPrice,
+                            diagnosis: diagnosis,
+                            tactic: tactic
+                        });
+                    });
+
+                    // D. Registrar caídas anómalas (dumping)
+                    dateDumpings.forEach(dp => {
+                        rivalAnomalies.push({
+                            dateISO: dateStr,
+                            dayOfWeek: dayInfo.dayOfWeek,
+                            dayLabel: dayInfo.dayLabel,
+                            isWeekend: dayInfo.isWeekend,
+                            competitor: dp.hotel,
+                            rivalPrice: dp.price,
+                            normalPrice: dp.normal,
+                            diff: dp.diff,
+                            type: 'dumping',
+                            isCityWide: false,
+                            badgeText: '🔻 CAÍDA ANÓMALA',
+                            badgeColor: '#0284c7',
+                            myPrice: myPrice,
+                            diagnosis: `Tarifa ${dp.price}€ (${dp.diff}€ bajo su media habitual de ${dp.normal}€).`,
+                            tactic: `Bajada puntual de ${dp.hotel}. No entrar en guerra de precios hacia abajo. Proteger ADR corporativo con valores añadidos.`
+                        });
+                    });
+
+                    // E. Strategic changes tracking
+                    Object.keys(d.hotels).forEach(hKey => {
+                        if (!isExternalRival(hKey)) return;
+                        const hObj = d.hotels[hKey];
+                        if (!hObj) return;
 
                         // Strategic Changes between uploads (change property)
                         // FILTRO ESTRATÉGICO: Ignorar movimientos menores de +/-10€.
@@ -1222,29 +1367,44 @@
                 });
             }
 
-            const hotelRooms = getHotelRoomsCount(currentHotel);
             let totalOpportunityEuros = 0;
 
             if (underpricedDates.length > 0) {
-                const estLoss = Math.round(underpricedDates.reduce((acc, d) => acc + (d.diff * Math.max(8, Math.round(hotelRooms * 0.2))), 0));
+                const leakDates = underpricedDates.filter(d => d.isRealLeak);
+                const volumeDates = underpricedDates.filter(d => !d.isRealLeak);
+                const criticalCount = leakDates.length;
+                const volumeCount = volumeDates.length;
+
+                // EstLoss solo suma fechas con fuga real ponderadas por habitaciones
+                const estLoss = Math.round(leakDates.reduce((acc, d) => {
+                    const roomWeight = Math.min(d.availRooms, Math.max(5, Math.round(hotelRooms * 0.15)));
+                    return acc + (d.diff * roomWeight);
+                }, 0));
                 totalOpportunityEuros += estLoss;
                 const avgDiff = Math.round(underpricedDates.reduce((s,d) => s + d.diff, 0) / underpricedDates.length);
                 const weekendCount = underpricedDates.filter(d => d.isWeekend).length;
 
+                const isPriorityCritical = criticalCount > 0;
+
                 insights.push({
                     id: 'ins_subpricing',
                     category: 'pricing',
-                    priority: 'critical',
-                    badge: '🔥 ALTA PRIORIDAD • PRECIOS',
-                    title: `Sub-pricing detectado en ${underpricedDates.length} fechas clave frente al CompSet`,
-                    diagnostic: `Se han identificado <b>${underpricedDates.length} días</b> (${weekendCount} fines de semana) donde tu tarifa está más de un 15% por debajo del mercado. Brecha media: <b>-${avgDiff} €/noche</b>. El coste de oportunidad estimado asciende a <b>${fmtEuro(estLoss)}</b> en ingresos no capturados.`,
-                    strategy: `<b>Estrategia Revenue Experta:</b><br>
-• <b>Reajuste Inmediato de BAR:</b> En fechas a más de 14 días vista, sube la tarifa de apertura entre <b>+10€ y +18€</b> para situarte en paridad o a un ligero diferencial competitivo (-5%), en vez de regalar un -25%.<br>
-• <b>Protección de Fines de Semana:</b> Aplica estancia mínima (<b>MLOS 2 noches</b>) en los ${weekendCount} viernes y sábados afectados para evitar estancias aisladas de una sola noche a tarifa de saldo.<br>
-• <b>Desactivación de Descuentos Agresivos:</b> Desactiva promociones de venta opaca, tarifas no reembolsables con descuento extra y programas tipo Genius en esas fechas concretas.`,
+                    priority: isPriorityCritical ? 'critical' : 'warning',
+                    badge: isPriorityCritical ? '🔥 GESTIÓN DE DISPONIBILIDAD & PRECIOS' : '💡 POSICIONAMIENTO & VOLUMEN',
+                    title: isPriorityCritical 
+                        ? `Auditoría vs CompSet: ${criticalCount} fechas con fuga de margen por bajo cupo y ${volumeCount} con volumen justificado`
+                        : `Tarifas de captación en ${underpricedDates.length} fechas con alta disponibilidad`,
+                    diagnostic: `Se han analizado <b>${underpricedDates.length} días</b> (${weekendCount} fines de semana) con tarifa inferior al CompSet teniendo en cuenta tus <b>habitaciones disponibles</b>:<br>
+• <b>${criticalCount} fechas con bajo cupo / revisión prioritaria:</b> Fechas con ocupación en avance o brecha acusada donde estar bajo el mercado genera un coste de oportunidad de <b>${fmtEuro(estLoss)}</b>.<br>
+• <b>${volumeCount} fechas con volumen justificado:</b> Fechas con <b>alta disponibilidad</b> o preventa donde situarse algo por debajo de la media es una táctica legítima para dinamizar el pick-up sin forzar subidas prematuras.`,
+                    strategy: `<b>Estrategia Revenue Experta por Disponibilidad:</b><br>
+• <b>Subida Selectiva por Ocupación:</b> Elevar tarifa BAR (+12€ a +18€) únicamente en fechas con ocupación avanzada o pocas habitaciones libres.<br>
+• <b>Protección del Pick-up en Alta Disponibilidad:</b> En fechas con muchas habitaciones libres, mantener tarifa competitiva (-5% a -10% vs CompSet) para asegurar reservas base antes de subir tramos.<br>
+• <b>Estancia Mínima Protegida:</b> Exigir MLOS 2 noches en fines de semana donde los competidores agoten disponibilidad o suban tarifas.`,
                     dates: underpricedDates,
-                    datesTitle: 'Fechas con Tarifa Inferior al Mercado',
-                    datesSubtitle: `Listado de los ${underpricedDates.length} días con tarifa >15% por debajo de la media de competidores`,
+                    datesTitle: 'Fechas con Tarifa Inferior al Mercado (según Disponibilidad)',
+                    datesSubtitle: `Auditoría de ${underpricedDates.length} fechas: ${criticalCount} con ajuste recomendado y ${volumeCount} justificadas por alta disponibilidad`,
+                    datesBtnText: `📅 Ver Disponibilidad y Tarifas (${underpricedDates.length}) 🔍`,
                     actionUrl: 'AnalisisCompetencia.html'
                 });
             }
@@ -1324,25 +1484,31 @@
             // AUDIT 4B: Comportamiento Anormal de Precios en Rivales (Spikes & Dumping)
             // ============================================================
             if (rivalAnomalies && rivalAnomalies.length > 0) {
-                const spikeCount = rivalAnomalies.filter(a => a.type === 'spike').length;
+                const citySurgeCount = rivalAnomalies.filter(a => a.isCityWide).length;
+                const isolatedCount = rivalAnomalies.filter(a => a.type === 'spike' && !a.isCityWide).length;
                 const dumpCount = rivalAnomalies.filter(a => a.type === 'dumping').length;
                 const topAnomComps = [...new Set(rivalAnomalies.map(a => a.competitor))].slice(0, 3).join(', ');
 
                 insights.push({
                     id: 'ins_comp_anomalies',
                     category: 'competitor',
-                    priority: spikeCount > 0 ? 'critical' : 'warning',
-                    badge: '🚨 ANOMALÍAS DE PRECIO COMPSET',
-                    title: `Comportamiento anormal en competidores detectado en ${rivalAnomalies.length} fechas`,
-                    diagnostic: `Se han detectado <b>${rivalAnomalies.length} anomalías tarifarias</b> en rivales externos (${topAnomComps}): <b>${spikeCount} picos extraordinarios</b> (+30% a +60% sobre su media habitual, sugiriendo eventos locales o compresión súbita) y <b>${dumpCount} caídas anómalas</b> (posible dumping o liquidación de última hora). <i>(Excluye hoteles propios Cumbria y Guadiana).</i>`,
-                    strategy: `<b>Estrategia Revenue Experta ante Anomalías Rivales:</b><br>
-• <b>Explotación de Picos Rivales:</b> En las ${spikeCount} fechas donde los rivales disparan tarifas, incrementa de inmediato tu tarifa de apertura BAR entre <b>+15€ y +25€</b> para capturar la demanda sin regalar ocupación.<br>
-• <b>Inmunidad ante Dumping:</b> Si un rival tira tarifas por debajo de su suelo histórico, no entres en guerra de precios hacia abajo. Protege tu tarifa corporativa con valor añadido (parking, desayuno o cancelación flexible).<br>
-• <b>Alerta Temprana de Eventos:</b> Los picos anómalos son el mejor indicador de bodas multitudinarias, congresos o eventos deportivos en Ciudad Real aún no anunciados en calendario.`,
+                    priority: citySurgeCount > 0 ? 'critical' : 'warning',
+                    badge: citySurgeCount > 0 ? '🏛️ PREVISIÓN DE EVENTOS EN LA CIUDAD' : '⚠️ ANOMALÍAS AISLADAS COMPSET',
+                    title: citySurgeCount > 0
+                        ? `Previsión de Mercado: ${citySurgeCount} anomalías con Evento en Ciudad Real y ${isolatedCount} casos puntuales`
+                        : `Comportamiento de rivales: ${isolatedCount} casos puntuales y ${dumpCount} caídas en el CompSet`,
+                    diagnostic: `Se ha analizado la plaza de Ciudad Real distinguiendo entre <b>subidas generales de ocupación</b> y <b>circunstancias internas de un solo hotel</b>:<br>
+• <b>${citySurgeCount} fechas con Evento / Alta Ocupación de Ciudad confirmada:</b> Al menos 2 competidores del CompSet disparan precios o cuelgan Sold Out simultáneamente.<br>
+• <b>${isolatedCount} fechas de Casos Puntuales de un solo hotel:</b> Picos aislados donde el resto del CompSet sigue en precios estándar (posibles grupos internos, bodas privadas o última suite de ese hotel).<br>
+• <b>${dumpCount} caídas anómalas:</b> Días con precios de liquidación en competidores aislados.`,
+                    strategy: `<b>Estrategia Revenue Experta (Ciudad vs Caso Aislado):</b><br>
+• <b>Eventos Confirmados en la Ciudad (${citySurgeCount} fechas):</b> Subir BAR con firmeza (<b>+18€ a +28€</b>) y aplicar <b>MLOS 2 noches</b>. La demanda es inelástica y absorbe tarifas superiores.<br>
+• <b>Casos Puntuales Aislados (${isolatedCount} fechas):</b> <b>NO sobre-reaccionar</b> subiendo tarifas si el resto de Ciudad Real no acompaña. Mantener precio competitivo para capturar las reservas que el rival descarte.<br>
+• <b>Protección ante Caídas:</b> Si un rival liquida precio de forma aislada, no entrar en guerra hacia abajo; proteger el ADR.`,
                     dates: rivalAnomalies,
-                    datesTitle: 'Anomalías de Precio en Competidores del CompSet',
-                    datesSubtitle: `Detalle de ${rivalAnomalies.length} fechas con picos alcistas extraordinarios o caídas anómalas en rivales directos`,
-                    datesBtnText: `🚨 Ver Fechas con Anomalías (${rivalAnomalies.length}) 🔍`,
+                    datesTitle: 'Anomalías de Precio en el CompSet (Ciudad vs Caso Puntual)',
+                    datesSubtitle: `Auditoría de ${rivalAnomalies.length} registros: ${citySurgeCount} con Evento de Ciudad y ${isolatedCount} casos aislados de un hotel`,
+                    datesBtnText: `🏛️ Ver Eventos de Ciudad y Casos (${rivalAnomalies.length}) 🔍`,
                     actionUrl: 'AnalisisCompetencia.html'
                 });
             }
@@ -1772,108 +1938,184 @@
                 const mName = monthNames[m];
                 const rRev = realRev[m] || 0;
                 const oRev = otbRev[m] || 0;
-                const soldM = isClosed(m) ? rRev : (m === curMonth ? (rRev + oRev) : Math.max(rRev, oRev));
                 const targetM = budgetRev ? (budgetRev[m] || 0) : 0;
-                const prevMRev = (prevYearData && prevYearData.service) ? ((typeof getGroupedProduction === 'function' ? getGroupedProduction(prevYearData.service)?.HABITACION?.revenue?.[m] : null) || prevYearData.service["TOTAL_MASTER"]?.revenue?.[m] || 0) : 0;
+                const prevMRev = (prevYearData && prevYearData.service) 
+                    ? ((typeof getGroupedProduction === 'function' ? getGroupedProduction(prevYearData.service)?.HABITACION?.revenue?.[m] : null) || prevYearData.service["TOTAL_MASTER"]?.revenue?.[m] || 0) 
+                    : 0;
+                const benchmarkFinal = targetM > 0 ? targetM : prevMRev;
 
-                const mDiff = targetM > 0 ? (soldM - targetM) : (prevMRev > 0 ? (soldM - prevMRev) : 0);
-                const mPct = targetM > 0 ? ((soldM / targetM) * 100) : (prevMRev > 0 ? ((soldM / prevMRev) * 100) : 0);
+                // Distancia en meses desde el mes actual del sistema
+                const monthDistance = (budgetYr - curYear) * 12 + (m - curMonth);
 
-                if (targetM > 0) {
-                    if (soldM >= targetM) {
-                        goodMonthsList.push({ month: mName, sold: soldM, target: targetM, diff: mDiff, pct: mPct });
-                        totalComplianceSurplus += mDiff;
+                if (monthDistance < 0) {
+                    // Meses ya cerrados en el calendario: solo auditar si el ejercicio seleccionado es un año histórico cerrado
+                    if (budgetYr < curYear && benchmarkFinal > 0) {
+                        const mDiff = rRev - benchmarkFinal;
+                        if (rRev < benchmarkFinal * 0.95) {
+                            riskMonthsList.push({ month: mName, sold: rRev, target: benchmarkFinal, diff: mDiff, pct: (rRev/benchmarkFinal)*100, isClosed: true });
+                            totalComplianceDeficit += Math.abs(mDiff);
+                            complianceRiskDates.push({
+                                dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
+                                dayLabel: `Mes cerrado: ${mName}`,
+                                status: 'Cerrado con Déficit',
+                                metrics: `${fmtEuro(rRev)} vs ${fmtEuro(benchmarkFinal)}`,
+                                tactic: `Déficit de -${fmtEuro(Math.abs(mDiff))} en ejercicio cerrado. Utilizar como base para corregir previsión.`
+                            });
+                        } else if (rRev >= benchmarkFinal) {
+                            goodMonthsList.push({ month: mName, sold: rRev, target: benchmarkFinal, diff: mDiff, pct: (rRev/benchmarkFinal)*100 });
+                            totalComplianceSurplus += mDiff;
+                            complianceGoodDates.push({
+                                dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
+                                dayLabel: `Mes cerrado: ${mName}`,
+                                status: 'Cerrado con Superávit',
+                                metrics: `${fmtEuro(rRev)} vs ${fmtEuro(benchmarkFinal)} (+${fmtEuro(mDiff)})`,
+                                tactic: `Objetivo cumplido con éxito (+${fmtEuro(mDiff)}).`
+                            });
+                        }
+                    }
+                    continue;
+                }
+
+                if (monthDistance === 0) {
+                    // ========================================================
+                    // PRIORIDAD MÁXIMA: MES EN CURSO (Días restantes & Ritmo diario)
+                    // ========================================================
+                    const soldCurrent = rRev + oRev;
+                    const daysLeft = Math.max(1, daysInM - now.getDate());
+                    const gapCurrent = benchmarkFinal - soldCurrent;
+
+                    if (gapCurrent <= 0 && benchmarkFinal > 0) {
+                        const surplus = Math.abs(gapCurrent);
+                        goodMonthsList.push({ month: mName, sold: soldCurrent, target: benchmarkFinal, diff: surplus, pct: (soldCurrent/benchmarkFinal)*100, isCurrent: true });
+                        totalComplianceSurplus += surplus;
                         complianceGoodDates.push({
-                            dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
-                            dayLabel: `Mes de ${mName}`,
-                            status: 'Cumplido',
-                            metrics: `${fmtEuro(soldM)} (Obj: ${fmtEuro(targetM)})`,
-                            tactic: `Superávit de +${fmtEuro(mDiff)} (${mPct.toFixed(1)}%). Subir tarifa BAR a nivel premium y eliminar descuentos innecesarios.`
+                            dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`,
+                            dayLabel: `Mes en curso: ${mName} (${daysLeft} días restantes)`,
+                            status: 'Objetivo Alcanzado',
+                            metrics: `${fmtEuro(soldCurrent)} (Obj: ${fmtEuro(benchmarkFinal)})`,
+                            tactic: `Superávit de +${fmtEuro(surplus)}. Con la meta asegurada, maximizar ADR en las fechas restantes y cerrar tarifas descuento.`
                         });
-                    } else if (isClosed(m)) {
-                        riskMonthsList.push({ month: mName, sold: soldM, target: targetM, diff: mDiff, pct: mPct, isClosed: true });
-                        totalComplianceDeficit += Math.abs(mDiff);
-                        complianceRiskDates.push({
-                            dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
-                            dayLabel: `Mes cerrado: ${mName}`,
-                            status: 'Incumplido',
-                            metrics: `${fmtEuro(soldM)} (Obj: ${fmtEuro(targetM)})`,
-                            tactic: `Déficit cerrado de -${fmtEuro(Math.abs(mDiff))}. Analizar qué canales no respondieron para renegociar cupos de cara al próximo ejercicio.`
-                        });
-                    } else if (m === curMonth) {
-                        const daysLeft = Math.max(1, daysInM - now.getDate());
-                        const gap = targetM - soldM;
-                        const dailyNeed = Math.round(gap / daysLeft);
-                        riskMonthsList.push({ month: mName, sold: soldM, target: targetM, diff: -gap, pct: mPct, dailyNeed, daysLeft, isCurrent: true });
-                        totalComplianceDeficit += gap;
+                    } else if (benchmarkFinal > 0) {
+                        const dailyNeed = Math.round(gapCurrent / daysLeft);
+                        riskMonthsList.push({ month: mName, sold: soldCurrent, target: benchmarkFinal, diff: -gapCurrent, pct: (soldCurrent/benchmarkFinal)*100, dailyNeed, daysLeft, isCurrent: true });
+                        totalComplianceDeficit += gapCurrent;
                         complianceRiskDates.push({
                             dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`,
-                            dayLabel: `Mes actual: ${mName} (${daysLeft} días restantes)`,
+                            dayLabel: `Mes en curso: ${mName} (${daysLeft} días restantes)`,
                             status: 'En Riesgo Inmediato',
-                            metrics: `Faltan ${fmtEuro(gap)} (${dailyNeed}€/día)`,
-                            tactic: `Ritmo diario requerido de ${fmtEuro(dailyNeed)}/día. Proteger fines de semana a tarifa alta y lanzar promoción opaca flash 48h entre semana.`
-                        });
-                    } else {
-                        // Future month
-                        riskMonthsList.push({ month: mName, sold: soldM, target: targetM, diff: mDiff, pct: mPct, isFuture: true });
-                        totalComplianceDeficit += Math.abs(mDiff);
-                        complianceRiskDates.push({
-                            dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
-                            dayLabel: `Mes futuro: ${mName}`,
-                            status: 'Cartera en Rezago',
-                            metrics: `Cartera: ${fmtEuro(soldM)} (Obj: ${fmtEuro(targetM)})`,
-                            tactic: `Brecha de ${fmtEuro(Math.abs(mDiff))}. Abrir venta a segmentos B2B y agencias con anticipación de 60-90 días.`
+                            metrics: `Faltan ${fmtEuro(gapCurrent)} (${dailyNeed}€/día)`,
+                            tactic: `Se requiere generar un ritmo diario de ${fmtEuro(dailyNeed)}/día en los ${daysLeft} días restantes. Subir BAR en fines de semana y activar promo opaca 48h entre semana.`
                         });
                     }
-                } else if (prevMRev > 0) {
-                    if (soldM >= prevMRev) {
-                        goodMonthsList.push({ month: mName, sold: soldM, target: prevMRev, diff: mDiff, pct: mPct });
-                        totalComplianceSurplus += mDiff;
+                } else if (monthDistance === 1) {
+                    // ========================================================
+                    // PRIORIDAD ALTA: MES SIGUIENTE (Ventana de 15-45 días vista)
+                    // ========================================================
+                    // A 30-45 días de distancia el hotel debe contar con un 35% - 45% de la cartera contratada
+                    const soldNext = Math.max(rRev, oRev);
+                    const expectedRatio = 0.35;
+                    const expectedPace = benchmarkFinal * expectedRatio;
+                    const paceDiff = soldNext - expectedPace;
+
+                    if (benchmarkFinal > 0) {
+                        if (soldNext >= expectedPace) {
+                            goodMonthsList.push({ month: mName, sold: soldNext, target: benchmarkFinal, diff: paceDiff, pct: (soldNext/benchmarkFinal)*100, isNext: true });
+                            totalComplianceSurplus += Math.max(0, paceDiff);
+                            complianceGoodDates.push({
+                                dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
+                                dayLabel: `Próximo mes: ${mName}`,
+                                status: 'En Buen Ritmo (30 días)',
+                                metrics: `${fmtEuro(soldNext)} en cartera (${((soldNext/benchmarkFinal)*100).toFixed(1)}% de meta)`,
+                                tactic: `Buena base contratada con 30-45 días de margen. Proteger tarifa BAR y evitar aperturas de descuentos no reembolsables.`
+                            });
+                        } else {
+                            const gapPace = expectedPace - soldNext;
+                            riskMonthsList.push({ month: mName, sold: soldNext, target: benchmarkFinal, diff: -gapPace, pct: (soldNext/benchmarkFinal)*100, isNext: true });
+                            totalComplianceDeficit += gapPace;
+                            complianceRiskDates.push({
+                                dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
+                                dayLabel: `Próximo mes: ${mName}`,
+                                status: 'Cartera a 30 Días Rezagada',
+                                metrics: `Cartera: ${fmtEuro(soldNext)} (Ritmo deseable: ${fmtEuro(expectedPace)})`,
+                                tactic: `Faltan 30-45 días y la cartera lleva un ritmo inferior al deseable. Activar convenios corporativos B2B y promociones de venta anticipada.`
+                            });
+                        }
+                    }
+                } else {
+                    // ========================================================
+                    // MESES LEJANOS (M+2 en adelante)
+                    // "tiene que tener en cuenta lo que falta para las fechas, igual no es tan importante todavía"
+                    // NO alertar como riesgo/caída porque falta mucho lead time.
+                    // Solo reconocer en positivo si ya cuenta con una cartera excepcional anticipada (>30% con mucha antelación).
+                    // ========================================================
+                    const soldFuture = Math.max(rRev, oRev);
+                    if (benchmarkFinal > 0 && soldFuture >= benchmarkFinal * 0.30) {
+                        goodMonthsList.push({ month: mName, sold: soldFuture, target: benchmarkFinal, diff: soldFuture, pct: (soldFuture/benchmarkFinal)*100, isFutureAdvance: true });
+                        totalComplianceSurplus += soldFuture;
                         complianceGoodDates.push({
                             dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
-                            dayLabel: `Mes de ${mName}`,
-                            status: 'Supera Año Anterior',
-                            metrics: `${fmtEuro(soldM)} vs ${fmtEuro(prevMRev)} (${prevYear})`,
-                            tactic: `Crecimiento interanual positivo (+${fmtEuro(mDiff)}). Mantener la estrategia actual de yield.`
-                        });
-                    } else {
-                        riskMonthsList.push({ month: mName, sold: soldM, target: prevMRev, diff: mDiff, pct: mPct });
-                        totalComplianceDeficit += Math.abs(mDiff);
-                        complianceRiskDates.push({
-                            dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
-                            dayLabel: `Mes de ${mName}`,
-                            status: 'Por Debajo Año Anterior',
-                            metrics: `${fmtEuro(soldM)} vs ${fmtEuro(prevMRev)} (${prevYear})`,
-                            tactic: `Caída de -${fmtEuro(Math.abs(mDiff))} vs ${prevYear}. Activar acciones de visibilidad comercial.`
+                            dayLabel: `Mes de ${mName} (a ${monthDistance} meses)`,
+                            status: 'Excelente Cobertura Anticipada',
+                            metrics: `${fmtEuro(soldFuture)} asegurados (${((soldFuture/benchmarkFinal)*100).toFixed(0)}% de meta)`,
+                            tactic: `Alta concentración de reservas con gran antelación. Subir tarifas de apertura BAR +12€ a +18€ y aplicar estancia mínima de 2 noches.`
                         });
                     }
                 }
             }
 
-            // Daily Compliance & Alert Checks (45 Days horizon)
+            // ============================================================
+            // AUDITORÍA DIARIA: FLUCTUACIONES DE PRECIO CON RESPECTO A LA COMPETENCIA (PRÓXIMOS 60 DÍAS)
+            // ============================================================
             if (compData && Array.isArray(compData.data)) {
-                compData.data.slice(0, 45).forEach(d => {
+                compData.data.slice(0, 60).forEach(d => {
                     const dateStr = d.dateISO || d.date;
                     const dayInfo = getDayInfo(dateStr);
                     const my = d.hotels?.[currentHotel];
                     const compAvg = d.compAvg || 0;
+
+                    // Detectar Sold Out en competidores
+                    const rivalsSoldOut = [];
+                    Object.keys(d.hotels || {}).forEach(hKey => {
+                        if (hKey !== currentHotel && d.hotels[hKey] && d.hotels[hKey].sold) {
+                            if (!hKey.toLowerCase().includes('guadiana') && !hKey.toLowerCase().includes('cumbria')) {
+                                rivalsSoldOut.push(hKey);
+                            }
+                        }
+                    });
+
+                    if (rivalsSoldOut.length > 0) {
+                        complianceGoodDates.push({
+                            dateISO: dateStr,
+                            dayLabel: `${dayInfo.dayOfWeek} ${formatSpanishDate(dateStr)}`,
+                            status: 'Rival(es) en Sold Out',
+                            metrics: `${rivalsSoldOut.join(', ')} agotados · Tu BAR: ${my?.price ? my.price + '€' : '-'}`,
+                            tactic: `Rivales completos en la plaza. Demanda inelástica: elevar tarifa BAR +20% a +30% de inmediato y fijar estancia mínima (MLOS 2 noches).`
+                        });
+                    }
+
                     if (my && !my.sold && my.price > 0 && compAvg > 0) {
                         const diff = compAvg - my.price;
-                        if (diff > 18) {
-                            complianceGoodDates.push({
-                                dateISO: dateStr,
-                                dayLabel: `${dayInfo.dayOfWeek} ${formatSpanishDate(dateStr)}`,
-                                status: 'Alta Demanda / Tracción',
-                                metrics: `Tu BAR: ${my.price}€ · Mercado: ${Math.round(compAvg)}€`,
-                                tactic: `Mercado en compresión fuerte (+${Math.round(diff)}€). Elevar tarifa BAR +15€ de inmediato y exigir MLOS 2 noches.`
-                            });
-                        } else if (diff < -15) {
+
+                        // FLUCTUACIÓN 1: RIESGO DE DESMARQUE (Tu precio demasiado alto sin demanda de mercado)
+                        if (diff < -15 && rivalsSoldOut.length === 0) {
+                            const overPrice = Math.round(Math.abs(diff));
                             complianceRiskDates.push({
                                 dateISO: dateStr,
                                 dayLabel: `${dayInfo.dayOfWeek} ${formatSpanishDate(dateStr)}`,
                                 status: 'Riesgo de Desmarque',
-                                metrics: `Tu BAR: ${my.price}€ · Mercado: ${Math.round(compAvg)}€`,
-                                tactic: `Precio +${Math.round(Math.abs(diff))}€ por encima del mercado sin compresión. Evaluar ajuste táctico o incluir desayuno para convertir.`
+                                metrics: `Tu BAR: ${my.price}€ · Mercado: ${Math.round(compAvg)}€ (+${overPrice}€)`,
+                                tactic: `Tu tarifa está +${overPrice}€ por encima del CompSet sin compresión en la plaza. Riesgo de fuga de reservas a rivales; evaluar ajuste táctico o empaquetar con desayuno/parking.`
+                            });
+                        }
+                        // FLUCTUACIÓN 2: FLUCTUACIÓN ALCISTA / COMPRESIÓN DE MERCADO (Mercado cobra tarifas altas)
+                        else if (diff > 18) {
+                            const underPrice = Math.round(diff);
+                            complianceGoodDates.push({
+                                dateISO: dateStr,
+                                dayLabel: `${dayInfo.dayOfWeek} ${formatSpanishDate(dateStr)}`,
+                                status: 'Mercado en Compresión / Yield',
+                                metrics: `Tu BAR: ${my.price}€ · Mercado: ${Math.round(compAvg)}€ (-${underPrice}€)`,
+                                tactic: `El mercado cotiza a tarifas altas (+${underPrice}€ por encima). Elevar tarifa BAR +12€ a +18€ de inmediato para no perder RevPAR.`
                             });
                         }
                     }
@@ -1882,21 +2124,21 @@
 
             // Push Insight: DÓNDE VAMOS BIEN
             if (goodMonthsList.length > 0 || complianceGoodDates.length > 0) {
-                const goodMonthsStr = goodMonthsList.slice(0, 4).map(m => `<b>${m.month}</b> (+${fmtEuro(m.diff)})`).join(', ');
+                const goodMonthsStr = goodMonthsList.slice(0, 3).map(m => `<b>${m.month}</b>`).join(', ');
                 insights.push({
                     id: 'ins_compliance_good',
                     category: 'compliance',
                     priority: 'positive',
                     badge: '🟢 DÓNDE VAMOS BIEN · SUPERÁVIT Y METAS',
-                    title: `Balance Positivo: ${goodMonthsList.length} meses y ${complianceGoodDates.length} fechas clave superando objetivos`,
-                    diagnostic: `El hotel presenta una tracción sobresaliente en <b>${goodMonthsList.length} meses</b> con un superávit consolidado de <b>+${fmtEuro(totalComplianceSurplus)}</b>. Periodos líderes: ${goodMonthsStr || 'cartera consolidada'}. Además, se detectan <b>${complianceGoodDates.length} fechas</b> con alta compresión de mercado donde el cliente absorbe precio máximo.`,
+                    title: `Balance Favorable: Meses clave al día y ${complianceGoodDates.length} fechas con oportunidad de Yield`,
+                    diagnostic: `El hotel presenta una tracción sobresaliente en periodos prioritarios (${goodMonthsStr || 'mes en curso y cartera anticipada'}). Además, se auditan <b>${complianceGoodDates.length} fechas</b> con compresión de mercado o competidores en Sold Out donde el cliente absorbe precio máximo.`,
                     strategy: `<b>Estrategia Revenue para Maximizar Periodos Fuertes:</b><br>
-• <b>Subida de Escalón de Precios:</b> En los meses y fechas que ya tienen su meta asegurada o demanda disparada, eleva la tarifa BAR <b>+15€ a +20€</b> para capturar exclusivamente reservas de alto valor.<br>
+• <b>Subida de Escalón de Precios:</b> En las fechas con compresión o rivales llenos, eleva la tarifa BAR <b>+15€ a +25€</b> para capturar exclusivamente reservas de alto valor.<br>
 • <b>Cierre de Tarifas Descuento:</b> Desactiva tarifas no reembolsables con -15% o -20% en estas fechas; el mercado comprará igualmente a tarifa estándar.<br>
 • <b>Estancia Mínima (MLOS 2 noches):</b> Blinda los fines de semana de alta demanda exigiendo estancia de viernes a domingo para impedir noches sueltas invendibles.`,
                     dates: complianceGoodDates,
-                    datesTitle: 'Fechas y Meses con Rendimiento Favorable',
-                    datesSubtitle: `Auditoría de ${complianceGoodDates.length} periodos donde el hotel supera objetivos o compresión de mercado`,
+                    datesTitle: 'Fechas y Periodos con Rendimiento Favorable',
+                    datesSubtitle: `Auditoría de periodos con objetivos al día, cartera anticipada sólida o compresión de mercado`,
                     datesBtnText: `🟢 Ver Meses y Fechas en Superávit (${complianceGoodDates.length}) 🔍`,
                     actionUrl: 'AnalisisProduccion.html'
                 });
@@ -1904,25 +2146,29 @@
 
             // Push Insight: DÓNDE NO SE ESTÁ CUMPLIENDO
             if (riskMonthsList.length > 0 || complianceRiskDates.length > 0) {
-                const riskMonthsStr = riskMonthsList.slice(0, 3).map(m => `<b>${m.month}</b> (-${fmtEuro(Math.abs(m.diff))})`).join(', ');
                 const curMRisk = riskMonthsList.find(m => m.isCurrent);
-                const curMAction = curMRisk ? `<br><br><b>🚨 Plan de Choque Inmediato para ${curMRisk.month}:</b> Faltan <b>${fmtEuro(Math.abs(curMRisk.diff))}</b> con solo <b>${curMRisk.daysLeft} días</b> de margen. Se requiere generar un ritmo diario de <b>${fmtEuro(curMRisk.dailyNeed)}/día</b>.` : '';
+                const nextMRisk = riskMonthsList.find(m => m.isNext);
+                const curMAction = curMRisk 
+                    ? `<br><br><b>🚨 Plan de Choque Inmediato para ${curMRisk.month}:</b> Faltan <b>${fmtEuro(Math.abs(curMRisk.diff))}</b> con solo <b>${curMRisk.daysLeft} días</b> de margen. Se requiere generar un ritmo diario de <b>${fmtEuro(curMRisk.dailyNeed)}/día</b>.` 
+                    : (nextMRisk ? `<br><br><b>⚠️ Atención al Próximo Mes (${nextMRisk.month}):</b> Cartera por debajo del ritmo deseable a 30-45 días vista.` : '');
+
+                const desmarqueDatesCount = complianceRiskDates.filter(d => d.status === 'Riesgo de Desmarque').length;
 
                 insights.push({
                     id: 'ins_compliance_risk',
                     category: 'compliance',
                     priority: 'critical',
                     badge: '🔴 DÓNDE NO SE ESTÁ CUMPLIENDO · ALERTAS DE RIESGO',
-                    title: `Alertas de Desvío: ${riskMonthsList.length} meses rezagados y fechas con bajo ritmo de reservas`,
-                    diagnostic: `Se identifican <b>${riskMonthsList.length} meses</b> con déficit o rezago en cartera frente a meta (brecha total acumulada: <b>-${fmtEuro(totalComplianceDeficit)}</b>). Meses más críticos: ${riskMonthsStr}.${curMAction}`,
-                    strategy: `<b>Plan de Acción Táctico para Salvar Meses en Riesgo:</b><br>
-• <b>Ritmo Diario de Recuperación:</b> Si el mes actual está en riesgo, monitoriza a diario el pick-up respecto a la meta diaria necesaria.<br>
+                    title: `Alertas de Desvío: ${curMRisk ? curMRisk.month : (nextMRisk ? nextMRisk.month : 'Periodos clave')} y ${desmarqueDatesCount} fechas con riesgo de desmarque`,
+                    diagnostic: `Auditoría focalizada en el horizonte inmediato (mes en curso y siguiente) sin alarmas prematuras para meses lejanos:${curMAction}${desmarqueDatesCount > 0 ? `<br><br><b>Fluctuación de Precios:</b> Se detectan <b>${desmarqueDatesCount} fechas</b> con tarifa BAR significativamente por encima del CompSet sin compresión de plaza, con riesgo de frenar reservas.` : ''}`,
+                    strategy: `<b>Plan de Acción Táctico Inmediato:</b><br>
+• <b>Ritmo Diario de Recuperación:</b> En el mes actual, monitoriza a diario el pick-up respecto a la meta diaria requerida.<br>
+• <b>Corrección de Desmarque:</b> En las ${desmarqueDatesCount} fechas donde tu precio supera a la competencia sin compresión, evalúa ajustar a paridad o incluir desayuno/parking para acelerar la conversión.<br>
 • <b>Promociones Opacas Flash (48h):</b> Lanza ofertas exclusivas para miembros o venta privada en canal directo sin alterar la tarifa pública visible en OTAs.<br>
-• <b>Activación Comercial B2B:</b> En días laborables de baja ocupación (lunes y jueves), contacta convenios corporativos de Ciudad Real con tarifas ventajosas por volumen.<br>
-• <b>Empaquetamiento de Servicios:</b> En lugar de bajar el precio facial de la habitación, ofrece paquetes que incluyan desayuno o parking gratuito para proteger el ADR nominal.`,
+• <b>Activación Comercial B2B:</b> En días laborables de baja ocupación (lunes y jueves), contacta convenios corporativos de Ciudad Real con tarifas ventajosas por volumen.`,
                     dates: complianceRiskDates,
                     datesTitle: 'Fechas y Meses en Riesgo de Incumplimiento',
-                    datesSubtitle: `Auditoría de ${complianceRiskDates.length} periodos con déficit o necesidad de estímulo de demanda`,
+                    datesSubtitle: `Auditoría del mes en curso, mes siguiente y fechas con riesgo de desmarque tarifario`,
                     datesBtnText: `🔴 Ver Meses y Fechas en Riesgo (${complianceRiskDates.length}) 🔍`,
                     actionUrl: `CalculadoraPresupuesto.html?openPacing=true&pacingMonth=${curMonth}`
                 });
@@ -2139,6 +2385,7 @@
                             <th style="padding: 10px 12px;">Fecha</th>
                             <th style="padding: 10px 12px; text-align: center;">Día</th>
                             <th style="padding: 10px 12px;">Rival(es) en Sold Out</th>
+                            <th style="padding: 10px 12px; text-align: center;">Disponibilidad</th>
                             <th style="padding: 10px 12px; text-align: right;">Tu Tarifa</th>
                             <th style="padding: 10px 12px; text-align: right;">Media Rivales Disp.</th>
                             <th style="padding: 10px 12px; text-align: right;">Diferencial</th>
@@ -2231,6 +2478,7 @@
                         <tr style="background: rgba(0,0,0,0.03); border-bottom: 2px solid var(--border); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted);">
                             <th style="padding: 10px 12px;">Fecha</th>
                             <th style="padding: 10px 12px; text-align: center;">Día</th>
+                            <th style="padding: 10px 12px; text-align: center;">Disponibilidad / Ocup.</th>
                             <th style="padding: 10px 12px; text-align: right;">Tu Tarifa</th>
                             <th style="padding: 10px 12px; text-align: right;">CompSet Medio</th>
                             <th style="padding: 10px 12px; text-align: right;">Diferencial</th>
@@ -2265,6 +2513,11 @@
                                 <td style="padding: 10px 12px;">
                                     ${compBadges}
                                 </td>
+                                <td style="padding: 10px 12px; text-align: center; white-space: nowrap;">
+                                    <span style="display:inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; background: ${d.occBadgeBg || '#f1f5f9'}; color: ${d.occBadgeColor || '#475569'}; border: 1px solid ${d.occBadgeBorder || '#cbd5e1'};">
+                                        ${d.availRooms !== undefined ? `${d.availRooms} libres (${d.occPct}%)` : '-'}
+                                    </span>
+                                </td>
                                 <td style="padding: 10px 12px; text-align: right; font-weight: 800; color: #4338ca;">
                                     ${d.myPrice ? d.myPrice + ' €' : '-'}
                                 </td>
@@ -2294,8 +2547,8 @@
                                 <td style="padding: 10px 12px; font-weight: 700; color: #1e293b;">
                                     🏨 ${d.competitor}
                                 </td>
-                                <td style="padding: 10px 12px; text-align: center;">
-                                    <span style="background:${d.type === 'spike' ? '#fee2e2' : '#ffedd5'}; color:${d.badgeColor}; padding:3px 8px; border-radius:6px; font-size:0.72rem; font-weight:800;">
+                                <td style="padding: 10px 12px; text-align: center; white-space: nowrap;">
+                                    <span style="background:${d.isCityWide ? '#f3e8ff' : (d.type === 'spike' ? '#fff7ed' : '#f0f9ff')}; color:${d.badgeColor}; border: 1px solid ${d.isCityWide ? '#d8b4fe' : (d.type === 'spike' ? '#fed7aa' : '#bae6fd')}; padding:3px 8px; border-radius:6px; font-size:0.71rem; font-weight:800;">
                                         ${d.badgeText}
                                     </span>
                                 </td>
@@ -2457,6 +2710,11 @@
                             <td style="padding: 10px 12px; text-align: center;">
                                 ${dayBadge}
                             </td>
+                            <td style="padding: 10px 12px; text-align: center; white-space: nowrap;">
+                                <span style="display:inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; background: ${d.occBadgeBg || '#f1f5f9'}; color: ${d.occBadgeColor || '#475569'}; border: 1px solid ${d.occBadgeBorder || '#cbd5e1'};">
+                                    ${d.availRooms !== undefined ? `${d.availRooms} libres (${d.occPct}%)` : '-'}
+                                </span>
+                            </td>
                             <td style="padding: 10px 12px; text-align: right; font-weight: 800; color: #4338ca;">
                                 ${d.myPrice ? d.myPrice + ' €' : '-'}
                             </td>
@@ -2468,7 +2726,7 @@
                                 ${d.diffPct ? ` <span style="font-size:0.7rem; font-weight:600;">(${d.diffPct}%)</span>` : ''}
                             </td>
                             <td style="padding: 10px 12px; font-size: 0.78rem; color: #0f172a;">
-                                ${d.tactic || 'Ajustar tarifa BAR a paridad'}
+                                ${d.tactic}
                             </td>
                         </tr>
                     `;
