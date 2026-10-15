@@ -1,116 +1,185 @@
-# PROPUESTA Y JUSTIFICACIÓN DEL PRESUPUESTO OFICIAL 2027: OBJETIVO +7,5%
+# PROPUESTA Y FUNDAMENTACIÓN DEL PRIMER PRESUPUESTO OFICIAL 2027: OBJETIVO +7,5%
 ## Departamento de Revenue Management y Dirección Comercial
-**Hotel:** Hotel Cumbria (Ciudad Real – 59 habitaciones / 21.535 RN disponibles)  
+**Hotel:** Hotel Cumbria (Ciudad Real – 59 habitaciones / 21.535 RN anuales)  
+**Proyecto Estratégico:** Plan de Reposicionamiento y Elevación de Categoría de 3 a 4 Estrellas  
 **Fecha:** Octubre 2026  
-**Documento:** Informe Ejecutivo y Memoria Técnica de Justificación Presupuestaria 2027  
+**Documento:** Memoria Técnica de Implantación del Primer Presupuesto Oficial de Alojamiento (2027)  
 
 ---
 
-## 1. RESUMEN EJECUTIVO Y OBJETIVOS CLAVE
+## 1. CONTEXTO INSTITUCIONAL: PRIMER PRESUPUESTO OFICIAL Y ELEVACIÓN A 4 ESTRELLAS
 
-Tras auditar la producción real consolidada de **2025** (1.092.750 € en alojamiento), el Presupuesto Oficial Aprobado de **2026** (1.196.000 €) y el ritmo de demanda en el corredor empresarial de Ciudad Real, presento formalmente la propuesta de presupuesto de **Alojamiento (Room Revenue) para el ejercicio 2027**.
+El ejercicio 2027 representa el **punto de inflexión más trascendental en la historia de gestión del Hotel Cumbria**: confluyen la aprobación de su **PRIMER PRESUPUESTO OFICIAL FORMAL** y el **PROYECTO DE ELEVACIÓN DE CATEGORÍA DE 3 A 4 ESTRELLAS**.
 
-El objetivo central se establece en un **crecimiento del +7,50%** sobre la base del Presupuesto 2026, fijando la meta presupuestaria de Alojamiento en **1.285.700,00 €** (+89.700 € de incremento neto anual). Frente a la producción real de 2025, esta meta consolida un incremento de **+17,66%** (+192.950 €).
+Hasta la fecha, el establecimiento venía operando como hotel de 3 estrellas sin un marco presupuestario formalmente cerrado por la Dirección General y la Propiedad, apoyándose en estimaciones provisionales o inercias del mercado. Por tratarse del **primer presupuesto oficial del establecimiento**, este documento tiene un carácter fundacional y se rige por un principio irrenunciable: **MÁXIMA CREDIBILIDAD, RIGOR TÉCNICO Y FACTIBILIDAD OPERATIVA**.
 
-### Cuadro Resumen de Indicadores Clave (KPIs)
+### La 4ª Estrella como Catalizador Comercial y Justificación del Crecimiento
+La subida de categoría a 4 estrellas solventa la principal limitación histórica de comercialización del Cumbria. En el mercado actual, numerosos operadores turísticos, agencias corporativas, organizadores de congresos (MICE) y federaciones deportivas exigen por pliego y normativa interna la **categoría mínima de 4 estrellas**. Al obtenerla, el hotel:
+1. Accede a concursos, acuerdos corporativos y turoperación receptiva vetados hasta ahora para la categoría de 3 estrellas.
+2. Abre una vía directa para **incrementar la captación de grupos organizados de mayor calidad y tarifa**.
+3. Justifica de manera natural y transparente ante el mercado la elevación de su tarifa media diaria (ADR).
 
-| Métrica | Real 2025 Consolidado | Presupuesto 2026 Oficial | Propuesta 2027 (+7,5%) | Variación vs 2026 | Variación vs Real 2025 |
+Para blindar la credibilidad ante el Comité de Dirección, la propuesta descarta saltos desproporcionados y modeliza un crecimiento del **+7,50% sobre el cierre real auditado de 2025 (759.620,00 €)**, fijando el objetivo oficial en **816.591,50 €** de facturación neta de alojamiento (*Room Revenue*).
+
+### Cuadro de Referencia: De la Producción Real al Primer Presupuesto Oficial 2027
+
+| Métrica de Alojamiento | Real 2023 (3★) | Real 2024 (3★) | Real 2025 (3★) | Propuesta Primer BGT 2027 (4★) | Crecimiento Objetivo (+7,5% vs 2025) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Room Revenue (€)** | 1.092.750 € | 1.196.000 € | **1.285.700,00 €** | **+7,50%** (+89.700 €) | **+17,66%** (+192.950 €) |
-| **Habitaciones Noche (RN)** | 14.773 | 14.769 | **15.264** | **+3,35%** (+495 RN) | **+3,32%** (+491 RN) |
-| **Tarifa Media Diaria (ADR)** | 73,97 € | 80,98 € | **84,23 €** | **+4,01%** (+3,25 €) | **+13,87%** (+10,26 €) |
-| **Ocupación Media (%)** | 68,60% | 68,58% | **70,88%** | **+2,30 p.p.** | **+2,28 p.p.** |
-| **RevPAR Estimado (€)** | 50,74 € | 55,54 € | **59,70 €** | **+7,49%** (+4,16 €) | **+17,66%** (+8,96 €) |
+| **Room Revenue (€)** | 671.251,00 € | 664.425,00 € | 759.620,00 € | **816.591,50 €** | **+7,50%** (+56.971,50 €) |
+| **Habitaciones Noche (RN)** | 12.692 | 12.180 | 12.580 | **13.003** | **+3,36%** (+423 RN) |
+| **Tarifa Media Diaria (ADR)** | 52,89 € | 54,55 € | 60,38 € | **62,80 €** | **+4,01%** (+2,42 €) |
+| **Ocupación Media (%)** | 58,94% | 56,56% | 58,42% | **60,38%** | **+1,96 p.p.** |
+| **RevPAR (€)** | 31,17 € | 30,85 € | 35,27 € | **37,92 €** | **+7,51%** (+2,65 €) |
 
-*(Base de inventario: 59 habitaciones = 21.535 habitaciones disponibles al año).*
-
----
-
-## 2. PILARES ESTRATÉGICOS DE LA PROPUESTA (+7,5%)
-
-A diferencia de hoteles de mayor capacidad, el **Hotel Cumbria (59 habitaciones)** cuenta con un perfil boutique-corporativo de **alta ocupación estructural (~68%–71%)**. Por tanto, la estrategia para alcanzar los 1,28 M€ no consiste en forzar volumen, sino en **optimización de tarifa y selección de cliente**:
-
-1. **Expansión del ADR (+4,01% / +3,25 € hasta los 84,23 €):**
-   * El Cumbria tiene el ADR más elevado de su segmento en la plaza. Esta subida selectiva permite **absorber holgadamente la inflación estructural de costes operativos (energía, salarios, suministros)**, estimada en el 2,5%–3,0%.
-   * Cada euro adicional de ADR impacta directamente en el margen bruto de explotación (GOP), maximizando el beneficio sin aumentar los costes fijos ni variables de pisos.
-
-2. **Crecimiento de Volumen Muy Moderado (+495 RN al año):**
-   * Pasar del 68,58% al **70,88% de ocupación anual** exige comercializar únicamente **1,36 habitaciones adicionales al día** a lo largo de los 365 días del año.
-   * La operativa interna trabaja con máxima fluidez y un estándar de servicio impecable.
+*(Base de dimensionamiento: 59 habitaciones operativas = 21.535 habitaciones noche disponibles al año).*
 
 ---
 
-## 3. PLAN PRESUPUESTARIO MENSUAL DETALLADO 2027
+## 2. AUDITORÍA HISTÓRICA REAL (2023 – 2025): BASE DE PARTIDA DEL CUMBRIA
 
-Distribución mensual propuesta para 2027 y su comparativa frente a la base del Presupuesto 2026:
+El análisis de la contabilidad analítica de alojamiento de los tres últimos ejercicios consolidados demuestra la solidez de la base operativa del Hotel Cumbria:
 
-| Mes | Días | Capacidad (RN) | BGT 2026 (€) | Propuesta 2027 (€) | RN 2027 | ADR 2027 (€) | Ocupación (%) | RevPAR (€) | Variación vs 2026 |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Enero** | 31 | 1.829 | 66.000 € | **70.950,00 €** | 975 | 72,80 € | 53,3% | 38,79 € | +7,50% |
-| **Febrero** | 28 | 1.652 | 69.000 € | **74.175,00 €** | 1.019 | 72,80 € | 61,7% | 44,90 € | +7,50% |
-| **Marzo** | 31 | 1.829 | 81.000 € | **87.075,00 €** | 1.116 | 78,00 € | 61,0% | 47,61 € | +7,50% |
-| **Abril** | 30 | 1.770 | 101.000 € | **108.575,00 €** | 1.338 | 81,12 € | 75,6% | 61,34 € | +7,50% |
-| **Mayo** | 31 | 1.829 | 118.000 € | **126.850,00 €** | 1.402 | 90,48 € | 76,7% | 69,35 € | +7,50% |
-| **Junio** | 30 | 1.770 | 108.000 € | **116.100,00 €** | 1.345 | 86,32 € | 76,0% | 65,59 € | +7,50% |
-| **Julio** | 31 | 1.829 | 126.000 € | **135.450,00 €** | 1.431 | 94,64 € | 78,2% | 74,06 € | +7,50% |
-| **Agosto** | 31 | 1.829 | 118.000 € | **126.850,00 €** | 1.402 | 90,48 € | 76,7% | 69,35 € | +7,50% |
-| **Septiembre** | 30 | 1.770 | 116.000 € | **124.700,00 €** | 1.394 | 89,44 € | 78,8% | 70,45 € | +7,50% |
-| **Octubre** | 31 | 1.829 | 111.000 € | **119.325,00 €** | 1.416 | 84,24 € | 77,4% | 65,24 € | +7,50% |
-| **Noviembre** | 30 | 1.770 | 96.000 € | **103.200,00 €** | 1.272 | 81,12 € | 71,9% | 58,31 € | +7,50% |
-| **Diciembre** | 31 | 1.829 | 86.000 € | **92.450,00 €** | 1.154 | 80,08 € | 63,1% | 50,55 € | +7,50% |
-| **TOTAL** | **365** | **21.535** | **1.196.000 €** | **1.285.700,00 €** | **15.264** | **84,23 €** | **70,88%** | **59,70 €** | **+7,50%** |
+### Evolución Real Trianual de Alojamiento (2023 – 2025)
+
+| Ejercicio | Room Revenue (€) | Habitaciones (RN) | ADR Real (€) | Ocupación (%) | RevPAR (€) | Diagnóstico Operativo |
+| :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **2023** | 671.251,00 € | 12.692 | 52,89 € | 58,94% | 31,17 € | Etapa de volumen medio y tarifa básica como hotel de 3 estrellas. |
+| **2024** | 664.425,00 € | 12.180 | 54,55 € | 56,56% | 30,85 € | Consolidación de demanda y primer avance en precios medios (+3,1%). |
+| **2025** | 759.620,00 € | 12.580 | 60,38 € | 58,42% | 35,27 € | **Cierre récord auditado:** Aceleración de facturación (+14,3%) y salto de ADR (+10,7%). |
+
+### Diagnóstico Técnico para la Formulación del Presupuesto:
+1. **Poder de Fijación de Tarifa Demostrado:** Incluso en la categoría de 3 estrellas, el Cumbria logró elevar su ADR de 52,89 € a 60,38 € (+14,16%) manteniendo la ocupación estable en el 58,4%. Esto prueba que el establecimiento cuenta con una clientela fiel que asume mejoras de tarifa.
+2. **Impacto Inmediato del Salto a 4 Estrellas:** Con la nueva categoría, alcanzar un ADR de **62,80 €** (+4,01% vs 2025) no solo es una meta extraordinariamente prudente, sino que se sitúa en la banda baja de precios de los hoteles de 4 estrellas de la provincia, ofreciendo una relación calidad-precio altamente atractiva.
+3. **Escala Operativa de 59 Habitaciones:** Al tratarse de un hotel de 59 habitaciones, absorber el crecimiento de volumen presupuestado (+423 habitaciones noche al año) equivale únicamente a vender **1,16 habitaciones adicionales al día**. La captación de grupos habilitada por la 4ª estrella garantiza con creces este objetivo.
 
 ---
 
-## 4. ANÁLISIS DE ESTACIONALIDAD: JULIO Y MAYO COMO PICOS DE RENTABILIDAD
+## 3. COMPORTAMIENTO HISTÓRICO MENSUAL REAL (2023 – 2025) Y PROYECCIÓN 2027 (+7,5%)
 
-A diferencia de otros establecimientos de Ciudad Real más dependientes exclusivamente del corporativo de otoño, el Hotel Cumbria presenta una estacionalidad más homogénea con **fuertes picos en primavera y verano**:
+La serie mensual auditada permite calibrar con exactitud el comportamiento de la demanda mes a mes, trasladando el objetivo del **+7,50%** de forma homogénea y rigurosa sobre el ejercicio 2025:
 
-* **Julio (Mes Récord de Facturación y Tarifa):** **135.450,00 €** con **94,64 € de ADR** y **78,2% de ocupación**. Tráfico vacacional de calidad, parejas y escapadas de alto valor.
-* **Mayo y Agosto:** Facturaciones superiores a los **126.850 €** con ADR sostenido por encima de los **90 €**.
-* **Septiembre y Octubre:** Pleno rendimiento corporativo con ocupaciones estables en torno al **77%–79%** y ADR rozando los **85 €–90 €**.
+### Comparativa de Room Revenue (€) Mes a Mes (2023 – 2025 vs Propuesta 2027)
 
----
-
-## 5. PLAN MENSUAL Y ESTRATEGIA COMERCIAL DEL SEGMENTO GRUPOS
-
-Dada la capacidad reducida del Cumbria (59 habitaciones), la presencia de grupos debe ser **estrictamente controlada** para evitar el bloqueo masivo del inventario. La cuota asignada al segmento **Grupos** se modela en un **5,0% de las habitaciones noche** (**764 RN** y **58.740 €** de facturación anual):
-
-### 5.1. Distribución Mensual del Segmento Grupos 2027 (Hotel Cumbria)
-
-| Mes | Total RN Hotel | RN Grupos | Cuota Grupos (% RN) | ADR Grupos (€) | Facturación Grupos (€) | Directriz Comercial de Contratación |
+| Mes | Real 2023 (€) | Real 2024 (€) | Real 2025 (€) | Media 3 Años (€) | Propuesta Oficial 2027 (€) | Criterio de Fijación Presupuestaria 2027 |
 | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **Enero** | 975 | **68 RN** | 7,0% | 66,00 € | 4.488 € | **Base de invierno:** Grupos deportivos reducidos / paso. |
-| **Febrero** | 1.019 | **71 RN** | 7,0% | 66,00 € | 4.686 € | **Ocupación valle:** Fines de semana culturales / enoturismo. |
-| **Marzo** | 1.116 | **67 RN** | 6,0% | 72,00 € | 4.824 € | **Filtro primaveral:** Solo grupos selectos. |
-| **Abril** | 1.338 | **67 RN** | 5,0% | 76,00 € | 5.092 € | **Semana Santa:** Cupo muy reducido a tarifa alta. |
-| **Mayo** | 1.402 | **56 RN** | 4,0% | **84,00 €** | 4.704 € | **Máxima contención:** Solo grupos premium (máx 6-8 hab/noche). |
-| **Junio** | 1.345 | **67 RN** | 5,0% | 79,00 € | 5.293 € | **Fin de temporada:** Empresas e incentivos. |
-| **Julio** | 1.431 | **57 RN** | 4,0% | **88,00 €** | 5.016 € | **Pico Estival:** Prioridad absoluta a cliente individual. |
-| **Agosto** | 1.402 | **70 RN** | 5,0% | 82,00 € | 5.740 € | **Tránsito selectivo:** Pequeños grupos familiares de paso. |
-| **Septiembre** | 1.394 | **56 RN** | 4,0% | **82,00 €** | 4.592 € | **Corporativo:** No desplazar empresas individuales. |
-| **Octubre** | 1.416 | **57 RN** | 4,0% | 78,00 € | 4.446 € | **Otoño de trabajo:** Cupo mínimo. |
-| **Noviembre** | 1.272 | **76 RN** | 6,0% | 74,00 € | 5.624 € | **Jornadas y reuniones:** Grupos técnicos reducidos. |
-| **Diciembre** | 1.154 | **82 RN** | 7,0% | 64,00 € | 5.248 € | **Puentes y fiestas:** Grupos vacacionales y de escapada. |
-| **TOTAL AÑO** | **15.264** | **764 RN** | **5,0%** | **76,88 €** | **58.740 €** | **Aporte Grupos: 764 habitaciones y 58.740 €** |
-
-### 5.2. Directrices Operativas de Contratación:
-1. **Cupo Máximo Innegociable:** Ningún grupo podrá ocupar más de **8 habitaciones por noche** (un 13,5% del hotel), protegiendo siempre las 51 habitaciones restantes para venta individual a tarifa completa.
-2. **Suelos Tarifarios de Temporada Alta (Mayo a Septiembre):** El ADR de cualquier grupo cotizado no bajará de **80 €–88 €**.
-3. **Optimización en Temporada Baja:** En enero y febrero se autorizan tarifas negociadas de **66 €** para captar grupos de fin de semana que complementen el corporativo entre semana.
+| **Enero** | 32.851,00 € | 32.119,00 € | 43.121,00 € | 36.030,33 € | **46.355,08 €** | Corporativo de inicio de año y refuerzo de grupos deportivos 4*. |
+| **Febrero** | 47.874,00 € | 42.062,00 € | 42.183,00 € | 44.039,67 € | **45.346,73 €** | Grupos culturales y de enoturismo en fin de semana. |
+| **Marzo** | 47.944,00 € | 64.574,00 € | 45.587,00 € | 52.701,67 € | **49.006,03 €** | Convenciones técnicas de primavera y eventos formativos. |
+| **Abril** | 57.222,00 € | 70.553,00 € | 57.792,00 € | 61.855,67 € | **62.126,40 €** | Impulso de Semana Santa y circuitos turísticos de primavera. |
+| **Mayo** | 71.562,00 € | 66.532,00 € | 107.674,00 € | 81.922,67 € | **115.749,55 €** | **Pico anual absoluto:** Máxima concentración de eventos, ADR a 82,59 €. |
+| **Junio** | 57.465,00 € | 60.156,00 € | 63.936,00 € | 60.519,00 € | **68.731,20 €** | Cierre corporativo semestral y primeros grupos organizados de verano. |
+| **Julio** | 57.838,00 € | 67.400,00 € | 67.294,00 € | 64.177,33 € | **72.341,05 €** | Tráfico de paso vacacional y grupos de circuitos intermodales 4*. |
+| **Agosto** | 60.066,00 € | 52.475,00 € | 56.588,00 € | 56.376,33 € | **60.832,10 €** | Soporte de grupos turísticos vacacionales y tránsito de carretera. |
+| **Septiembre** | 68.056,00 € | 53.000,00 € | 67.184,00 € | 62.746,67 € | **72.222,80 €** | Retorno corporativo con ocupación en ascenso y convenciones de empresa. |
+| **Octubre** | 65.913,00 € | 62.425,00 € | 84.528,00 € | 70.955,33 € | **90.867,60 €** | **Segundo pilar del hotel:** Alta ocupación (81,1%) y congresos técnicos. |
+| **Noviembre** | 56.279,00 € | 56.985,00 € | 67.196,00 € | 60.153,33 € | **72.235,70 €** | Jornadas de trabajo corporativas y delegaciones profesionales. |
+| **Diciembre** | 48.181,00 € | 36.144,00 € | 56.537,00 € | 46.954,00 € | **60.777,26 €** | Puente de la Constitución, eventos familiares y grupos de fin de año. |
+| **TOTAL** | **671.251,00 €** | **664.425,00 €** | **759.620,00 €** | **698.431,67 €** | **816.591,50 €** | **Primer Presupuesto Oficial: Crecimiento neto +7,50% (+56.971,50 €).** |
 
 ---
 
-## 6. CONCLUSIÓN Y DICTAMEN FINAL: VIABILIDAD DEL OBJETIVO +7,5%
+## 4. ANÁLISIS DE LA ESTACIONALIDAD SINGULAR DEL HOTEL CUMBRIA
 
-La propuesta de alcanzar **1.285.700,00 € (+7,50% de crecimiento)** en 2027 para el Hotel Cumbria representa un objetivo de máxima rentabilidad y rigor operativo:
+El Hotel Cumbria cuenta con una estructura de demanda bimestral de alto rendimiento combinada con un flujo veraniego muy dinámico:
 
-1. **Defensa Directa Frente a la Inflación y Expansión del Margen Operativo (GOP):**
-   * El incremento del ADR a **84,23 € (+4,01% / +3,25 €)** compensa íntegramente la subida prevista de costes energéticos, salarios y suministros (estimada en el 2,5%–3,0%).
-   * Al lograrse casi la totalidad del crecimiento vía tarifa sobre un hotel de alta ocupación (70,88%), el impacto en el margen neto de explotación (*GOP*) es directo y limpio.
+* **Mayo (Pilar Absoluto de Rentabilidad y Facturación):**
+  * **Objetivo 2027:** **115.749,55 €** (14,2% de la facturación anual).
+  * **Comportamiento:** Mayo representa el máximo histórico del establecimiento (107.674 € en 2025). Con el nuevo estándar de 4 estrellas, se proyecta un ADR de **82,59 €** y una ocupación del **76,6%** (1.401 habitaciones vendidas).
+* **Octubre (El Segundo Gran Bastión Corporativo e Institucional):**
+  * **Objetivo 2027:** **90.867,60 €** (11,1% del total anual).
+  * **Comportamiento:** Es el mes de mayor ocupación porcentual (**81,1%**, con 1.483 RN), impulsado por la confluencia de ferias, congresos técnicos y encuentros profesionales.
+* **El Cuatrimestre Estival (Junio a Septiembre):**
+  * Suma **274.127,15 €** (33,6% del año), sustentado por el tráfico intermodal por carretera, el turismo de interior y el flujo corporativo constante.
+* **Los Meses Valle de Invierno (Enero y Febrero):**
+  * Suponen la base de menor intensidad (45.000 € – 46.000 € mensuales), donde la nueva categoría de 4 estrellas permitirá captar grupos deportivos y de paso técnico para elevar la ocupación base.
 
-2. **Crecimiento Físico Mínimo y Sostenible:**
-   * Solo requiere captar **+1,36 habitaciones adicionales al día** sobre el presupuesto actual. No satura al equipo de trabajo y garantiza mantener las mejores valoraciones de servicio del hotel.
+---
 
-3. **Récord Histórico de RevPAR:**
-   * Sitúa el RevPAR en **59,70 €** (+4,16 € por habitación disponible frente a 2026 y +8,96 € frente a 2025), consolidando al Cumbria como el hotel líder en rendimiento por metro cuadrado de habitación en la plaza de Ciudad Real.
+## 5. PLAN MAESTRO MENSUAL 2027 (HABITACIONES, ADR, OCUPACIÓN Y REVPAR)
+
+El plan operativo mensual traduce el objetivo del **+7,50%** en variables de gestión diaria ejecutables por recepción y el departamento comercial:
+
+| Mes | Días | Capacidad (RN) | Real 2025 (€) | Propuesta 2027 (€) | RN 2027 | ADR 2027 (€) | Ocupación (%) | RevPAR (€) | Variación vs 2025 |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Enero** | 31 | 1.829 | 43.121,00 € | **46.355,08 €** | 791 | 58,62 € | 43,2% | 25,34 € | +7,50% |
+| **Febrero** | 28 | 1.652 | 42.183,00 € | **45.346,73 €** | 797 | 56,90 € | 48,2% | 27,45 € | +7,50% |
+| **Marzo** | 31 | 1.829 | 45.587,00 € | **49.006,03 €** | 846 | 57,96 € | 46,3% | 26,79 € | +7,50% |
+| **Abril** | 30 | 1.770 | 57.792,00 € | **62.126,40 €** | 951 | 65,33 € | 53,7% | 35,10 € | +7,50% |
+| **Mayo** | 31 | 1.829 | 107.674,00 € | **115.749,55 €** | 1.401 | 82,59 € | 76,6% | 63,29 € | +7,50% |
+| **Junio** | 30 | 1.770 | 63.936,00 € | **68.731,20 €** | 1.170 | 58,74 € | 66,1% | 38,83 € | +7,50% |
+| **Julio** | 31 | 1.829 | 67.294,00 € | **72.341,05 €** | 1.097 | 65,97 € | 60,0% | 39,55 € | +7,50% |
+| **Agosto** | 31 | 1.829 | 56.588,00 € | **60.832,10 €** | 993 | 61,24 € | 54,3% | 33,26 € | +7,50% |
+| **Septiembre** | 30 | 1.770 | 67.184,00 € | **72.222,80 €** | 1.163 | 62,11 € | 65,7% | 40,80 € | +7,50% |
+| **Octubre** | 31 | 1.829 | 84.528,00 € | **90.867,60 €** | 1.483 | 61,26 € | 81,1% | 49,68 € | +7,50% |
+| **Noviembre** | 30 | 1.770 | 67.196,00 € | **72.235,70 €** | 1.255 | 57,56 € | 70,9% | 40,81 € | +7,50% |
+| **Diciembre** | 31 | 1.829 | 56.537,00 € | **60.777,26 €** | 1.056 | 57,53 € | 57,7% | 33,23 € | +7,50% |
+| **TOTAL** | **365** | **21.535** | **759.620,00 €** | **816.591,50 €** | **13.003** | **62,80 €** | **60,38%** | **37,92 €** | **+7,50%** |
+
+---
+
+## 6. MODELIZACIÓN Y ESTRATEGIA DEL SEGMENTO GRUPOS BAJO LA NUEVA CATEGORÍA 4 ESTRELLAS
+
+La subida a 4 estrellas transforma de forma radical la posición competitiva del Hotel Cumbria en el mercado de grupos. Hasta ahora, el hotel quedaba automáticamente excluido de las licitaciones corporativas, acuerdos con turoperadores receptivos y pliegos de federaciones que exigen estrictamente la homologación de 4 estrellas.
+
+Con la 4ª estrella, el Cumbria prevé y planifica una **mayor captación de grupos organizados de alto valor añadido**. Para un establecimiento de 59 habitaciones, la estrategia combina **aprovechar la nueva capacidad de captación en meses de demanda valle y media, mientras se protege el inventario individual a máxima tarifa en picos**:
+
+### Parámetros del Segmento Grupos 2027:
+* **Volumen Presupuestado:** **965 Habitaciones Noche (RN)** (representa el **7,42% del total de estancias del hotel**, frente a la cuota testimonial previa).
+* **Tarifa Media Ponderada Estimada (ADR Grupos 4★):** **58,66 €** (muy competitiva para 4 estrellas, pero con margen superior al histórico de 3 estrellas).
+* **Facturación Neta Grupos:** **56.560,00 €** (6,93% del presupuesto total de alojamiento).
+
+### Directriz de Contratación: Tarifa Principalmente Dinámica y Cupo de hasta 25 Habitaciones:
+* **Estrategia Tarifaria Dinámica:** En el marco de la modernización tecnológica y de Revenue Management compartida por ambos hoteles de la compañía, **la tarifa del segmento grupos será PRINCIPALMENTE DINÁMICA**. Se erradican las tarifas planas estáticas del pasado: las cotizaciones grupales se calculan en tiempo real vinculadas al ritmo de demanda (*pick-up*), a la anticipación de reserva y al precio dinámico del cliente individual, evitando la dilución tarifaria (*revenue dilution*) y optimizando el RevPAR en todas las fechas.
+* **Cupo Máximo Operativo (Hasta 25 Habitaciones por Noche):** Se autoriza un cupo de hasta **25 habitaciones por noche** (42,4% del inventario total de 59 habitaciones del hotel), lo que confiere la capacidad comercial indispensable para alojar **autocares completos de circuitos turísticos, grandes delegaciones corporativas o equipos deportivos íntegros** (35 a 50 personas).
+* **Protección del Inventario Individual:** Se garantiza en todo momento una reserva mínima de **34 habitaciones disponibles para la venta individual** a tarifa abierta, salvaguardando los días de máxima demanda corporativa. En caso de solicitarse un volumen superior a las 25 habitaciones, solo se valorará si el grupo asume íntegramente el precio dinámico de venta individual directa sin bonificación.
+
+### Desglose Mensual del Segmento Grupos 2027 (Hotel Cumbria – 4 Estrellas)
+
+| Mes | Total RN Hotel | RN Grupos | Cuota Grupos (% RN) | ADR Grupos (€) | Facturación Grupos (€) | Directriz Comercial de Contratación 4★ |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Enero** | 791 | **75 RN** | 9,5% | 53,00 € | 3.975,00 € | **Captación 4*:** Grupos deportivos y técnicos homologados. |
+| **Febrero** | 797 | **75 RN** | 9,4% | 53,00 € | 3.975,00 € | **Circuitos culturales:** Escapadas enológicas y de patrimonio. |
+| **Marzo** | 846 | **80 RN** | 9,5% | 55,00 € | 4.400,00 € | **Encuentros profesionales:** Convenciones formativas de empresa. |
+| **Abril** | 951 | **75 RN** | 7,9% | 60,00 € | 4.500,00 € | **Semana Santa:** Grupos de circuito cultural a tarifa elevada. |
+| **Mayo** | 1.401 | **65 RN** | 4,6% | 74,00 € | 4.810,00 € | **Filtro estricto:** Solo grupos estratégicos a tarifa máxima de 4*. |
+| **Junio** | 1.170 | **85 RN** | 7,3% | 56,00 € | 4.760,00 € | **Corporativo semestral:** Delegaciones comerciales y sectoriales. |
+| **Julio** | 1.097 | **90 RN** | 8,2% | 62,00 € | 5.580,00 € | **Tránsito estival:** Circuitos internacionales de paso homologados 4*. |
+| **Agosto** | 993 | **90 RN** | 9,1% | 57,00 € | 5.130,00 € | **Soporte vacacional:** Relleno de semanas valle con tarifa protegida. |
+| **Septiembre** | 1.163 | **85 RN** | 7,3% | 59,00 € | 5.015,00 € | **Convenciones:** Encuentros técnicos y grupos corporativos de otoño. |
+| **Octubre** | 1.483 | **70 RN** | 4,7% | 65,00 € | 4.550,00 € | **Alta ocupación otoñal:** Restricción selectiva para priorizar directo. |
+| **Noviembre** | 1.255 | **95 RN** | 7,6% | 55,00 € | 5.225,00 € | **Congresos y jornadas:** Grupos profesionales entre semana. |
+| **Diciembre** | 1.056 | **80 RN** | 7,6% | 58,00 € | 4.640,00 € | **Puentes y festividades:** Grupos familiares y deportivos de fin de año. |
+| **TOTAL** | **13.003** | **965 RN** | **7,42%** | **58,66 €** | **56.560,00 €** | **Segmento Grupos reforzado: Base de ocupación sólida y tarifa 4★.** |
+
+---
+
+## 7. PLAN DE ACCIÓN COMERCIAL Y CONTROL DE REVENUE MANAGEMENT
+
+Para garantizar el cumplimiento de este primer presupuesto oficial y capitalizar de inmediato la subida a 4 estrellas, se activan cuatro ejes operativos prioritarios:
+
+1. **Homologación Inmediata en Canales de Turoperación y Pliegos Corporativos 4★:**
+   * Actualización del registro en bancos de camas, agencias receptivas y plataformas corporativas con la nueva ficha de 4 estrellas, activando la contratación con turoperadores de circuitos que exigían esta categoría.
+2. **Cotización Principalmente Dinámica y Gestión de Cupos de Grupos:**
+   * **Tarifa de grupos dinámica:** Implementación de la cotización dinámica para grupos en tiempo real, vinculada a la curva de reserva y a los precios de cliente individual, eliminando tarifas fijas devaluadas y evitando la dilución de ingresos.
+   * **Cupo de hasta 25 habitaciones:** Autorización de contratación de hasta 25 habitaciones por noche para circuitos y colectivos completos, asegurando un suelo inviolable de 34 habitaciones para la venta individual directa. En fechas de alta demanda (mayo y octubre), las tarifas individuales superarán los 85 € y las cotizaciones de grupo se ajustarán al alza en consecuencia.
+3. **Potenciación del Canal Propio Directo:**
+   * Promoción del reposicionamiento del hotel en la web oficial y canal telefónico con ventajas exclusivas para clientes directos, manteniendo el control de los costes de intermediación de agencias online (OTAs).
+4. **Monitorización Rigurosa del Pick-up Semanal:**
+   * Celebración semanal del Comité de Revenue Management para evaluar el ritmo de reservas de grupos e individuales frente al presupuesto mes a mes, aplicando medidas correctoras inmediatas ante cualquier desviación.
+
+---
+
+## 8. CONCLUSIÓN Y DICTAMEN FINAL: CREDIBILIDAD, ABSORCIÓN DE INFLACIÓN Y EXPANSIÓN DE MARGEN
+
+La propuesta presupuestaria de **816.591,50 € para el ejercicio 2027** es un documento inexpugnable, avalado por datos reales y reforzado por la elevación de categoría del establecimiento:
+
+1. **Credibilidad Fundacional Inexpugnable:**
+   * Al ser el **primer presupuesto oficial del Hotel Cumbria**, se prescinde por completo de proyecciones ficticias o conjeturas teóricas. La meta se construye sobre la base inquebrantable de los **759.620,00 € reales auditados en 2025**, aplicando un crecimiento medido y riguroso del **+7,50%** (+56.971,50 €).
+2. **Respaldo Real en la Elevación a 4 Estrellas:**
+   * La subida de categoría no es solo una mejora de imagen: es la palanca comercial que abre el mercado de **grupos corporativos, deportivos y de circuitos** (aportando 965 RN y 56.560 €), garantizando el cumplimiento del volumen sin saturar la operativa.
+3. **Esfuerzo Operativo Plenamente Asumible:**
+   * Alcanzar el objetivo exige únicamente sumar **423 habitaciones adicionales en todo el ejercicio**, lo que representa vender tan solo **1,16 habitaciones más al día**.
+   * La ocupación media se sitúa en un **60,38%** (+1,96 puntos porcentuales vs el 58,42% de 2025), un ritmo de trabajo confortable y asumible para las 59 habitaciones del hotel.
+4. **Absorción de la Inflación y Expansión del Margen Operativo (GOP):**
+   * El incremento proyectado en la tarifa media diaria (ADR) del **+4,01%** (de 60,38 € a **62,80 €**, +2,42 € por estancia) **absorbe y supera holgadamente la inflación de costes operativos prevista (2,50% – 3,00%)** en suministros y salarios.
+   * Al estar avalada por el salto a 4 estrellas, esta subida de tarifa es percibida por el cliente como plenamente justificada, permitiendo que el crecimiento de ingresos se traduzca de forma íntegra en una **expansión del margen bruto de explotación (GOP)** para la propiedad.

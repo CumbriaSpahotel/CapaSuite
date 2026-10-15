@@ -47,6 +47,9 @@ function generateHotelDocx(mdPath, docxName) {
     if (numCols === 7 && headerStr.includes('directriz')) {
       return [1480, 1628, 1628, 1480, 1480, 1924, 5180];
     }
+    if (numCols === 7 && (headerStr.includes('media') || headerStr.includes('criterio'))) {
+      return [1400, 1750, 1750, 1750, 1850, 2100, 4200];
+    }
     const equalW = Math.floor(USABLE_WIDTH_TWIPS / numCols);
     return new Array(numCols).fill(equalW);
   }
