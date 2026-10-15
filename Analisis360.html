@@ -3982,6 +3982,7 @@
                 'TTOO DINAMICA',
                 'GRUPOS',
                 'GRTANTEO',
+                'BONO ONLINE',
                 'BONO SPA',
                 'OTROS'
             ]
@@ -4042,6 +4043,12 @@
             }
             if (upper === 'DIROFFLINE' || upper === 'DIR OFFLINE' || upper === 'DIR_OFFLINE' || upper === 'D OFF LINE' || upper === 'DIRECTO OFFLINE' || upper === 'DIRECTO OFF') {
                 return 'DIRECTO OFFLINE';
+            }
+            if (upper === 'BONO ONLINE' || upper === 'BONO LINE' || upper === 'BONO ON LINE') {
+                return 'BONO ONLINE';
+            }
+            if (upper === 'BONO SPA') {
+                return 'BONO SPA';
             }
 
             // 3. Fallback a segment-analysis si existe

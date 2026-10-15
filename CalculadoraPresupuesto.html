@@ -3203,8 +3203,11 @@
             if (upper === 'AGENCIAS' || upper === 'GRUPO AVORIS') {
                 return 'AGENCIAS';
             }
-            if (upper === 'BONO ONLINE' || upper === 'BONO LINE' || upper === 'BONO SPA') {
+            if (upper === 'BONO ONLINE' || upper === 'BONO LINE' || upper === 'BONO ON LINE') {
                 return 'BONO ONLINE';
+            }
+            if (upper === 'BONO SPA') {
+                return 'BONO SPA';
             }
             return clean;
         }

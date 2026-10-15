@@ -75,7 +75,7 @@
         'WEEKENDESK': 'TTOO DINAMICA',
         // Otros y Bonos
         'BONO LINE': 'BONO ONLINE', 
-        'BONO SPA': 'BONO ONLINE',
+        'BONO ON LINE': 'BONO ONLINE',
         'BONO LINEAL': 'OTROS', 
         'SMARTBOX': 'OTROS',
         'EXMARBOOX': 'OTROS',
@@ -295,7 +295,8 @@
         'GRTANTEO': () => 'Grupos Tanteo',
         'PARTICULARES': () => 'Particulares',
         'AGENCIAS': () => 'Agencias Tradicionales',
-        'BONO ONLINE': (hotel) => (String(hotel || '').toLowerCase().includes('cumbria') ? 'Bono Spa' : 'Bono Online')
+        'BONO ONLINE': () => 'Bono Online',
+        'BONO SPA': () => 'Bono Spa'
     };
 
     function getDefaultChannelForSegment(segmentName, hotel = '') {

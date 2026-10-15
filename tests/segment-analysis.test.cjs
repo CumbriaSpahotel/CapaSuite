@@ -408,6 +408,16 @@ test('operational hotel channel-to-segment rules (Guadiana & Cumbria)', () => {
     assert.equal(S.canonical('GRUPO TANTEO'), 'GRTANTEO');
 });
 
+test('Cumbria recognizes both BONO ONLINE and BONO SPA as official distinct segments', () => {
+    assert.equal(S.canonical('BONO ONLINE'), 'BONO ONLINE');
+    assert.equal(S.canonical('BONO LINE'), 'BONO ONLINE');
+    assert.equal(S.canonical('BONO ON LINE'), 'BONO ONLINE');
+    assert.equal(S.canonical('BONO SPA'), 'BONO SPA');
+    assert.ok(S.validSegments.includes('BONO ONLINE'));
+    assert.ok(S.validSegments.includes('BONO SPA'));
+});
+
+
 
 
 
