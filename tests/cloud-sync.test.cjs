@@ -110,3 +110,19 @@ test('switching cloud accounts retains a backup and does not carry data or pendi
     assert.equal(s.cloud().Guadiana[2026], 2);
 });
 
+test('applyCloudData skips unchanged fields and extended settings sync across modules', async () => {
+    const s = setup({Guadiana:{2026:1}});
+    await s.run('downloadFromCloud()');
+    // Identical cloud snapshot returns 0 changed keys
+    const unchanged = s.run("applyCloudData({ hotelData: JSON.stringify({Guadiana:{2026:1}}) })");
+    assert.equal(unchanged.length, 0);
+
+    // Extended settings are synced to cloud
+    s.run("CapaStorage.setItem('manual_cupos_v1', JSON.stringify({Guadiana:{'2026-10':15}}))");
+    s.run("CapaStorage.setItem('channel_commissions_Guadiana', JSON.stringify({'BOOKING.COM':{pct:18,fixedPerRN:0}}))");
+    await s.run('uploadToCloud()');
+    assert.equal(s.run('pendingChanges.size'), 0);
+    assert.equal(JSON.parse(s.storage.manual_cupos_v1).Guadiana['2026-10'], 15);
+});
+
+

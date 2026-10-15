@@ -4241,6 +4241,10 @@
            PICK-UP Y RENDIMIENTO POR SEGMENTO (VS AÑO ANTERIOR)
            ========================================================================== */
         function renderSegmentPickupAnalysis(hotel, year, midx) {
+            const escapeHTML = (typeof window !== 'undefined' && typeof window.escapeHTML === 'function')
+                ? window.escapeHTML
+                : (str => String(str ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])));
+            const SEG_MONTHS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
             const effectiveMonth = (typeof window.__seg360SelectedMonth !== 'undefined' && window.__seg360SelectedMonth !== null) ? window.__seg360SelectedMonth : midx;
             window.__seg360SelectedMonth = effectiveMonth;
 
@@ -4454,7 +4458,7 @@
             let totRmsLY = 0, totRevLY = 0;
             let totPickupRms = 0, totPickupRev = 0;
 
-            const officialList = getHotelOfficialSegments(hotel);
+            const officialList = (typeof getHotelOfficialSegments === 'function') ? getHotelOfficialSegments(hotel) : [];
 
             allCanonicalKeys.forEach(segName => {
                 const cur = groupedMap[segName].cur;
@@ -4464,10 +4468,10 @@
                 let pickupRms = 0;
                 let pickupRev = 0;
 
-                if (hasForecastPrev && curForecastVals[segName] && prevForecastVals[segName]) {
-                    pickupRms = curForecastVals[segName].rooms - prevForecastVals[segName].rooms;
-                    pickupRev = curForecastVals[segName].rev - prevForecastVals[segName].rev;
-                } else if (hasMonthlyOtbPrev && segOtbTY[segName] && segOtbPrevTY[segName]) {
+                if (hasForecastPrev && (curForecastVals[segName] || prevForecastVals[segName])) {
+                    pickupRms = (curForecastVals[segName]?.rooms || 0) - (prevForecastVals[segName]?.rooms || 0);
+                    pickupRev = (curForecastVals[segName]?.rev || 0) - (prevForecastVals[segName]?.rev || 0);
+                } else if (hasMonthlyOtbPrev && (segOtbTY[segName] || segOtbPrevTY[segName])) {
                     const cO = getSegmentValues(segOtbTY[segName]);
                     const pO = getSegmentValues(segOtbPrevTY[segName]);
                     pickupRms = cO.rooms - pO.rooms;
@@ -4815,6 +4819,9 @@
         }
 
         function render360SegmentMatrix() {
+            const escapeHTML = (typeof window !== 'undefined' && typeof window.escapeHTML === 'function')
+                ? window.escapeHTML
+                : (str => String(str ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])));
             const tbody = document.getElementById('segMatrixBody');
             if (!tbody) return;
             tbody.innerHTML = '';
@@ -4830,7 +4837,7 @@
             const metric = window.__seg360MatrixMetric || 'rev';
             const compMode = window.__seg360MatrixComp || 'TY';
 
-            const officialList = getHotelOfficialSegments(hotel);
+            const officialList = (typeof getHotelOfficialSegments === 'function') ? getHotelOfficialSegments(hotel) : [];
             const sortedKeys = Object.keys(groupedMap).sort((a, b) => {
                 const revA = groupedMap[a].monthlyCur.rev.reduce((sum, v) => sum + v, 0);
                 const revB = groupedMap[b].monthlyCur.rev.reduce((sum, v) => sum + v, 0);
@@ -5042,7 +5049,8 @@
 
         function switchHotel(h) {
             currentHotel = h;
-            localStorage.setItem('active_hotel_suite', h);
+            if (window.CapaState) window.CapaState.setActiveHotel(h);
+            else localStorage.setItem('active_hotel_suite', h);
             const hSel = document.getElementById('hotelSelector');
             if (hSel && hSel.value !== h) hSel.value = h;
             initSelectors();
@@ -5145,7 +5153,7 @@
                 setTimeout(() => document.getElementById('loadingOverlay').style.display = 'none', 500);
             }, 800);
 
-            const savedH = localStorage.getItem('active_hotel_suite');
+            const savedH = window.CapaState?.activeHotel || localStorage.getItem('active_hotel_suite');
             if (savedH && (savedH === 'Guadiana' || savedH === 'Cumbria')) {
                 currentHotel = savedH;
                 const hSel = document.getElementById('hotelSelector');
@@ -5155,12 +5163,23 @@
             loadInitialData();
             
             window.addEventListener('capasuite-data-synced', () => {
+                loadInitialData();
                 const notice = document.getElementById('syncNotice');
-                notice.style.display = 'block';
-                setTimeout(() => {
-                    loadInitialData();
-                    notice.style.display = 'none';
-                }, 2000);
+                if (notice) {
+                    notice.style.display = 'block';
+                    setTimeout(() => { notice.style.display = 'none'; }, 1500);
+                }
+            });
+
+            window.addEventListener('hotel-changed', (e) => {
+                const h = e?.detail;
+                if (h && h !== currentHotel && (h === 'Guadiana' || h === 'Cumbria')) {
+                    currentHotel = h;
+                    const hSel = document.getElementById('hotelSelector');
+                    if (hSel && hSel.value !== h) hSel.value = h;
+                    initSelectors();
+                    refreshAll();
+                }
             });
         };
 
@@ -6010,22 +6029,17 @@
             let maxStayDate = null;
             let comparedDays = 0;
 
-            const roomsHelper = entry => {
-                if (entry === null || entry === undefined) return 0;
-                if (typeof entry === 'object') return Number.isFinite(entry.rooms) ? entry.rooms : 0;
-                const n = Number(entry);
-                return Number.isFinite(n) ? n : 0;
-            };
+            const roomsHelper = entry => entry !== null && typeof entry === 'object' ? entry.rooms : entry;
             const revHelper = entry => {
                 if (entry === null || entry === undefined) return 0;
                 if (typeof entry === 'object') {
                     const r = entry.revenue !== undefined ? entry.revenue : entry.accommodation;
                     return Number.isFinite(r) ? r : 0;
                 }
-                const n = Number(entry);
-                return Number.isFinite(n) ? n : 0;
+                return 0;
             };
 
+            let comparable = true;
             if (yearData.daily_otb && yearData.otb_prev && yearData.otb_prev.daily_otb) {
                 const currOtb = yearData.daily_otb;
                 const prevOtb = yearData.otb_prev.daily_otb;
@@ -6033,16 +6047,21 @@
 
                 dates.forEach(date => {
                     const parsed = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
-                    if (!parsed) return;
+                    if (!parsed) { comparable = false; return; }
                     const m = Number(parsed[2]) - 1;
                     if (parsed[1] !== String(currentYear) || (midx !== -1 && m !== midx)) return;
+                    const validDate = new Date(Date.UTC(Number(parsed[1]), m, Number(parsed[3])));
+                    if (validDate.toISOString().slice(0, 10) !== date) { comparable = false; return; }
 
-                    const c = currOtb[date] !== undefined ? roomsHelper(currOtb[date]) : 0;
-                    const p = prevOtb[date] !== undefined ? roomsHelper(prevOtb[date]) : 0;
-                    const cR = currOtb[date] !== undefined ? revHelper(currOtb[date]) : 0;
-                    const pR = prevOtb[date] !== undefined ? revHelper(prevOtb[date]) : 0;
-
-                    if (c < 0 || p < 0) return;
+                    const c = roomsHelper(currOtb[date]);
+                    const p = roomsHelper(prevOtb[date]);
+                    // Missing dates/amounts are not evidence of zero bookings or cancellations.
+                    if (!Number.isFinite(c) || !Number.isFinite(p) || c < 0 || p < 0) {
+                        comparable = false;
+                        return;
+                    }
+                    const cR = revHelper(currOtb[date]);
+                    const pR = revHelper(prevOtb[date]);
 
                     comparedDays++;
                     totalPickup += (c - p);
@@ -6055,6 +6074,7 @@
                     if (!minStayDate || date < minStayDate) minStayDate = date;
                     if (!maxStayDate || date > maxStayDate) maxStayDate = date;
                 });
+                if (!comparable) comparedDays = 0;
             }
 
             // Fallback si no hay daily_otb o no hubo días coincidentes pero hay OTB mensual

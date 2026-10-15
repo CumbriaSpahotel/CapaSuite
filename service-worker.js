@@ -3,7 +3,7 @@
  * Gestiona el caché offline y las actualizaciones de la PWA.
  */
 
-const CACHE_NAME = 'capasuite-v13';
+const CACHE_NAME = 'capasuite-v14';
 
 // Recursos que se cachean en la instalación (shell de la app)
 const STATIC_ASSETS = [
@@ -15,6 +15,7 @@ const STATIC_ASSETS = [
   './AnalisisProduccion.html',
   './CalculadoraPresupuesto.html',
   './CargarDatos.html',
+  './HistoricoAlojamiento.html',
   './manifest.json',
   './Imagen/icon-192.png',
   './Imagen/icon-512.png',
@@ -34,6 +35,8 @@ const STATIC_ASSETS = [
   './js/theme-manager.js',
   './js/state.js',
   './js/chart.js',
+  './js/daily-pickup.js',
+  './js/firebase-auth.js',
   './js/segment-analysis.js',
   './js/segment-dashboard.js',
   './js/segment-review.js',

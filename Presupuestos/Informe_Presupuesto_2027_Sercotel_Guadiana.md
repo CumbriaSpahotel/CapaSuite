@@ -62,19 +62,19 @@ Al auditar la serie mensual de los últimos 4 ejercicios cerrados, la estacional
 
 | Mes | 2022 (€) | 2023 (€) | 2024 (€) | 2025 (€) | Media 4 Años (€) | Propuesta 2027 (€) | Justificación de Crecimiento |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **Enero** | 53.221 € | 49.845 € | 41.029 € | 46.594 € | 47.672 € | **75.310 €** | Captación activa de grupos y eventos deportivos base. |
-| **Febrero** | 92.867 € | 81.304 € | 59.827 € | 65.276 € | 74.819 € | **80.555 €** | Retorno al nivel medio de demanda de febrero. |
-| **Marzo** | 58.393 € | 71.543 € | 125.581 € | 85.752 € | 85.317 € | **120.510 €** | Efecto congresos primavera + Semana Santa / ferias. |
-| **Abril** | 82.924 € | 107.118 € | 130.668 € | 112.422 € | 108.283 € | **146.868 €** | Alta demanda corporativa y puentes primaverales. |
-| **Mayo** | 143.835 € | 127.007 € | 124.149 € | 161.051 € | 139.011 € | **141.294 €** | Estabilización de ADR tras pico atípico de 2025. |
-| **Junio** | 85.069 € | 80.273 € | 105.104 € | 107.233 € | 94.420 € | **133.789 €** | Cierre corporativo y eventos formativos. |
-| **Julio** | 82.766 € | 86.808 € | 129.310 € | 129.649 € | 107.133 € | **137.521 €** | Consolidación del turismo estival en tránsito. |
-| **Agosto** | 81.625 € | 89.013 € | 121.359 € | 124.448 € | 104.111 € | **147.756 €** | Volumen familiar y paso vacacional hacia el sur. |
-| **Septiembre**| 89.156 € | 110.396 € | 102.697 € | 143.034 € | 111.321 € | **167.550 €** | Reactivación corporativa otoñal a pleno rendimiento. |
-| **Octubre** | **100.195 €**| **107.855 €**| **117.252 €**| **146.243 €**| **117.886 €**| **184.822 €**| **Mes líder absoluto: compresión empresarial y AVE.** |
-| **Noviembre** | 73.495 € | 50.767 € | 103.299 € | 106.319 € | 83.470 € | **129.376 €** | Continuidad de tráfico institucional y jornadas. |
-| **Diciembre** | 66.784 € | 73.620 € | 74.543 € | 90.839 € | 76.447 € | **108.036 €** | Puentes de diciembre y ocio navideño familiar. |
-| **TOTAL** | **1.010.330 €**|**1.035.549 €**|**1.234.818 €**|**1.318.860 €**|**1.149.889 €**|**1.573.386 €**| **Crecimiento respaldado por la tendencia real.** |
+| **Enero** | 53.221 € | 49.845 € | 41.029 € | 46.594 € | 47.672 € | **68.531 €** | Captación activa de grupos deportivos y técnicos a tarifa dinámica. |
+| **Febrero** | 92.867 € | 81.304 € | 59.827 € | 65.276 € | 74.819 € | **83.672 €** | Retorno al nivel medio de demanda corporativa invernal. |
+| **Marzo** | 58.393 € | 71.543 € | 125.581 € | 85.752 € | 85.317 € | **118.408 €** | Impulso de congresos de primavera y ferias sectoriales. |
+| **Abril** | 82.924 € | 107.118 € | 130.668 € | 112.422 € | 108.283 € | **152.946 €** | Alta tracción empresarial y puentes primaverales (70,9% ocup.). |
+| **Mayo** | 143.835 € | 127.007 € | 124.149 € | 161.051 € | 139.011 € | **184.689 €** | Mes de mayor facturación absoluta del año (ADR 76,33 €). |
+| **Junio** | 85.069 € | 80.273 € | 105.104 € | 107.233 € | 94.420 € | **135.979 €** | Cierre de cursos y eventos corporativos antes del verano. |
+| **Julio** | 82.766 € | 86.808 € | 129.310 € | 129.649 € | 107.133 € | **121.849 €** | Turismo en tránsito hacia Andalucía y ocio familiar. |
+| **Agosto** | 81.625 € | 89.013 € | 121.359 € | 124.448 € | 104.111 € | **153.179 €** | Gran volumen de paso vacacional y escapadas de interior. |
+| **Septiembre**| 89.156 € | 110.396 € | 102.697 € | 143.034 € | 111.321 € | **154.687 €** | Reactivación corporativa otoñal a pleno rendimiento. |
+| **Octubre** | **100.195 €**| **107.855 €**| **117.252 €**| **146.243 €**| **117.886 €**| **175.939 €**| **Mes de máxima ocupación de la serie (87,9% y 2.942 RN).** |
+| **Noviembre** | 73.495 € | 50.767 € | 103.299 € | 106.319 € | 83.470 € | **121.569 €** | Jornadas profesionales y administración pública. |
+| **Diciembre** | 66.784 € | 73.620 € | 74.543 € | 90.839 € | 76.447 € | **101.939 €** | Puente de la Constitución y escapadas navideñas. |
+| **TOTAL** | **1.010.330 €**|**1.035.549 €**|**1.234.818 €**|**1.318.860 €**|**1.149.889 €**|**1.573.386 €**| **Crecimiento del +7,5% rigurosamente verificado.** |
 
 ---
 

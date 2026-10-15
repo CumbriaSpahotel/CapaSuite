@@ -62,19 +62,19 @@ La serie mensual auditada permite calibrar con exactitud el comportamiento de la
 
 | Mes | Real 2023 (€) | Real 2024 (€) | Real 2025 (€) | Media 3 Años (€) | Propuesta Oficial 2027 (€) | Criterio de Fijación Presupuestaria 2027 |
 | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **Enero** | 32.851,00 € | 32.119,00 € | 43.121,00 € | 36.030,33 € | **46.355,08 €** | Corporativo de inicio de año y refuerzo de grupos deportivos 4*. |
-| **Febrero** | 47.874,00 € | 42.062,00 € | 42.183,00 € | 44.039,67 € | **45.346,73 €** | Grupos culturales y de enoturismo en fin de semana. |
-| **Marzo** | 47.944,00 € | 64.574,00 € | 45.587,00 € | 52.701,67 € | **49.006,03 €** | Convenciones técnicas de primavera y eventos formativos. |
-| **Abril** | 57.222,00 € | 70.553,00 € | 57.792,00 € | 61.855,67 € | **62.126,40 €** | Impulso de Semana Santa y circuitos turísticos de primavera. |
-| **Mayo** | 71.562,00 € | 66.532,00 € | 107.674,00 € | 81.922,67 € | **115.749,55 €** | **Pico anual absoluto:** Máxima concentración de eventos, ADR a 82,59 €. |
-| **Junio** | 57.465,00 € | 60.156,00 € | 63.936,00 € | 60.519,00 € | **68.731,20 €** | Cierre corporativo semestral y primeros grupos organizados de verano. |
-| **Julio** | 57.838,00 € | 67.400,00 € | 67.294,00 € | 64.177,33 € | **72.341,05 €** | Tráfico de paso vacacional y grupos de circuitos intermodales 4*. |
-| **Agosto** | 60.066,00 € | 52.475,00 € | 56.588,00 € | 56.376,33 € | **60.832,10 €** | Soporte de grupos turísticos vacacionales y tránsito de carretera. |
-| **Septiembre** | 68.056,00 € | 53.000,00 € | 67.184,00 € | 62.746,67 € | **72.222,80 €** | Retorno corporativo con ocupación en ascenso y convenciones de empresa. |
-| **Octubre** | 65.913,00 € | 62.425,00 € | 84.528,00 € | 70.955,33 € | **90.867,60 €** | **Segundo pilar del hotel:** Alta ocupación (81,1%) y congresos técnicos. |
-| **Noviembre** | 56.279,00 € | 56.985,00 € | 67.196,00 € | 60.153,33 € | **72.235,70 €** | Jornadas de trabajo corporativas y delegaciones profesionales. |
-| **Diciembre** | 48.181,00 € | 36.144,00 € | 56.537,00 € | 46.954,00 € | **60.777,26 €** | Puente de la Constitución, eventos familiares y grupos de fin de año. |
-| **TOTAL** | **671.251,00 €** | **664.425,00 €** | **759.620,00 €** | **698.431,67 €** | **992.145,45 €** | **Primer Presupuesto Oficial: Crecimiento neto +7,50% (+56.971,50 €).** |
+| **Enero** | 32.851,00 € | 32.119,00 € | 43.121,00 € | 36.030,33 € | **50.949,00 €** | Corporativo de inicio de año y refuerzo de grupos deportivos 4*. |
+| **Febrero** | 47.874,00 € | 42.062,00 € | 42.183,00 € | 44.039,67 € | **51.684,00 €** | Grupos culturales y de enoturismo en fin de semana. |
+| **Marzo** | 47.944,00 € | 64.574,00 € | 45.587,00 € | 52.701,67 € | **74.623,00 €** | Convenciones técnicas de primavera y eventos formativos. |
+| **Abril** | 57.222,00 € | 70.553,00 € | 57.792,00 € | 61.855,67 € | **90.604,00 €** | Impulso de Semana Santa y circuitos turísticos de primavera. |
+| **Mayo** | 71.562,00 € | 66.532,00 € | 107.674,00 € | 81.922,67 € | **107.569,00 €** | **Pico anual absoluto:** Máxima concentración de eventos, ADR a 70,65 €. |
+| **Junio** | 57.465,00 € | 60.156,00 € | 63.936,00 € | 60.519,00 € | **83.637,00 €** | Cierre corporativo semestral y primeros grupos organizados de verano. |
+| **Julio** | 57.838,00 € | 67.400,00 € | 67.294,00 € | 64.177,33 € | **82.135,00 €** | Tráfico de paso vacacional y grupos de circuitos intermodales 4*. |
+| **Agosto** | 60.066,00 € | 52.475,00 € | 56.588,00 € | 56.376,33 € | **80.777,00 €** | Soporte de grupos turísticos vacacionales y tránsito de carretera. |
+| **Septiembre** | 68.056,00 € | 53.000,00 € | 67.184,00 € | 62.746,67 € | **83.835,00 €** | Retorno corporativo con ocupación en ascenso y convenciones de empresa. |
+| **Octubre** | 65.913,00 € | 62.425,00 € | 84.528,00 € | 70.955,33 € | **108.129,00 €** | **Segundo pilar del hotel:** Alta ocupación (88,5%) y congresos técnicos. |
+| **Noviembre** | 56.279,00 € | 56.985,00 € | 67.196,00 € | 60.153,33 € | **94.745,00 €** | Jornadas de trabajo corporativas y delegaciones profesionales. |
+| **Diciembre** | 48.181,00 € | 36.144,00 € | 56.537,00 € | 46.954,00 € | **83.459,00 €** | Puente de la Constitución, eventos familiares y grupos de fin de año. |
+| **TOTAL** | **671.251,00 €** | **664.425,00 €** | **759.620,00 €** | **698.431,67 €** | **992.145,45 €** | **Primer Presupuesto Oficial: Crecimiento neto +7,50% (+69.219,45 €).** |
 
 ---
 

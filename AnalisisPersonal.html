@@ -1639,7 +1639,21 @@
             });
         }
 
+        window.updateAll = refreshAll;
+        window.addEventListener('capasuite-data-synced', refreshAll);
+        window.addEventListener('hotel-changed', (e) => {
+            const h = e?.detail;
+            if (h && h !== currentHotel && (h === 'Guadiana' || h === 'Cumbria')) {
+                currentHotel = h;
+                const hSel = document.getElementById('hotelSelector');
+                if (hSel && hSel.value !== h) hSel.value = h;
+                refreshAll();
+            }
+        });
+
         window.onload = function() {
+            const savedH = window.CapaState?.activeHotel || localStorage.getItem('active_hotel_suite');
+            if (savedH && (savedH === 'Guadiana' || savedH === 'Cumbria')) currentHotel = savedH;
             const hSel = document.getElementById('hotelSelector');
             if (hSel) hSel.value = currentHotel;
             refreshAll();

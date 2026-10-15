@@ -59,4 +59,17 @@
         },
     };
 
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+        window.addEventListener('storage', (event) => {
+            if (event && event.key === 'active_hotel_suite' && ['Guadiana', 'Cumbria'].includes(event.newValue)) {
+                if (window.CapaState.hotel !== event.newValue) {
+                    window.CapaState.hotel = event.newValue;
+                    const sel = document.getElementById('hotelSelectorNav') || document.getElementById('hotelSelector');
+                    if (sel) sel.value = event.newValue;
+                    window.dispatchEvent(new CustomEvent('hotel-changed', { detail: event.newValue }));
+                }
+            }
+        });
+    }
+
 })();

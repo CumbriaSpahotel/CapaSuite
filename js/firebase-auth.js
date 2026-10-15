@@ -70,12 +70,15 @@ function checkAuth() {
         // En modo local, resolvemos inmediatamente sin esperar a Firebase
         if (_isLocalBypass) {
             // Actualizar UI de nav global si existe (cuando cargue el DOM)
-            document.addEventListener('DOMContentLoaded', () => {
+            const showLocalLabel = () => {
                 const navEmail = document.getElementById('userEmailNav');
                 if (navEmail) {
                     navEmail.innerHTML = '<span style="color:#ef4444; font-weight:800; cursor:pointer;" onclick="localStorage.setItem(\'force_login_once\', \'true\'); location.reload()">🚀 MODO LOCAL (Inicia Sesión para Nube)</span>';
                 }
-            });
+            };
+            // checkAuth runs on 'load', when DOMContentLoaded has usually already fired.
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', showLocalLabel);
+            else showLocalLabel();
             resolve({ email: 'Local Mode', uid: 'local', isLocal: true });
             return;
         }
@@ -104,7 +107,7 @@ function checkAuth() {
                 // Si acabamos de entrar, descargar datos
                 if (!window._initialDownloadDone) {
                     const downloaded = await downloadFromCloud();
-                    if (!downloaded) { resolve(user); return; }
+                    if (!downloaded) { scheduleSyncRetry(); resolve(user); return; }
                     window._initialDownloadDone = true;
                     startCloudListener(user.uid);
                     // Refrescar página si hay funciones de renderizado
@@ -127,8 +130,25 @@ const syncFields = {
     [SYNC_COMP_KEY]: 'compData',
     segment_forecast_v2: 'segmentForecast',
     segment_mappings_Guadiana: 'segmentMappingsGuadiana',
-    segment_mappings_Cumbria: 'segmentMappingsCumbria'
+    segment_mappings_Cumbria: 'segmentMappingsCumbria',
+    // Configuración que altera los cálculos de varios módulos: debe ser idéntica en todos los dispositivos.
+    manual_cupos_v1: 'manualCupos',
+    custom_events: 'customEvents',
+    custom_segment_mapping_v2: 'customSegmentMapping',
+    channel_commissions_Guadiana: 'channelCommissionsGuadiana',
+    channel_commissions_Cumbria: 'channelCommissionsCumbria',
+    capasuite_room_costs_v1: 'roomCosts',
+    capasuite_yield_strategy_v1: 'yieldStrategy'
 };
+// Settings that existed only locally before being synced: upload the local copy once if the cloud lacks it.
+// If the database rules reject these fields, they are dropped so the core data keeps syncing.
+const EXTENDED_SYNC_KEYS = new Set([
+    'manual_cupos_v1', 'custom_events', 'custom_segment_mapping_v2',
+    'channel_commissions_Guadiana', 'channel_commissions_Cumbria',
+    'capasuite_room_costs_v1', 'capasuite_yield_strategy_v1'
+]);
+let extendedSyncDisabled = false;
+const isSyncedKey = key => Object.hasOwn(syncFields, key) && !(extendedSyncDisabled && EXTENDED_SYNC_KEYS.has(key));
 const originalSetItem = CapaStorage.setItem.bind(CapaStorage);
 const originalRemoveItem = CapaStorage.removeItem.bind(CapaStorage);
 const pendingChanges = new Map();
@@ -136,6 +156,8 @@ let applyingCloud = false;
 let uploadInFlight = null;
 let cloudListener = null;
 let cloudListenerUid = null;
+let syncRetryTimer = null;
+let syncRetryDelay = 0;
 
 function syncStatus(message, failed = false) {
     let status = document.getElementById('capasuiteSyncStatus');
@@ -190,22 +212,73 @@ function writeLocalSyncValue(key, value) {
 
 function applyCloudData(cloudData) {
     applyingCloud = true;
+    const changedKeys = [];
     try {
         for (const [key, field] of Object.entries(syncFields)) {
+            if (!isSyncedKey(key)) continue;
             // An absent cloud account is not permission to delete local data.
             if (!Object.hasOwn(cloudData, field)) continue;
-            const remote = parseSyncValue(cloudData[field]);
-            const pending = pendingChanges.get(key);
-            const local = parseSyncValue(CapaStorage.getItem(key));
-            const merged = pending ? mergeSyncChanges(pending.base, local, remote) : remote;
-            writeLocalSyncValue(key, merged);
-            if (pending) pending.base = remote;
+            try {
+                const pending = pendingChanges.get(key);
+                const currentRaw = CapaStorage.getItem(key);
+                // Fast path: identical serialized value and nothing pending -> no parse, no write.
+                if (!pending && cloudData[field] === currentRaw) continue;
+                const remote = parseSyncValue(cloudData[field]);
+                const merged = pending ? mergeSyncChanges(pending.base, parseSyncValue(currentRaw), remote) : remote;
+                const nextRaw = merged == null ? null : JSON.stringify(merged);
+                if (nextRaw !== currentRaw) {
+                    writeLocalSyncValue(key, merged);
+                    changedKeys.push(key);
+                }
+                if (pending) pending.base = remote;
+            } catch (error) {
+                // One corrupt field must not block the remaining modules from syncing.
+                console.error(`CapaSuite: no se pudo aplicar '${field}' desde la nube.`, error);
+            }
         }
-        window.dispatchEvent(new CustomEvent('capasuite-data-synced'));
+        if (changedKeys.length) {
+            window.dispatchEvent(new CustomEvent('capasuite-data-synced', { detail: { keys: changedKeys, source: 'cloud' } }));
+        }
     } finally {
         applyingCloud = false;
     }
+    return changedKeys;
 }
+
+function seedMissingCloudSettings(cloudData) {
+    for (const key of EXTENDED_SYNC_KEYS) {
+        if (!isSyncedKey(key) || pendingChanges.has(key) || Object.hasOwn(cloudData, syncFields[key])) continue;
+        if (CapaStorage.getItem(key) != null) pendingChanges.set(key, { base: null, version: 1 });
+    }
+}
+
+function scheduleSyncRetry() {
+    if (syncRetryTimer || !cloudAuth.currentUser) return;
+    syncRetryDelay = Math.min(syncRetryDelay ? syncRetryDelay * 2 : 5000, 120000);
+    syncRetryTimer = setTimeout(async () => {
+        syncRetryTimer = null;
+        if (!cloudAuth.currentUser) return;
+        try {
+            if (!window._initialDownloadDone) {
+                if (!(await downloadFromCloud())) { scheduleSyncRetry(); return; }
+                const globalUpdate = window.updateAll || window.renderAll || window.render || window.init || window.initView;
+                if (typeof globalUpdate === 'function') globalUpdate();
+            } else if (pendingChanges.size) {
+                await uploadToCloud();
+            }
+            syncRetryDelay = 0;
+        } catch (error) {
+            console.error('Reintento de sincronización fallido:', error);
+            scheduleSyncRetry();
+        }
+    }, syncRetryDelay);
+}
+
+window.addEventListener('online', () => {
+    if (syncRetryTimer) { clearTimeout(syncRetryTimer); syncRetryTimer = null; }
+    syncRetryDelay = 0;
+    if (cloudAuth.currentUser && (!window._initialDownloadDone || pendingChanges.size)) scheduleSyncRetry();
+});
 
 function scheduleCloudUpload() {
     if (window._syncTimer) clearTimeout(window._syncTimer);
@@ -256,6 +329,14 @@ async function uploadToCloud() {
             return true;
         } catch (error) {
             syncStatus('Error al guardar en la nube. Cambios pendientes.', true);
+            const denied = /permission/i.test(String(error?.code || '') + ' ' + String(error?.message || ''));
+            if (denied && !extendedSyncDisabled && changes.some(change => EXTENDED_SYNC_KEYS.has(change.key))) {
+                // Rules may not allow the new settings fields yet: keep syncing the core data without them.
+                console.warn('CapaSuite: la nube rechazó los ajustes compartidos; se sincronizarán solo los datos principales.');
+                extendedSyncDisabled = true;
+                for (const key of EXTENDED_SYNC_KEYS) pendingChanges.delete(key);
+            }
+            scheduleSyncRetry();
             throw error;
         } finally {
             uploadInFlight = null;
@@ -274,7 +355,9 @@ async function downloadFromCloud() {
     try {
         const snapshot = await cloudDb.ref('users/' + user.uid).once('value');
         if (cloudAuth.currentUser?.uid !== user.uid) return false;
-        applyCloudData(snapshot.val() || {});
+        const cloudData = snapshot.val() || {};
+        applyCloudData(cloudData);
+        seedMissingCloudSettings(cloudData);
         window._initialDownloadDone = true;
         startCloudListener(user.uid);
         syncStatus('Datos descargados de la nube');
@@ -343,7 +426,7 @@ function startCloudListener(uid) {
 }
 
 function recordSyncChange(key, before, after) {
-    if (applyingCloud || !syncFields[key] || before === after) return;
+    if (applyingCloud || !isSyncedKey(key) || before === after) return;
     const existing = pendingChanges.get(key);
     pendingChanges.set(key, { base: existing ? existing.base : parseSyncValue(before), version: (existing?.version || 0) + 1 });
     scheduleCloudUpload();
@@ -358,14 +441,14 @@ function readLocalWithoutEcho(key) {
 
 CapaStorage.setItem = function (key, value) {
     if (applyingCloud) return originalSetItem(key, value);
-    const before = syncFields[key] ? readLocalWithoutEcho(key) : null;
+    const before = isSyncedKey(key) ? readLocalWithoutEcho(key) : null;
     const result = originalSetItem(key, value);
     recordSyncChange(key, before, value);
     return result;
 };
 CapaStorage.removeItem = function (key) {
     if (applyingCloud) { originalRemoveItem(key); return; }
-    const before = syncFields[key] ? readLocalWithoutEcho(key) : null;
+    const before = isSyncedKey(key) ? readLocalWithoutEcho(key) : null;
     originalRemoveItem(key);
     recordSyncChange(key, before, null);
 };

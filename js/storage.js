@@ -87,12 +87,14 @@
                     localStorage.setItem(`${VERSION}_${key}`, value);
                     persisted = true;
                 } catch (e) { 
-                    // Si se alcanza el límite de cuota (5MB), intentar purgar claves legacy sin prefijo v3_
+                    // Si se alcanza el límite de cuota (5MB), purgar SOLO copias legacy sin prefijo que ya
+                    // están duplicadas con prefijo v3_ (getItem nunca las lee). Las claves sin duplicado
+                    // (hotel activo, tema, ajustes, datos antiguos) siguen siendo necesarias y no se tocan.
                     try {
                         let freed = false;
                         for (let i = localStorage.length - 1; i >= 0; i--) {
                             const k = localStorage.key(i);
-                            if (k && !k.startsWith(VERSION + '_') && !k.startsWith('firebase:')) {
+                            if (k && !k.startsWith(VERSION + '_') && !k.startsWith('firebase:') && localStorage.getItem(`${VERSION}_${k}`) !== null) {
                                 localStorage.removeItem(k);
                                 freed = true;
                             }
@@ -149,6 +151,30 @@
             );
         }
     };
+
+    // Sincronización reactiva entre pestañas del mismo navegador
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+        window.addEventListener('storage', (event) => {
+            if (!event || !event.key) return;
+            const prefix = VERSION + '_';
+            const logicalKey = event.key.startsWith(prefix) ? event.key.slice(prefix.length) : event.key;
+            if (!logicalKey || logicalKey.startsWith('__') || logicalKey.startsWith('_cs_') || logicalKey.startsWith('firebase:')) return;
+
+            delete memoryStorage[logicalKey];
+            try { sessionStorage.removeItem('_cs_dirty_' + logicalKey); } catch (e) { }
+            if (event.newValue == null) {
+                removeFromSession(logicalKey);
+            } else {
+                saveToSession(logicalKey, event.newValue);
+            }
+
+            if (logicalKey !== 'active_hotel_suite' && logicalKey !== 'capasuite_theme') {
+                window.dispatchEvent?.(new CustomEvent('capasuite-data-synced', {
+                    detail: { keys: [logicalKey], source: 'storage' }
+                }));
+            }
+        });
+    }
 
     // Auto-init
     CapaStorage.showWarningIfNeeded();

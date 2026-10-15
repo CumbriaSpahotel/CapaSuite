@@ -2089,6 +2089,23 @@
                     rn:  [...base2025.rn],
                     adr: [...base2025.adr]
                 };
+            } else if (currentYear === '2027') {
+                // BASE 2026 OFICIAL DE REFERENCIA (100% Alineada con el Informe Oficial Aprobado)
+                // Guadiana: 1.463.615 € (+7.5% -> 1.573.386,12 € | RN: 23.393 | ADR: 67,26 €)
+                // Cumbria: 922.926 € (+7.5% -> 992.145,45 € | RN: 15.434 | ADR: 64,28 €)
+                if (currentHotel === 'Guadiana') {
+                    h.referenceBase = {
+                        rev: [63750, 77834, 110147, 142275, 171804, 126492, 113348, 142492, 143895, 163664, 113087, 94827],
+                        rn:  [1037,  1300,  1606,   2223,   2341,   1828,   1742,   2139,   2254,   2845,   1785,   1533],
+                        adr: [61.48, 59.87, 68.58,  64.00,  73.39,  69.20,  65.07,  66.62,  63.84,  57.53,  63.35,  61.86]
+                    };
+                } else {
+                    h.referenceBase = {
+                        rev: [47394, 48078, 69417, 84283, 100064, 77802, 76405, 75141, 77986, 100585, 88135, 77636],
+                        rn:  [907,   912,   1132,  1288,  1473,   1306,   1341,   1385,   1310,   1565,   1224,   1082],
+                        adr: [52.25, 52.72, 61.32, 65.44, 67.93,  59.57,  56.98,  54.25,  59.53,  64.27,  72.01,  71.75]
+                    };
+                }
             } else {
                 h.referenceBase = buildReferenceBaseline(currentHotel, currentYear, blendWeight);
             }
@@ -2119,10 +2136,7 @@
                 } else {
                     const histPct = Math.round(blendWeight * 100);
                     const prevPct = 100 - histPct;
-                    const blendSub = histPct > 0 
-                        ? `<br><span style="font-size:0.65rem; font-weight:normal; opacity:0.85;">(${prevPct}% ${prevYear} + ${histPct}% Histórico)</span>`
-                        : `<br><span style="font-size:0.65rem; font-weight:normal; opacity:0.85;">(100% ${prevYear})</span>`;
-                    thHistRef.innerHTML = `BASE ${prevYear} (Referencia)${blendSub}`;
+                    thHistRef.innerHTML = `BASE ${prevYear} (Referencia)<br><span style="font-size:0.65rem; font-weight:normal; opacity:0.85;">(Base Oficial Aprobada)</span>`;
                 }
             }
 

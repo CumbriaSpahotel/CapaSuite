@@ -1557,9 +1557,9 @@
         let distinctMonths = [];
         let customEvents = [];
 
-        // Load ignored competitors from memory
+        // Load ignored competitors from storage
         try {
-            const savedIgnored = localStorage.getItem('ignored_competitors');
+            const savedIgnored = (typeof CapaStorage !== 'undefined' ? CapaStorage.getItem('ignored_competitors') : null) || localStorage.getItem('ignored_competitors');
             if (savedIgnored) {
                 ignoredCompetitors = new Set(JSON.parse(savedIgnored));
             }
@@ -1583,11 +1583,11 @@
 
         function loadDayPartMultipliers() {
             try {
-                const saved = localStorage.getItem('capasuite_day_part_multipliers');
+                const saved = (typeof CapaStorage !== 'undefined' ? CapaStorage.getItem('capasuite_day_part_multipliers') : null) || localStorage.getItem('capasuite_day_part_multipliers');
                 if (saved) {
                     dayPartMultipliers = Object.assign({ ...DEFAULT_DAY_PART_MULTIPLIERS }, JSON.parse(saved));
                 } else {
-                    const rawStrat = localStorage.getItem('capasuite_yield_strategy_v1');
+                    const rawStrat = (typeof CapaStorage !== 'undefined' ? CapaStorage.getItem('capasuite_yield_strategy_v1') : null) || localStorage.getItem('capasuite_yield_strategy_v1');
                     if (rawStrat) {
                         const parsed = JSON.parse(rawStrat);
                         const actH = (typeof activeHotel !== 'undefined' ? activeHotel : 'Guadiana');
@@ -1596,7 +1596,7 @@
                         }
                     }
                 }
-                const savedUse = localStorage.getItem('capasuite_use_day_part_mult');
+                const savedUse = (typeof CapaStorage !== 'undefined' ? CapaStorage.getItem('capasuite_use_day_part_mult') : null) ?? localStorage.getItem('capasuite_use_day_part_mult');
                 if (savedUse !== null) {
                     useDayPartMultipliers = (savedUse === 'true');
                 }
@@ -1608,8 +1608,14 @@
 
         function saveDayPartMultipliers() {
             try {
-                localStorage.setItem('capasuite_day_part_multipliers', JSON.stringify(dayPartMultipliers));
-                localStorage.setItem('capasuite_use_day_part_mult', String(useDayPartMultipliers));
+                const multJson = JSON.stringify(dayPartMultipliers);
+                const useStr = String(useDayPartMultipliers);
+                if (typeof CapaStorage !== 'undefined') {
+                    CapaStorage.setItem('capasuite_day_part_multipliers', multJson);
+                    CapaStorage.setItem('capasuite_use_day_part_mult', useStr);
+                }
+                localStorage.setItem('capasuite_day_part_multipliers', multJson);
+                localStorage.setItem('capasuite_use_day_part_mult', useStr);
             } catch(e) {
                 console.warn("Failed to save day part multipliers:", e);
             }
@@ -1617,11 +1623,11 @@
 
         function loadHotelMinPrices() {
             try {
-                const saved = localStorage.getItem('capasuite_hotel_min_prices');
+                const saved = (typeof CapaStorage !== 'undefined' ? CapaStorage.getItem('capasuite_hotel_min_prices') : null) || localStorage.getItem('capasuite_hotel_min_prices');
                 if (saved) {
                     hotelMinPrices = Object.assign({ ...DEFAULT_HOTEL_MIN_PRICES }, JSON.parse(saved));
                 }
-                const savedIgnore = localStorage.getItem('capasuite_ignore_below_min');
+                const savedIgnore = (typeof CapaStorage !== 'undefined' ? CapaStorage.getItem('capasuite_ignore_below_min') : null) ?? localStorage.getItem('capasuite_ignore_below_min');
                 if (savedIgnore !== null) {
                     ignoreCompetitorsBelowMin = (savedIgnore === 'true');
                 }
@@ -1655,8 +1661,14 @@
 
         function saveHotelMinPrices() {
             try {
-                localStorage.setItem('capasuite_hotel_min_prices', JSON.stringify(hotelMinPrices));
-                localStorage.setItem('capasuite_ignore_below_min', String(ignoreCompetitorsBelowMin));
+                const pricesJson = JSON.stringify(hotelMinPrices);
+                const ignoreStr = String(ignoreCompetitorsBelowMin);
+                if (typeof CapaStorage !== 'undefined') {
+                    CapaStorage.setItem('capasuite_hotel_min_prices', pricesJson);
+                    CapaStorage.setItem('capasuite_ignore_below_min', ignoreStr);
+                }
+                localStorage.setItem('capasuite_hotel_min_prices', pricesJson);
+                localStorage.setItem('capasuite_ignore_below_min', ignoreStr);
             } catch (e) {
                 console.warn("Failed to save hotel min prices to localStorage", e);
             }
@@ -4695,12 +4707,25 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
             } catch (e) { console.warn("No cached data available yet", e); }
         }
 
-        // Exposed for firebase-auth.js to call after cloud download
+        // Exposed for firebase-auth.js and cross-tab sync to call after data updates
         window.updateAll = function () {
             if (manualPricesPending) return;
             console.log("🔄 Cloud Data Received -> Refreshing View...");
+            loadDayPartMultipliers();
+            loadHotelMinPrices();
             initApp();
         };
+
+        window.addEventListener('capasuite-data-synced', () => {
+            if (typeof window.updateAll === 'function') window.updateAll();
+        });
+
+        window.addEventListener('hotel-changed', (e) => {
+            const h = e?.detail;
+            if (h && h !== activeHotel && (h === 'Guadiana' || h === 'Cumbria')) {
+                switchHotel(h);
+            }
+        });
 
         window.clearData = function () {
             if (confirm("¿Borrar datos actuales y subir nuevo archivo?\n(Pulsa ACEPTAR y espera en la pantalla de carga)")) {
@@ -4811,12 +4836,15 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
             } else {
                 ignoredCompetitors.add(compName);
             }
-            localStorage.setItem('ignored_competitors', JSON.stringify(Array.from(ignoredCompetitors)));
+            const serialized = JSON.stringify(Array.from(ignoredCompetitors));
+            if (typeof CapaStorage !== 'undefined') CapaStorage.setItem('ignored_competitors', serialized);
+            localStorage.setItem('ignored_competitors', serialized);
         }
 
         function closeCompConfig() {
             document.getElementById('compConfigModal').style.display = 'none';
             renderAll();
+            if (processedData && processedData.length > 0) saveData();
         }
 
         function recalcMarketAverages(data) {
@@ -5039,6 +5067,7 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
             // Recalcular promedios y actualizar toda la vista
             if (processedData && processedData.length > 0) {
                 recalcMarketAverages(processedData);
+                saveData();
                 refreshActiveView();
             }
         }
@@ -5054,6 +5083,7 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
                 openMinPriceModal();
                 if (processedData && processedData.length > 0) {
                     recalcMarketAverages(processedData);
+                    saveData();
                     refreshActiveView();
                 }
             }
