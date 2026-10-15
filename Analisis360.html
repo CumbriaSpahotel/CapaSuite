@@ -1272,6 +1272,97 @@
             border: 1px solid rgba(245, 158, 11, 0.35);
             display: inline-block;
         }
+
+        /* MONITOR DE CUMPLIMIENTO 365 DÍAS */
+        .compliance-monitor-panel {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        .compliance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .compliance-title-group h3 {
+            margin: 0;
+            font-size: 1.15rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+        }
+        .compliance-tabs {
+            display: flex;
+            gap: 8px;
+        }
+        .compliance-tab-btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .compliance-tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .compliance-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .compliance-sum-card {
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+        }
+        .compliance-months-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        .compliance-month-card {
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 12px 14px;
+            background: var(--bg-card);
+            cursor: pointer;
+            transition: transform 0.15s, border-color 0.15s;
+        }
+        .compliance-month-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+        .compliance-day-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            margin-bottom: 8px;
+            font-size: 0.82rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
     </style>
 </head>
 
@@ -1392,6 +1483,55 @@
                     <span id="kpi-margin-cpor-label">CPOR: 21,0 €</span>
                     <span id="kpi-margin-vacant-label">Coste Vacías: 0 €</span>
                 </div>
+            </div>
+        </div>
+
+        <!-- MONITOR DE CUMPLIMIENTO 365 DÍAS: DÓNDE VAMOS BIEN Y DÓNDE NO SE ESTÁ CUMPLIENDO -->
+        <div class="compliance-monitor-panel" id="compliance365Panel">
+            <div class="compliance-header">
+                <div class="compliance-title-group">
+                    <h3><span>🎯</span> Monitor de Cumplimiento 365 Días · ¿Dónde vamos bien y dónde no se está cumpliendo?</h3>
+                    <p style="margin:4px 0 0; font-size:0.8rem; color:var(--text-muted);">
+                        Auditoría mes a mes y día a día basada en histórico multianual, ritmo de reservas (OTB) y objetivos de alojamiento.
+                    </p>
+                </div>
+                <div class="compliance-tabs">
+                    <button type="button" class="compliance-tab-btn active" id="tabBtnComplianceMonths" onclick="switchComplianceTab('months')">
+                        📅 Balance Mes a Mes (12M)
+                    </button>
+                    <button type="button" class="compliance-tab-btn" id="tabBtnComplianceDays" onclick="switchComplianceTab('days')">
+                        ⚡ Alertas Día a Día (60 Días)
+                    </button>
+                </div>
+            </div>
+
+            <!-- SEMÁFORO GLOBAL DE 3 TARJETAS -->
+            <div class="compliance-summary-grid">
+                <div class="compliance-sum-card" style="border-left: 4px solid #10b981;">
+                    <div style="font-size:0.72rem; font-weight:700; color:#10b981; text-transform:uppercase;">🟢 DÓNDE VAMOS BIEN</div>
+                    <div style="font-size:1.45rem; font-weight:800; color:var(--text-main); margin:4px 0;" id="compSumGoodCount">--</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);" id="compSumGoodDetail">Superávit o ritmo superior a histórico</div>
+                </div>
+                <div class="compliance-sum-card" style="border-left: 4px solid #ef4444;">
+                    <div style="font-size:0.72rem; font-weight:700; color:#ef4444; text-transform:uppercase;">🔴 DÓNDE NO SE ESTÁ CUMPLIENDO</div>
+                    <div style="font-size:1.45rem; font-weight:800; color:var(--text-main); margin:4px 0;" id="compSumRiskCount">--</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);" id="compSumRiskDetail">Meses con déficit o rezago en cartera</div>
+                </div>
+                <div class="compliance-sum-card" style="border-left: 4px solid var(--primary);">
+                    <div style="font-size:0.72rem; font-weight:700; color:var(--primary); text-transform:uppercase;">⚡ RITMO REQUERIDO MES ACTUAL</div>
+                    <div style="font-size:1.45rem; font-weight:800; color:var(--primary); margin:4px 0;" id="compSumDailyNeeded">--</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);" id="compSumDailyDetail">Facturación diaria necesaria para cerrar objetivo</div>
+                </div>
+            </div>
+
+            <!-- CONTENEDOR 1: MES A MES -->
+            <div id="complianceMonthsView" class="compliance-months-grid">
+                <!-- Inyectado dinámicamente -->
+            </div>
+
+            <!-- CONTENEDOR 2: DÍA A DÍA -->
+            <div id="complianceDaysView" style="display:none;">
+                <div id="complianceDaysList"></div>
             </div>
         </div>
 
@@ -4290,7 +4430,29 @@
 
         function initSelectors() {
             const ySel = document.getElementById('yearSelector');
-            const rawYears = db[currentHotel] ? Object.keys(db[currentHotel]).filter(k => /^(20\d{2})$/.test(k)) : [];
+            const rawYears = db[currentHotel] ? Object.keys(db[currentHotel]).filter(k => {
+                if (!/^(20\d{2})$/.test(k)) return false;
+                const yData = db[currentHotel][k];
+                if (!yData) return false;
+                let hasData = false;
+                if (yData.service) {
+                    const hab = (typeof getGroupedProduction === 'function' ? getGroupedProduction(yData.service)?.HABITACION?.revenue : null) || [];
+                    const mast = yData.service["TOTAL_MASTER"]?.rooms || [];
+                    if (hab.some(v => v > 0) || mast.some(v => v > 0)) hasData = true;
+                }
+                if (!hasData && yData.otb) {
+                    const oRms = yData.otb.breakdown?.habitacion_rn || yData.otb.rooms || [];
+                    const oRev = yData.otb.breakdown?.habitacion || yData.otb.revenue || [];
+                    if (oRms.some(v => v > 0) || oRev.some(v => v > 0)) hasData = true;
+                }
+                if (!hasData && yData.segment) {
+                    Object.values(yData.segment).forEach(s => {
+                        if ((s.rooms || []).some(v => v > 0) || (s.revenue || []).some(v => v > 0)) hasData = true;
+                    });
+                }
+                if (!hasData && (k === "2025" || k === "2026" || k === "2027")) hasData = true;
+                return hasData;
+            }) : [];
             const years = rawYears.sort((a, b) => parseInt(b) - parseInt(a));
             if (!years.length) years.push("2026", "2025");
             ySel.innerHTML = years.map(y => `<option value="${y}" ${y==currentYear?'selected':''}>${y}</option>`).join('');
@@ -4335,6 +4497,7 @@
             const agg = aggregateServices(data, midx, currentViewMode);
             
             renderKPIRow(agg, currentHotel);
+            renderComplianceMonitor365(data, currentHotel, currentYear, midx);
             renderHistoricalChart(midx);
             renderCharts(agg, data.segment || {}, data.daily || {}, midx, data);
             renderTables(agg, data.segment || {}, midx, data);
@@ -4506,6 +4669,322 @@
                 otbHabRev: otbHabRevTotal,
                 otbHabRms: otbHabRmsTotal
             };
+        }
+
+        function switchComplianceTab(tab) {
+            const monthsView = document.getElementById('complianceMonthsView');
+            const daysView = document.getElementById('complianceDaysView');
+            const btnMonths = document.getElementById('tabBtnComplianceMonths');
+            const btnDays = document.getElementById('tabBtnComplianceDays');
+
+            if (tab === 'months') {
+                if (monthsView) monthsView.style.display = 'grid';
+                if (daysView) daysView.style.display = 'none';
+                if (btnMonths) btnMonths.classList.add('active');
+                if (btnDays) btnDays.classList.remove('active');
+            } else {
+                if (monthsView) monthsView.style.display = 'none';
+                if (daysView) daysView.style.display = 'block';
+                if (btnMonths) btnMonths.classList.remove('active');
+                if (btnDays) btnDays.classList.add('active');
+            }
+        }
+
+        function selectMonthFromCompliance(m) {
+            const mSel = document.getElementById('monthSelector');
+            if (mSel) {
+                mSel.value = String(m);
+                refreshAll();
+                window.scrollTo({ top: 380, behavior: 'smooth' });
+            }
+        }
+
+        function renderComplianceMonitor365(data, hotel, year, midx) {
+            const panel = document.getElementById('compliance365Panel');
+            if (!panel) return;
+
+            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            const shortMonths = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+            const hotelRooms = hotel === 'Cumbria' ? 59 : 108;
+            const now = new Date();
+            const curY = now.getFullYear();
+            const curM = now.getMonth();
+            const yInt = parseInt(year);
+
+            // 1. Production (Real + OTB)
+            const grouped = getGroupedProduction(data.service);
+            const realHabRev = grouped["HABITACION"]?.revenue || new Array(12).fill(0);
+            const realHabRN = grouped["HABITACION"]?.rooms || data.service?.["TOTAL_MASTER"]?.rooms || new Array(12).fill(0);
+
+            const otbRev = data.otb?.breakdown?.habitacion || data.otb?.revenue || new Array(12).fill(0);
+            const otbRN = data.otb?.breakdown?.habitacion_rn || data.otb?.rooms || new Array(12).fill(0);
+
+            // 2. Budget
+            const budgetKey = `custom_budget_${year}`;
+            const budgetObj = (db[hotel] && db[hotel][budgetKey]) || (db[hotel] && db[hotel]['custom_budget']);
+            const budgetRev = (budgetObj && budgetObj.rev && budgetObj.rev.some(v => v > 0)) ? budgetObj.rev : null;
+
+            // 3. Previous Year Benchmark
+            const prevYear = String(yInt - 1);
+            const prevData = db[hotel]?.[prevYear];
+            const prevGrouped = prevData ? getGroupedProduction(prevData.service) : null;
+            const prevHabRev = prevGrouped?.["HABITACION"]?.revenue || new Array(12).fill(0);
+
+            let goodCount = 0;
+            let riskCount = 0;
+            let totalSurplus = 0;
+            let totalDeficit = 0;
+
+            const monthsData = [];
+
+            for (let m = 0; m < 12; m++) {
+                const daysInM = new Date(yInt, m + 1, 0).getDate();
+                const isPassed = (yInt < curY) || (yInt === curY && m < curM);
+                const isCurrent = (yInt === curY && m === curM);
+                const isFuture = (yInt > curY) || (yInt === curY && m > curM);
+
+                const rRev = realHabRev[m] || 0;
+                const oRev = otbRev[m] || 0;
+                // In closed months, actual revenue; in open/current, projection (Real + OTB or max)
+                const sold = isPassed ? rRev : (isCurrent ? (rRev + oRev) : Math.max(rRev, oRev));
+                const target = budgetRev ? (budgetRev[m] || 0) : (prevHabRev[m] ? prevHabRev[m] * 1.05 : 0);
+                const prevRev = prevHabRev[m] || 0;
+
+                const diff = target > 0 ? (sold - target) : (prevRev > 0 ? (sold - prevRev) : 0);
+                const pct = target > 0 ? (sold / target * 100) : (prevRev > 0 ? (sold / prevRev * 100) : 0);
+
+                let status = 'neutral';
+                let statusLabel = 'Sin Objetivo';
+                let statusClass = 'border-color: var(--border);';
+                let badgeStyle = 'background: rgba(148, 163, 184, 0.15); color: var(--text-muted);';
+
+                if (target > 0) {
+                    if (sold >= target) {
+                        status = 'good';
+                        goodCount++;
+                        totalSurplus += (sold - target);
+                        statusLabel = isPassed ? `Cumplido (+${fmtNum(sold - target)}€)` : `Superávit (+${fmtNum(sold - target)}€)`;
+                        statusClass = 'border-color: rgba(16, 185, 129, 0.5);';
+                        badgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #10b981;';
+                    } else if (isPassed) {
+                        status = 'risk';
+                        riskCount++;
+                        totalDeficit += (target - sold);
+                        statusLabel = `Déficit (-${fmtNum(target - sold)}€)`;
+                        statusClass = 'border-color: rgba(239, 68, 68, 0.4);';
+                        badgeStyle = 'background: rgba(239, 68, 68, 0.15); color: #ef4444;';
+                    } else if (isCurrent) {
+                        const daysLeft = Math.max(1, daysInM - now.getDate());
+                        const gap = target - sold;
+                        const dailyNeed = Math.round(gap / daysLeft);
+                        if (gap <= 0) {
+                            status = 'good';
+                            goodCount++;
+                            statusLabel = `Cumplido (+${fmtNum(Math.abs(gap))}€)`;
+                            badgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #10b981;';
+                        } else {
+                            status = 'risk';
+                            riskCount++;
+                            totalDeficit += gap;
+                            statusLabel = `Faltan ${fmtNum(dailyNeed)}€/día (${daysLeft}d)`;
+                            statusClass = 'border-color: rgba(245, 158, 11, 0.5);';
+                            badgeStyle = 'background: rgba(245, 158, 11, 0.15); color: #f59e0b;';
+                        }
+                    } else {
+                        // Future month
+                        const paceRatio = prevRev > 0 ? (sold / (prevRev * 0.45)) : 1;
+                        if (paceRatio >= 0.9) {
+                            status = 'good';
+                            goodCount++;
+                            statusLabel = `En Ritmo (${pct.toFixed(0)}%)`;
+                            badgeStyle = 'background: rgba(99, 102, 241, 0.15); color: var(--primary);';
+                        } else {
+                            status = 'risk';
+                            riskCount++;
+                            totalDeficit += (target - sold);
+                            statusLabel = `Rezago OTB (-${fmtNum(target - sold)}€)`;
+                            statusClass = 'border-color: rgba(239, 68, 68, 0.4);';
+                            badgeStyle = 'background: rgba(239, 68, 68, 0.15); color: #ef4444;';
+                        }
+                    }
+                } else if (prevRev > 0) {
+                    if (sold >= prevRev) {
+                        status = 'good';
+                        goodCount++;
+                        statusLabel = `+${((sold-prevRev)/prevRev*100).toFixed(0)}% vs ${prevYear}`;
+                        badgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #10b981;';
+                    } else {
+                        status = 'risk';
+                        riskCount++;
+                        statusLabel = `-${((prevRev-sold)/prevRev*100).toFixed(0)}% vs ${prevYear}`;
+                        badgeStyle = 'background: rgba(239, 68, 68, 0.15); color: #ef4444;';
+                    }
+                }
+
+                monthsData.push({
+                    m,
+                    name: monthNames[m],
+                    shortName: shortMonths[m],
+                    sold,
+                    target,
+                    diff,
+                    pct,
+                    status,
+                    statusLabel,
+                    statusClass,
+                    badgeStyle,
+                    isCurrent,
+                    isPassed,
+                    isFuture
+                });
+            }
+
+            // Summary cards
+            const goodCountEl = document.getElementById('compSumGoodCount');
+            const goodDetailEl = document.getElementById('compSumGoodDetail');
+            if (goodCountEl) goodCountEl.innerText = `${goodCount} Meses en Verde`;
+            if (goodDetailEl) goodDetailEl.innerText = totalSurplus > 0 ? `+${fmtNum(totalSurplus)} € de superávit acumulado` : 'Rendimiento en ritmo positivo';
+
+            const riskCountEl = document.getElementById('compSumRiskCount');
+            const riskDetailEl = document.getElementById('compSumRiskDetail');
+            if (riskCountEl) riskCountEl.innerText = `${riskCount} Meses en Alerta`;
+            if (riskDetailEl) riskDetailEl.innerText = totalDeficit > 0 ? `-${fmtNum(totalDeficit)} € de brecha a recuperar` : 'Sin alertas de riesgo';
+
+            // Current month daily needed
+            const curMonthData = monthsData[curM];
+            const dailyEl = document.getElementById('compSumDailyNeeded');
+            const dailyDetailEl = document.getElementById('compSumDailyDetail');
+            if (yInt === curY && curMonthData) {
+                const daysInCurM = new Date(curY, curM + 1, 0).getDate();
+                const daysLeft = Math.max(1, daysInCurM - now.getDate());
+                const curGap = curMonthData.target > 0 ? (curMonthData.target - curMonthData.sold) : 0;
+                if (curGap > 0) {
+                    const dailyNeed = Math.round(curGap / daysLeft);
+                    if (dailyEl) dailyEl.innerText = `${fmtNum(dailyNeed)} € / día`;
+                    if (dailyDetailEl) dailyDetailEl.innerText = `Faltan ${fmtNum(curGap)} € en ${daysLeft} días de ${curMonthData.name}`;
+                } else if (curMonthData.target > 0) {
+                    if (dailyEl) dailyEl.innerText = `¡Cumplido!`;
+                    if (dailyDetailEl) dailyDetailEl.innerText = `Superávit de +${fmtNum(Math.abs(curGap))} € en ${curMonthData.name}`;
+                } else {
+                    if (dailyEl) dailyEl.innerText = `${fmtNum(Math.round(curMonthData.sold / Math.max(1, now.getDate())))} € / día`;
+                    if (dailyDetailEl) dailyDetailEl.innerText = `Ritmo actual alcanzado en ${curMonthData.name}`;
+                }
+            } else {
+                if (dailyEl) dailyEl.innerText = `--`;
+                if (dailyDetailEl) dailyDetailEl.innerText = `Ejercicio ${year}`;
+            }
+
+            // Render Months Grid
+            const monthsView = document.getElementById('complianceMonthsView');
+            if (monthsView) {
+                monthsView.innerHTML = monthsData.map(md => {
+                    const pctBar = Math.min(100, Math.max(0, md.pct || 0));
+                    const isSelected = (midx === md.m);
+                    const selectedGlow = isSelected ? 'border: 2px solid var(--primary); box-shadow: 0 0 12px var(--primary-glow);' : '';
+
+                    return `
+                        <div class="compliance-month-card" style="${md.statusClass} ${selectedGlow}" onclick="selectMonthFromCompliance(${md.m})" title="Clic para filtrar ${md.name} en vista 360°">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-size: 0.82rem; font-weight: 800; color: var(--text-main);">${md.name}</span>
+                                <span style="font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; ${md.badgeStyle}">
+                                    ${md.statusLabel}
+                                </span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 5px;">
+                                <span>Alcanzado: <b style="color:var(--text-main);">${fmtNum(md.sold)}€</b></span>
+                                <span>Obj: <b>${md.target > 0 ? fmtNum(md.target)+'€' : '--'}</b></span>
+                            </div>
+                            <div style="width: 100%; height: 5px; background: rgba(0,0,0,0.08); border-radius: 3px; overflow: hidden;">
+                                <div style="width: ${pctBar}%; height: 100%; background: ${md.status === 'good' ? '#10b981' : (md.status === 'risk' ? '#ef4444' : 'var(--primary)')};"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Render Daily Alerts View
+            const daysList = document.getElementById('complianceDaysList');
+            if (daysList) {
+                let dailyAlerts = [];
+                // Check if compData or daily data has alerts
+                let compData = null;
+                try {
+                    const raw = CapaStorage.getItem('revenue_data_v2');
+                    if (raw) compData = JSON.parse(raw);
+                } catch(e) {}
+
+                if (compData && Array.isArray(compData.data)) {
+                    compData.data.slice(0, 30).forEach(d => {
+                        const dateStr = d.dateISO || d.date;
+                        const my = d.hotels?.[hotel];
+                        const compAvg = d.compAvg || 0;
+                        if (my && !my.sold && my.price > 0 && compAvg > 0) {
+                            const diff = compAvg - my.price;
+                            if (diff > 15) {
+                                dailyAlerts.push({
+                                    type: 'opportunity',
+                                    date: dateStr,
+                                    label: `🟢 Oportunidad Fuerte (${dateStr})`,
+                                    desc: `Tu precio (${my.price}€) está -${Math.round(diff)}€ por debajo del CompSet (${Math.round(compAvg)}€). Subir tarifa BAR para maximizar ADR.`,
+                                    badge: `Subir +15€`,
+                                    color: '#10b981'
+                                });
+                            } else if (diff < -15) {
+                                dailyAlerts.push({
+                                    type: 'risk',
+                                    date: dateStr,
+                                    label: `🔴 Alerta de Demanda (${dateStr})`,
+                                    desc: `Tu precio (${my.price}€) supera en +${Math.round(Math.abs(diff))}€ la media de mercado (${Math.round(compAvg)}€). Riesgo de perder volumen si no hay compresión.`,
+                                    badge: `Revisar BAR`,
+                                    color: '#ef4444'
+                                });
+                            }
+                        }
+                    });
+                }
+
+                if (dailyAlerts.length === 0) {
+                    daysList.innerHTML = `
+                        <div class="compliance-day-item" style="border-left: 4px solid #10b981;">
+                            <div>
+                                <strong style="color:#10b981;">🟢 Días Laborables (Martes y Miércoles)</strong>
+                                <p style="margin:2px 0 0; font-size:0.75rem; color:var(--text-muted);">
+                                    Sostén corporativo estable en Ciudad Real. Proteger tarifa de 65€-75€ sin descuentos innecesarios.
+                                </p>
+                            </div>
+                            <span style="font-size:0.72rem; font-weight:700; padding:3px 8px; border-radius:4px; background:rgba(16,185,129,0.15); color:#10b981;">Estable</span>
+                        </div>
+                        <div class="compliance-day-item" style="border-left: 4px solid #f59e0b;">
+                            <div>
+                                <strong style="color:#f59e0b;">🟡 Fines de Semana (Viernes y Sábados)</strong>
+                                <p style="margin:2px 0 0; font-size:0.75rem; color:var(--text-muted);">
+                                    Concentración de demanda de ocio y bodas. Exigir estancia mínima (MLOS 2 noches) para evitar noches sueltas sin vender.
+                                </p>
+                            </div>
+                            <span style="font-size:0.72rem; font-weight:700; padding:3px 8px; border-radius:4px; background:rgba(245,158,11,0.15); color:#f59e0b;">MLOS 2</span>
+                        </div>
+                        <div class="compliance-day-item" style="border-left: 4px solid #ef4444;">
+                            <div>
+                                <strong style="color:#ef4444;">🔴 Domingos y Lunes Valle</strong>
+                                <p style="margin:2px 0 0; font-size:0.75rem; color:var(--text-muted);">
+                                    Ocupación habitualmente por debajo del 35%. Lanzar paquetes de escapada domingo tarde o tarifa ventajosa para corporativo que llega domingo noche.
+                                </p>
+                            </div>
+                            <span style="font-size:0.72rem; font-weight:700; padding:3px 8px; border-radius:4px; background:rgba(239,68,68,0.15); color:#ef4444;">Acción Comercial</span>
+                        </div>
+                    `;
+                } else {
+                    daysList.innerHTML = dailyAlerts.slice(0, 8).map(da => `
+                        <div class="compliance-day-item" style="border-left: 4px solid ${da.color};">
+                            <div>
+                                <strong style="color:${da.color};">${da.label}</strong>
+                                <p style="margin:2px 0 0; font-size:0.75rem; color:var(--text-muted);">${da.desc}</p>
+                            </div>
+                            <span style="font-size:0.72rem; font-weight:700; padding:3px 8px; border-radius:4px; background:${da.color}22; color:${da.color};">${da.badge}</span>
+                        </div>
+                    `).join('');
+                }
+            }
         }
 
         function renderKPIRow(agg, hotel) {

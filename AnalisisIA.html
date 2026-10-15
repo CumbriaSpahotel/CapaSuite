@@ -572,9 +572,15 @@
 
     <div class="container">
 
-        <div class="hotel-bar">
-            <div class="hotel-pill active" id="pillGuadiana" onclick="switchHotel('Guadiana')">Sercotel Guadiana</div>
-            <div class="hotel-pill" id="pillCumbria" onclick="switchHotel('Cumbria')">Cumbria Spa & Hotel</div>
+        <div class="hotel-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 10px;">
+                <div class="hotel-pill active" id="pillGuadiana" onclick="switchHotel('Guadiana')">Sercotel Guadiana</div>
+                <div class="hotel-pill" id="pillCumbria" onclick="switchHotel('Cumbria')">Cumbria Spa & Hotel</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Auditar Ejercicio:</span>
+                <select id="aiYearSelector" onchange="switchAIYear(this.value)" style="padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-main); font-weight: 700; cursor: pointer;"></select>
+            </div>
         </div>
 
         <header class="ai-hero">
@@ -740,6 +746,13 @@
             return (h === 'Cumbria') ? 59 : 108;
         }
 
+        let selectedAIYear = null;
+
+        function switchAIYear(y) {
+            selectedAIYear = y;
+            renderAIAnalysis();
+        }
+
         function renderAIAnalysis() {
             const container = document.getElementById('ai-insights');
             const welcomeText = document.getElementById('welcomeText');
@@ -761,9 +774,35 @@
             if (container) container.innerHTML = '';
 
             const hotelData = db[currentHotel];
-            const years = Object.keys(hotelData).filter(k => !k.startsWith('custom')).sort().reverse();
-            const lastYear = years[0] || '2026';
-            const prevYear = years[1] || '2025';
+            const rawYears = Object.keys(hotelData).filter(k => {
+                if (!/^(20\d{2})$/.test(k)) return false;
+                const yData = hotelData[k];
+                if (!yData) return false;
+                let hasData = false;
+                if (yData.service) {
+                    for (const val of Object.values(yData.service)) {
+                        if (val.revenue?.some(v => v > 0) || val.rooms?.some(v => v > 0)) { hasData = true; break; }
+                    }
+                }
+                if (!hasData && yData.otb) {
+                    const oRev = yData.otb.breakdown?.habitacion || yData.otb.revenue || [];
+                    if (oRev.some(v => v > 0)) hasData = true;
+                }
+                if (!hasData && (k === "2025" || k === "2026" || k === "2027")) hasData = true;
+                return hasData;
+            }).sort((a, b) => parseInt(b) - parseInt(a));
+
+            const years = rawYears.length ? rawYears : ['2026', '2025'];
+            if (!selectedAIYear || !years.includes(selectedAIYear)) {
+                selectedAIYear = years[0];
+            }
+            const ySel = document.getElementById('aiYearSelector');
+            if (ySel) {
+                ySel.innerHTML = years.map(y => `<option value="${y}" ${y === selectedAIYear ? 'selected' : ''}>Ejercicio ${y}</option>`).join('');
+            }
+
+            const lastYear = selectedAIYear;
+            const prevYear = String(parseInt(lastYear) - 1);
             const yearData  = hotelData[lastYear] || {};
             const prevYearData = prevYear ? hotelData[prevYear] : null;
 
@@ -1566,6 +1605,176 @@
                 }
             }
 
+            // ============================================================
+            // AUDIT 10: DÓNDE VAMOS BIEN Y DÓNDE NO SE ESTÁ CUMPLIENDO (MES A MES & DÍA A DÍA)
+            // ============================================================
+            const goodMonthsList = [];
+            const riskMonthsList = [];
+            let totalComplianceSurplus = 0;
+            let totalComplianceDeficit = 0;
+
+            const complianceGoodDates = [];
+            const complianceRiskDates = [];
+
+            for (let m = 0; m < 12; m++) {
+                const daysInM = new Date(budgetYr, m + 1, 0).getDate();
+                const mName = monthNames[m];
+                const rRev = realRev[m] || 0;
+                const oRev = otbRev[m] || 0;
+                const soldM = isClosed(m) ? rRev : (m === curMonth ? (rRev + oRev) : Math.max(rRev, oRev));
+                const targetM = budgetRev ? (budgetRev[m] || 0) : 0;
+                const prevMRev = (prevYearData && prevYearData.service) ? ((typeof getGroupedProduction === 'function' ? getGroupedProduction(prevYearData.service)?.HABITACION?.revenue?.[m] : null) || prevYearData.service["TOTAL_MASTER"]?.revenue?.[m] || 0) : 0;
+
+                const mDiff = targetM > 0 ? (soldM - targetM) : (prevMRev > 0 ? (soldM - prevMRev) : 0);
+                const mPct = targetM > 0 ? ((soldM / targetM) * 100) : (prevMRev > 0 ? ((soldM / prevMRev) * 100) : 0);
+
+                if (targetM > 0) {
+                    if (soldM >= targetM) {
+                        goodMonthsList.push({ month: mName, sold: soldM, target: targetM, diff: mDiff, pct: mPct });
+                        totalComplianceSurplus += mDiff;
+                        complianceGoodDates.push({
+                            dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
+                            dayLabel: `Mes de ${mName}`,
+                            status: 'Cumplido',
+                            metrics: `${fmtEuro(soldM)} (Obj: ${fmtEuro(targetM)})`,
+                            tactic: `Superávit de +${fmtEuro(mDiff)} (${mPct.toFixed(1)}%). Subir tarifa BAR a nivel premium y eliminar descuentos innecesarios.`
+                        });
+                    } else if (isClosed(m)) {
+                        riskMonthsList.push({ month: mName, sold: soldM, target: targetM, diff: mDiff, pct: mPct, isClosed: true });
+                        totalComplianceDeficit += Math.abs(mDiff);
+                        complianceRiskDates.push({
+                            dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
+                            dayLabel: `Mes cerrado: ${mName}`,
+                            status: 'Incumplido',
+                            metrics: `${fmtEuro(soldM)} (Obj: ${fmtEuro(targetM)})`,
+                            tactic: `Déficit cerrado de -${fmtEuro(Math.abs(mDiff))}. Analizar qué canales no respondieron para renegociar cupos de cara al próximo ejercicio.`
+                        });
+                    } else if (m === curMonth) {
+                        const daysLeft = Math.max(1, daysInM - now.getDate());
+                        const gap = targetM - soldM;
+                        const dailyNeed = Math.round(gap / daysLeft);
+                        riskMonthsList.push({ month: mName, sold: soldM, target: targetM, diff: -gap, pct: mPct, dailyNeed, daysLeft, isCurrent: true });
+                        totalComplianceDeficit += gap;
+                        complianceRiskDates.push({
+                            dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`,
+                            dayLabel: `Mes actual: ${mName} (${daysLeft} días restantes)`,
+                            status: 'En Riesgo Inmediato',
+                            metrics: `Faltan ${fmtEuro(gap)} (${dailyNeed}€/día)`,
+                            tactic: `Ritmo diario requerido de ${fmtEuro(dailyNeed)}/día. Proteger fines de semana a tarifa alta y lanzar promoción opaca flash 48h entre semana.`
+                        });
+                    } else {
+                        // Future month
+                        riskMonthsList.push({ month: mName, sold: soldM, target: targetM, diff: mDiff, pct: mPct, isFuture: true });
+                        totalComplianceDeficit += Math.abs(mDiff);
+                        complianceRiskDates.push({
+                            dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
+                            dayLabel: `Mes futuro: ${mName}`,
+                            status: 'Cartera en Rezago',
+                            metrics: `Cartera: ${fmtEuro(soldM)} (Obj: ${fmtEuro(targetM)})`,
+                            tactic: `Brecha de ${fmtEuro(Math.abs(mDiff))}. Abrir venta a segmentos B2B y agencias con anticipación de 60-90 días.`
+                        });
+                    }
+                } else if (prevMRev > 0) {
+                    if (soldM >= prevMRev) {
+                        goodMonthsList.push({ month: mName, sold: soldM, target: prevMRev, diff: mDiff, pct: mPct });
+                        totalComplianceSurplus += mDiff;
+                        complianceGoodDates.push({
+                            dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
+                            dayLabel: `Mes de ${mName}`,
+                            status: 'Supera Año Anterior',
+                            metrics: `${fmtEuro(soldM)} vs ${fmtEuro(prevMRev)} (${prevYear})`,
+                            tactic: `Crecimiento interanual positivo (+${fmtEuro(mDiff)}). Mantener la estrategia actual de yield.`
+                        });
+                    } else {
+                        riskMonthsList.push({ month: mName, sold: soldM, target: prevMRev, diff: mDiff, pct: mPct });
+                        totalComplianceDeficit += Math.abs(mDiff);
+                        complianceRiskDates.push({
+                            dateISO: `${budgetYr}-${String(m+1).padStart(2,'0')}-01`,
+                            dayLabel: `Mes de ${mName}`,
+                            status: 'Por Debajo Año Anterior',
+                            metrics: `${fmtEuro(soldM)} vs ${fmtEuro(prevMRev)} (${prevYear})`,
+                            tactic: `Caída de -${fmtEuro(Math.abs(mDiff))} vs ${prevYear}. Activar acciones de visibilidad comercial.`
+                        });
+                    }
+                }
+            }
+
+            // Daily Compliance & Alert Checks (45 Days horizon)
+            if (compData && Array.isArray(compData.data)) {
+                compData.data.slice(0, 45).forEach(d => {
+                    const dateStr = d.dateISO || d.date;
+                    const dayInfo = getDayInfo(dateStr);
+                    const my = d.hotels?.[currentHotel];
+                    const compAvg = d.compAvg || 0;
+                    if (my && !my.sold && my.price > 0 && compAvg > 0) {
+                        const diff = compAvg - my.price;
+                        if (diff > 18) {
+                            complianceGoodDates.push({
+                                dateISO: dateStr,
+                                dayLabel: `${dayInfo.dayOfWeek} ${formatSpanishDate(dateStr)}`,
+                                status: 'Alta Demanda / Tracción',
+                                metrics: `Tu BAR: ${my.price}€ · Mercado: ${Math.round(compAvg)}€`,
+                                tactic: `Mercado en compresión fuerte (+${Math.round(diff)}€). Elevar tarifa BAR +15€ de inmediato y exigir MLOS 2 noches.`
+                            });
+                        } else if (diff < -15) {
+                            complianceRiskDates.push({
+                                dateISO: dateStr,
+                                dayLabel: `${dayInfo.dayOfWeek} ${formatSpanishDate(dateStr)}`,
+                                status: 'Riesgo de Desmarque',
+                                metrics: `Tu BAR: ${my.price}€ · Mercado: ${Math.round(compAvg)}€`,
+                                tactic: `Precio +${Math.round(Math.abs(diff))}€ por encima del mercado sin compresión. Evaluar ajuste táctico o incluir desayuno para convertir.`
+                            });
+                        }
+                    }
+                });
+            }
+
+            // Push Insight: DÓNDE VAMOS BIEN
+            if (goodMonthsList.length > 0 || complianceGoodDates.length > 0) {
+                const goodMonthsStr = goodMonthsList.slice(0, 4).map(m => `<b>${m.month}</b> (+${fmtEuro(m.diff)})`).join(', ');
+                insights.push({
+                    id: 'ins_compliance_good',
+                    category: 'compliance',
+                    priority: 'positive',
+                    badge: '🟢 DÓNDE VAMOS BIEN · SUPERÁVIT Y METAS',
+                    title: `Balance Positivo: ${goodMonthsList.length} meses y ${complianceGoodDates.length} fechas clave superando objetivos`,
+                    diagnostic: `El hotel presenta una tracción sobresaliente en <b>${goodMonthsList.length} meses</b> con un superávit consolidado de <b>+${fmtEuro(totalComplianceSurplus)}</b>. Periodos líderes: ${goodMonthsStr || 'cartera consolidada'}. Además, se detectan <b>${complianceGoodDates.length} fechas</b> con alta compresión de mercado donde el cliente absorbe precio máximo.`,
+                    strategy: `<b>Estrategia Revenue para Maximizar Periodos Fuertes:</b><br>
+• <b>Subida de Escalón de Precios:</b> En los meses y fechas que ya tienen su meta asegurada o demanda disparada, eleva la tarifa BAR <b>+15€ a +20€</b> para capturar exclusivamente reservas de alto valor.<br>
+• <b>Cierre de Tarifas Descuento:</b> Desactiva tarifas no reembolsables con -15% o -20% en estas fechas; el mercado comprará igualmente a tarifa estándar.<br>
+• <b>Estancia Mínima (MLOS 2 noches):</b> Blinda los fines de semana de alta demanda exigiendo estancia de viernes a domingo para impedir noches sueltas invendibles.`,
+                    dates: complianceGoodDates,
+                    datesTitle: 'Fechas y Meses con Rendimiento Favorable',
+                    datesSubtitle: `Auditoría de ${complianceGoodDates.length} periodos donde el hotel supera objetivos o compresión de mercado`,
+                    actionUrl: 'AnalisisProduccion.html'
+                });
+            }
+
+            // Push Insight: DÓNDE NO SE ESTÁ CUMPLIENDO
+            if (riskMonthsList.length > 0 || complianceRiskDates.length > 0) {
+                const riskMonthsStr = riskMonthsList.slice(0, 3).map(m => `<b>${m.month}</b> (-${fmtEuro(Math.abs(m.diff))})`).join(', ');
+                const curMRisk = riskMonthsList.find(m => m.isCurrent);
+                const curMAction = curMRisk ? `<br><br><b>🚨 Plan de Choque Inmediato para ${curMRisk.month}:</b> Faltan <b>${fmtEuro(Math.abs(curMRisk.diff))}</b> con solo <b>${curMRisk.daysLeft} días</b> de margen. Se requiere generar un ritmo diario de <b>${fmtEuro(curMRisk.dailyNeed)}/día</b>.` : '';
+
+                insights.push({
+                    id: 'ins_compliance_risk',
+                    category: 'compliance',
+                    priority: 'critical',
+                    badge: '🔴 DÓNDE NO SE ESTÁ CUMPLIENDO · ALERTAS DE RIESGO',
+                    title: `Alertas de Desvío: ${riskMonthsList.length} meses rezagados y fechas con bajo ritmo de reservas`,
+                    diagnostic: `Se identifican <b>${riskMonthsList.length} meses</b> con déficit o rezago en cartera frente a meta (brecha total acumulada: <b>-${fmtEuro(totalComplianceDeficit)}</b>). Meses más críticos: ${riskMonthsStr}.${curMAction}`,
+                    strategy: `<b>Plan de Acción Táctico para Salvar Meses en Riesgo:</b><br>
+• <b>Ritmo Diario de Recuperación:</b> Si el mes actual está en riesgo, monitoriza a diario el pick-up respecto a la meta diaria necesaria.<br>
+• <b>Promociones Opacas Flash (48h):</b> Lanza ofertas exclusivas para miembros o venta privada en canal directo sin alterar la tarifa pública visible en OTAs.<br>
+• <b>Activación Comercial B2B:</b> En días laborables de baja ocupación (lunes y jueves), contacta convenios corporativos de Ciudad Real con tarifas ventajosas por volumen.<br>
+• <b>Empaquetamiento de Servicios:</b> En lugar de bajar el precio facial de la habitación, ofrece paquetes que incluyan desayuno o parking gratuito para proteger el ADR nominal.`,
+                    dates: complianceRiskDates,
+                    datesTitle: 'Fechas y Meses en Riesgo de Incumplimiento',
+                    datesSubtitle: `Auditoría de ${complianceRiskDates.length} periodos con déficit o necesidad de estímulo de demanda`,
+                    actionUrl: `CalculadoraPresupuesto.html?openPacing=true&pacingMonth=${curMonth}`
+                });
+            }
+
             allGeneratedInsights = insights;
 
             // Calculate Executive Revenue Health Score (0-100)
@@ -1647,6 +1856,7 @@
                 const counts = {
                     all: insights.length,
                     priority: insights.filter(i => i.priority === 'critical').length,
+                    compliance: insights.filter(i => i.category === 'compliance').length,
                     pricing: insights.filter(i => i.category === 'pricing').length,
                     competitor: insights.filter(i => i.category === 'competitor').length,
                     distribution: insights.filter(i => i.category === 'distribution').length,
@@ -1661,6 +1871,9 @@
                     <button class="filter-pill-btn" data-cat="priority" onclick="filterInsights('priority')">
                         <span>🔥</span> Alta Prioridad (${counts.priority})
                     </button>
+                    <button class="filter-pill-btn" data-cat="compliance" onclick="filterInsights('compliance')">
+                        <span>🎯</span> Cumplimiento Mes/Día (${counts.compliance})
+                    </button>
                     <button class="filter-pill-btn" data-cat="pricing" onclick="filterInsights('pricing')">
                         <span>💰</span> Tarifas & Yield (${counts.pricing})
                     </button>
@@ -1674,7 +1887,7 @@
                         <span>📅</span> Pick-up & Pace (${counts.pickup})
                     </button>
                     <button class="filter-pill-btn" data-cat="budget" onclick="filterInsights('budget')">
-                        <span>🎯</span> Metas Presupuesto (${counts.budget})
+                        <span>📊</span> Metas Presupuesto (${counts.budget})
                     </button>
                 `;
             }
@@ -1758,6 +1971,7 @@
             const isSoldOut = (insightId === 'ins_soldout');
             const isCompAnomalies = (insightId === 'ins_comp_anomalies');
             const isCompChanges = (insightId === 'ins_comp_changes');
+            const isCompliance = (insightId === 'ins_compliance_good' || insightId === 'ins_compliance_risk');
 
             if (tableContainer) {
                 let headerHtml = '';
@@ -1802,6 +2016,17 @@
                             <th style="padding: 10px 12px; text-align: right;">Tarifa Actual</th>
                             <th style="padding: 10px 12px; text-align: right;">Tu Tarifa</th>
                             <th style="padding: 10px 12px;">Lectura Revenue</th>
+                        </tr>
+                    </thead>
+                    `;
+                } else if (isCompliance) {
+                    headerHtml = `
+                    <thead>
+                        <tr style="background: rgba(0,0,0,0.03); border-bottom: 2px solid var(--border); font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted);">
+                            <th style="padding: 10px 12px;">Periodo / Fecha</th>
+                            <th style="padding: 10px 12px; text-align: center;">Estado Auditoría</th>
+                            <th style="padding: 10px 12px; text-align: right;">Cifras / Rendimiento</th>
+                            <th style="padding: 10px 12px;">Estrategia & Táctica Recomendada</th>
                         </tr>
                     </thead>
                     `;
@@ -1924,6 +2149,30 @@
                                 </td>
                                 <td style="padding: 10px 12px; font-size: 0.78rem; color: #0f172a;">
                                     <b>${d.diagnosis}</b><br><span style="color:#475569;">${d.tactic}</span>
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    if (isCompliance) {
+                        const isGood = insightId === 'ins_compliance_good';
+                        const statusBg = isGood ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)';
+                        const statusColor = isGood ? '#059669' : '#dc2626';
+                        return `
+                            <tr style="border-bottom: 1px solid var(--border); font-size: 0.83rem;">
+                                <td style="padding: 10px 12px; font-weight: 700; white-space: nowrap;">
+                                    ${d.dayLabel || displayDate}
+                                </td>
+                                <td style="padding: 10px 12px; text-align: center;">
+                                    <span style="background: ${statusBg}; color: ${statusColor}; padding: 3px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 800; white-space: nowrap;">
+                                        ${d.status || (isGood ? 'Cumpliendo' : 'En Riesgo')}
+                                    </span>
+                                </td>
+                                <td style="padding: 10px 12px; text-align: right; font-weight: 800; color: #1e293b; white-space: nowrap;">
+                                    ${d.metrics || '-'}
+                                </td>
+                                <td style="padding: 10px 12px; font-size: 0.78rem; color: #0f172a;">
+                                    ${d.tactic || '-'}
                                 </td>
                             </tr>
                         `;
