@@ -111,15 +111,12 @@
                     try { 
                         const correctionsMap = Object.fromEntries(inputs.map(([cell, input]) => [cell, input.value]));
                         
-                        // Guardar asignaciones aprendidas para el hotel
+                        // Guardar asignaciones aprendidas para el hotel (solo por nombre de segmento, nunca por coordenada de fila como A86)
                         const newHotelMappings = {};
-                        inputs.forEach(([cell, input, original]) => {
-                            if (input.value && input.value !== 'TOTAL GENERAL') {
-                                if (original && original.trim()) {
-                                    const normOrig = original.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[.]/g, '').trim();
-                                    newHotelMappings[normOrig] = input.value;
-                                }
-                                newHotelMappings[cell] = input.value;
+                        inputs.forEach(([, input, original]) => {
+                            if (input.value && input.value !== 'TOTAL GENERAL' && original && original.trim() && !SegmentAnalysis.isTotalName(original)) {
+                                const normOrig = original.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[.]/g, '').trim();
+                                newHotelMappings[normOrig] = input.value;
                             }
                         });
                         SegmentAnalysis.saveHotelMappings(detectedHotel, newHotelMappings);

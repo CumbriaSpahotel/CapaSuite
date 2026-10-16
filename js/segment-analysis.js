@@ -503,7 +503,13 @@
             if (!raw && typeof window !== 'undefined' && window.localStorage) {
                 raw = window.localStorage.getItem('segment_mappings_' + h);
             }
-            return raw ? JSON.parse(raw) : {};
+            const parsed = raw ? JSON.parse(raw) : {};
+            const cleaned = {};
+            for (const [k, v] of Object.entries(parsed || {})) {
+                if (/^[A-Z]+\d+$/.test(k) || isTotalName(k)) continue;
+                cleaned[k] = v;
+            }
+            return cleaned;
         } catch (e) {
             return {};
         }
@@ -513,7 +519,12 @@
         try {
             const h = (hotel && typeof hotel === 'string') ? hotel : 'Guadiana';
             const existing = getStoredHotelMappings(h);
-            const merged = { ...existing, ...mappings };
+            const filtered = {};
+            for (const [k, v] of Object.entries(mappings || {})) {
+                if (/^[A-Z]+\d+$/.test(k) || isTotalName(k) || v === 'TOTAL GENERAL') continue;
+                filtered[k] = v;
+            }
+            const merged = { ...existing, ...filtered };
             const json = JSON.stringify(merged);
 
             if (typeof CapaStorage !== 'undefined' && CapaStorage.setItem) {
@@ -541,10 +552,13 @@
             if (idx === habRows.length - 1 && !item.original && habRows.length > 1) {
                 const thisRow = rows[item.index] || [];
                 for (let c = 2; c < thisRow.length; c++) {
-                    const val = Number(String(thisRow[c] || '').replace(/[€\s\u00a0,]/g, ''));
+                    let val = 0;
+                    try { val = number(thisRow[c]); } catch (e) { val = 0; }
                     if (val > 0) {
-                        const prevSum = habRows.slice(0, -1).reduce((s, h) => s + (Number(String(rows[h.index]?.[c] || '').replace(/[€\s\u00a0,]/g, '')) || 0), 0);
-                        if (prevSum === val) {
+                        const prevSum = habRows.slice(0, -1).reduce((s, h) => {
+                            try { return s + number(rows[h.index]?.[c]); } catch (e) { return s; }
+                        }, 0);
+                        if (Math.abs(prevSum - val) < 0.01) {
                             item.original = 'TOTAL GENERAL';
                             break;
                         }
@@ -556,19 +570,24 @@
             let value = '';
             if (Object.hasOwn(corrections, cell)) {
                 value = corrections[cell];
-            } else if (hotelMappings && hotelMappings[rawNorm]) {
+            } else if (isTotalName(rawNorm)) {
+                value = 'TOTAL GENERAL';
+            } else if (rawNorm && hotelMappings && hotelMappings[rawNorm]) {
                 value = hotelMappings[rawNorm];
-            } else if (hotelMappings && hotelMappings[cell]) {
-                value = hotelMappings[cell];
             } else if (aliases[rawNorm]) {
                 value = aliases[rawNorm];
+            } else if (validSegments.includes(rawNorm)) {
+                value = rawNorm;
+            } else if (!rawNorm && hotelMappings && hotelMappings[cell]) {
+                value = hotelMappings[cell];
             } else {
                 value = item.original;
             }
 
             // An explicit choice in this import takes precedence over remembered mappings.
             let name = Object.hasOwn(corrections, cell) ? canonical(value)
-                : (hotelMappings && hotelMappings[rawNorm]) ? hotelMappings[rawNorm] : canonical(value);
+                : isTotalName(rawNorm) ? 'TOTAL GENERAL'
+                : (rawNorm && hotelMappings && hotelMappings[rawNorm]) ? hotelMappings[rawNorm] : canonical(value);
             const reason = !name ? 'Falta el segmento a la izquierda de Hab.' : !validSegments.includes(name) && !isTotalName(name) ? 'Segmento no válido. Debes asignarlo a un segmento correcto.' : '';
             return { cell, row: item.row, original: item.original, name, reason };
         });
