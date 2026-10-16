@@ -170,7 +170,7 @@
         async function begin(file, metadata) {
             if (!['Guadiana', 'Cumbria'].includes(metadata.hotel)) throw new Error('Hotel no válido.');
             const version = file ? await inspectFile(file, metadata) : null;
-            if (version?.status === 'duplicate') throw new Error(version.message);
+            if (version?.status === 'duplicate' && !metadata.allowDuplicate) throw new Error(version.message);
             const row = { id: id(), owner: owner(), hotel: metadata.hotel, mode: metadata.mode || 'actual',
                 type: metadata.type || '', period: metadata.period || '', preferSegments: metadata.preferSegments !== false,
                 capturedAt: now(), status: 'prepared', before: read(),

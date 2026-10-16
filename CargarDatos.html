@@ -1444,7 +1444,13 @@
                 const version = await CapaRevenueHistory.inspectFile(file, { hotel: versionHotel, type: finalType, mode: versionMode });
                 document.getElementById('fileVersionNotice').textContent = version.message;
                 document.getElementById('importVersionStatus').textContent = version.message;
-                if (version.status === 'duplicate') { pendingFile = null; showToast(version.message, 'info'); return; }
+                if (version.status === 'duplicate') {
+                    if (!confirm(`${version.message}\n\n¿Quieres volver a procesarlo igualmente?`)) {
+                        pendingFile = null;
+                        showToast(version.message, 'info');
+                        return;
+                    }
+                }
             } catch (error) { pendingFile = null; document.getElementById('importVersionStatus').textContent = error.message; showToast(error.message, 'error'); return; }
 
             const dateInfo = extractDateFromFilename(file.name);
@@ -1767,7 +1773,7 @@
                 try {
                     historyId = await CapaRevenueHistory.begin(file, { hotel, type, period: manualDate,
                         mode: ['Otb', 'Prevision'].includes(type) || /PREVISION|OTB|VALORADA/i.test(file.name) ? 'forecast' : 'actual',
-                        preferSegments: type === 'Seg' });
+                        preferSegments: type === 'Seg', allowDuplicate: true });
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
 
@@ -2972,6 +2978,33 @@
                     }
                     CapaStorage.setItem('revenue_data_v2', JSON.stringify(revDB));
                     console.log("OTB and Forecast Segments cleanly parsed and merged via SegmentAnalysis");
+                    } else {
+                        // Sync Calendario Estratégico for non-segment OTB files
+                        let revRaw = CapaStorage.getItem('revenue_data_v2');
+                        let revDB = typeof revRaw === 'string' ? JSON.parse(revRaw) : (revRaw || { data: [] });
+                        if (!revDB.data) revDB.data = [];
+                        yearsToClear.forEach(yStr => {
+                            const yData = db[hotel]?.[yStr];
+                            if (!yData?.daily_otb) return;
+                            for (const [iso, dt] of Object.entries(yData.daily_otb)) {
+                                let dayEntry = revDB.data.find(d => d.dateISO === iso);
+                                if (!dayEntry) {
+                                    dayEntry = { dateISO: iso, occupancyData: {} };
+                                    revDB.data.push(dayEntry);
+                                }
+                                dayEntry.occupancyData ||= {};
+                                const hData = dayEntry.occupancyData[hotel] ||= { otb: 0, otb_prev: null, adr: 0, revenue: 0 };
+                                const rooms = dt.rooms || 0;
+                                const rev = dt.revenue || 0;
+                                if (hData.otb !== rooms && hData.otb > 0) {
+                                    hData.otb_prev = hData.otb;
+                                }
+                                hData.otb = rooms;
+                                hData.revenue = rev;
+                                hData.adr = rooms > 0 ? rev / rooms : 0;
+                            }
+                        });
+                        CapaStorage.setItem('revenue_data_v2', JSON.stringify(revDB));
                     }
                 } catch (e) {
                     console.error("Error in parseForecast override:", e);

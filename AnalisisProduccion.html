@@ -1412,21 +1412,22 @@
                         projectedRev += rVal;
                         realPart += rVal;
                     } else {
-                        const cellVal = Math.max(rVal, oVal);
+                        const cellVal = rVal + oVal;
                         projectedRev += cellVal;
-                        otbPart += cellVal;
+                        otbPart += oVal;
                     }
                 }
 
                 const fullYearLY = totalLY ? totalLY.revenue.reduce((a, b) => a + b, 0) : 0;
-                if (fullYearLY > 0) {
-                    const projDiff = ((projectedRev - fullYearLY) / fullYearLY * 100).toFixed(1);
-                    const col = projDiff >= 0 ? 'var(--text-light)' : 'var(--danger)';
+                if (projectedRev > 0) {
+                    const projDiff = fullYearLY > 0 ? ((projectedRev - fullYearLY) / fullYearLY * 100).toFixed(1) : null;
+                    const col = (projDiff === null || projDiff >= 0) ? 'var(--text-light)' : 'var(--danger)';
 
                     const projTooltip = `Cálculo Proyección:\nReal (Cerrado): ${fmt(realPart)}\nPrevisión (Futuro): ${fmt(otbPart)}\nTotal Estimado: ${fmt(projectedRev)}`;
+                    const diffSpan = projDiff !== null ? ` <span style="opacity:0.8;">(${projDiff}% vs Año ${String(prevYear).slice(-2)})</span>` : '';
 
                     totalTrendHTML += `<div style="margin-top:4px; font-size:0.7rem; color:${col}; border-top:1px solid #e2e8f0; padding-top:2px; cursor:help;" title="${projTooltip}">
-                        <span style="font-weight:700;">Proy. Cierre: ${fmtNum(projectedRev)}€</span> <span style="opacity:0.8;">(${projDiff}% vs Año 25)</span>
+                        <span style="font-weight:700;">Proy. Cierre: ${fmtNum(projectedRev)}€</span>${diffSpan}
                      </div>`;
                 }
             }
@@ -1439,16 +1440,17 @@
                 const now = new Date();
                 const rM = now.getMonth();
                 for (let i = 0; i < 12; i++) {
-                    const isClosed = i < rM;
+                    const isClosed = (parseInt(currentYear) < now.getFullYear()) || (parseInt(currentYear) === now.getFullYear() && i < rM);
                     const rVal = groupedTY.HABITACION.revenue[i] || 0;
                     const oVal = data.otb.breakdown?.habitacion?.[i] || (data.otb.revenue[i] || 0); // fallback
                     projHab += rVal + (isClosed ? 0 : oVal);
                 }
                 const fullLY = groupedLY.HABITACION ? groupedLY.HABITACION.revenue.reduce((a, b) => a + b, 0) : 0;
-                if (fullLY > 0) {
-                    const projDiff = ((projHab - fullLY) / fullLY * 100).toFixed(1);
+                if (projHab > 0) {
+                    const projDiff = fullLY > 0 ? ((projHab - fullLY) / fullLY * 100).toFixed(1) : null;
+                    const diffTxt = projDiff !== null ? ` (${projDiff}% vs Año ${String(prevYear).slice(-2)})` : '';
                     habTrendHTML += `<div style="margin-top:4px; font-size:0.65rem; color:#64748b; border-top:1px solid #e2e8f0; padding-top:2px;">
-                        <span style="font-weight:600;">Proy: ${fmtNum(projHab)}€</span> (${projDiff}%)
+                        <span style="font-weight:600;">Proy: ${fmtNum(projHab)}€</span>${diffTxt}
                      </div>`;
                 }
             }
@@ -1722,7 +1724,6 @@
 
             Object.values(grouped).sort((a, b) => parseInt(a.name) - parseInt(b.name)).forEach(g => {
                 const gRealVal = getV(g.revenue);
-                if (gRealVal === 0 && g.details.length === 0) return;
 
                 // MAPPING: Production Group Name -> OTB Breakdown Key
                 let otbKey = null;
@@ -1731,10 +1732,15 @@
                 else if (gName.includes('DESAYUNO')) otbKey = 'desayunos';
                 else if (gName.includes('RESTAURANTE') || gName.includes('ALMUERZO') || gName.includes('CENA')) otbKey = 'restaurante';
                 else if (gName.includes('SPA')) otbKey = 'spa';
+                else if (gName.includes('EVENTO')) otbKey = 'eventos';
+                else if (gName.includes('CAFETERÍA') || gName.includes('CAFETERIA')) otbKey = 'cafeteria';
+                else if (gName.includes('MINIBAR')) otbKey = 'minibar';
+                else if (gName.includes('ALQUILER') || gName.includes('OFICINA')) otbKey = 'oficinas';
                 else if (gName.includes('VARIOS') || gName.includes('OTROS') || gName.includes('EXTRAS')) otbKey = 'varios';
 
+                const hasBreakdown = otbData && otbData.breakdown && Object.keys(otbData.breakdown).length > 0;
                 const groupOtbArr = (otbData && otbData.breakdown && otbKey && otbData.breakdown[otbKey]) ? otbData.breakdown[otbKey] :
-                    (otbKey === 'habitacion' && otbData.revenue ? otbData.revenue : new Array(12).fill(0));
+                    (!hasBreakdown && otbKey === 'habitacion' && otbData.revenue ? otbData.revenue : new Array(12).fill(0));
 
                 // Apply closed month logic to total accumulation
                 // This is tricky because we need to sum conditional OTB
@@ -1748,29 +1754,21 @@
                 }
 
                 const gProjectedVal = gRealVal + gOtbVal;
+                if (gProjectedVal === 0 && g.details.length === 0) return;
 
                 const percTotal = hotelTotalProjected > 0 ? (gProjectedVal / hotelTotalProjected * 100).toFixed(1) : "0.0";
 
                 let row = `<tr class="row-group"><td>${g.name}</td>`;
                 if (midx === -1) {
                     for (let i = 0; i < 12; i++) {
-                        // Determine key for OTB Breakdown
-                        let otbKey = null;
-                        const gName = g.name.toUpperCase();
-                        if (gName.includes('HABITACIÓN') || gName.includes('HABITACION')) otbKey = 'habitacion';
-                        else if (gName.includes('DESAYUNO')) otbKey = 'desayunos';
-                        else if (gName.includes('RESTAURANTE') || gName.includes('ALMUERZO') || gName.includes('CENA')) otbKey = 'restaurante';
-                        else if (gName.includes('SPA')) otbKey = 'spa';
-                        else if (gName.includes('VARIOS') || gName.includes('OTROS') || gName.includes('EXTRAS')) otbKey = 'varios';
-
-                        let groupOtbArr = (otbData && otbData.breakdown && otbKey && otbData.breakdown[otbKey]) ? otbData.breakdown[otbKey] :
-                            (otbKey === 'habitacion' && otbData && otbData.revenue ? otbData.revenue : new Array(12).fill(0));
+                        let cellOtbArr = (otbData && otbData.breakdown && otbKey && otbData.breakdown[otbKey]) ? otbData.breakdown[otbKey] :
+                            (!hasBreakdown && otbKey === 'habitacion' && otbData && otbData.revenue ? otbData.revenue : new Array(12).fill(0));
                         
-                        if (!Array.isArray(groupOtbArr)) groupOtbArr = new Array(12).fill(0);
+                        if (!Array.isArray(cellOtbArr)) cellOtbArr = new Array(12).fill(0);
 
                         const isClosed = isMonthClosedRow(i);
                         const realVal = g.revenue[i] || 0;
-                        const otbVal = isClosed ? 0 : (groupOtbArr[i] || 0);
+                        const otbVal = isClosed ? 0 : (cellOtbArr[i] || 0);
 
                         // Freshness Check for Pick-up
                         // We assume data.updates.otb holds the date string "D/M/YYYY"
@@ -1810,8 +1808,8 @@
                             }
                             // Only Future OTB
                             else if (otbVal > 0) {
-                                // Calculate rooms for OTB if available in group
-                                const otbRms = (db[currentHotel][currentYear].otb && db[currentHotel][currentYear].otb.rooms && db[currentHotel][currentYear].otb.rooms[i])
+                                // Calculate rooms for OTB if available in group (only for Habitación)
+                                const otbRms = (otbKey === 'habitacion' && db[currentHotel][currentYear].otb && db[currentHotel][currentYear].otb.rooms && db[currentHotel][currentYear].otb.rooms[i])
                                     ? db[currentHotel][currentYear].otb.rooms[i] : 0;
 
                                 cellContent = `
