@@ -1181,6 +1181,12 @@
                                 dbModified = true;
                             }
                         });
+                        Object.keys(db[hotel]).forEach(k => {
+                            if (/^20\d{2}$/.test(k) && db[hotel][k] && typeof db[hotel][k] === 'object') {
+                                if (!db[hotel][k].service) { db[hotel][k].service = {}; dbModified = true; }
+                                if (!db[hotel][k].segment) { db[hotel][k].segment = {}; dbModified = true; }
+                            }
+                        });
 
                         // Limpieza de snapshot corrupto histórico de 2027
                         if (db[hotel]['2027'] && db[hotel]['2027'].otb_prev) {
@@ -1221,6 +1227,7 @@
         window.addEventListener('capasuite-data-synced', () => {
             console.log("🔄 Recargando datos locales desde la nube...");
             db = JSON.parse(CapaStorage.getItem(DB_KEY)) || {};
+            sanitizeDbYears();
             config = JSON.parse(CapaStorage.getItem(CONFIG_KEY)) || {};
             updateHistory();
         });
@@ -2741,8 +2748,10 @@
                     const y = (yRaw.length === 2) ? "20" + yRaw : yRaw;
                         const m = parseInt(mStr) - 1;
                     if (!db[hotel]) db[hotel] = {};
-                    if (!db[hotel][y]) db[hotel][y] = { otb: { rooms: new Array(12).fill(0), revenue: new Array(12).fill(0), breakdown: {} }, daily_otb: {}, lastUpdate: "" };
+                    if (!db[hotel][y]) db[hotel][y] = { service: {}, segment: {}, otb: { rooms: new Array(12).fill(0), revenue: new Array(12).fill(0), breakdown: {} }, daily_otb: {}, lastUpdate: "" };
                     const targetYear = db[hotel][y];
+                    if (!targetYear.service) targetYear.service = {};
+                    if (!targetYear.segment) targetYear.segment = {};
                     if (!targetYear.otb) targetYear.otb = { rooms: new Array(12).fill(0), revenue: new Array(12).fill(0), breakdown: {} };
                     if (!targetYear.otb.breakdown) targetYear.otb.breakdown = {};
                         if (!targetYear.daily_otb) targetYear.daily_otb = {};
@@ -3077,7 +3086,9 @@
             }
 
             saveData();
-            updateUploadSummary(hotel, type, reportYear);
+            if (type !== 'Otb' && type !== 'Prevision') {
+                updateUploadSummary(hotel, type, reportYear);
+            }
             showDebugResults(hotel);
         }
 
@@ -3094,7 +3105,7 @@
                 totalREV = dbYear.otb.revenue.reduce((a, b) => a + b, 0);
                 daysCount = Object.keys(dbYear.daily_otb || {}).filter(k => (dbYear.daily_otb[k].rooms > 0 || dbYear.daily_otb[k].revenue > 0)).length;
             } else {
-                const master = dbYear.service["TOTAL_MASTER"];
+                const master = dbYear.service?.["TOTAL_MASTER"];
                 if (master) {
                     totalRMS = master.rooms.reduce((a, b) => a + b, 0);
                     totalREV = master.revenue.reduce((a, b) => a + b, 0);
@@ -3145,7 +3156,7 @@
 
             years.forEach(y => {
                 const yearData = db[hotel][y];
-                const master = yearData.service["TOTAL_MASTER"];
+                const master = yearData?.service?.["TOTAL_MASTER"];
 
                 if (master) {
                     const rev = master.revenue.reduce((a, b) => a + b, 0);
