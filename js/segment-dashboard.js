@@ -223,8 +223,8 @@ function updateMode(triggerRender = true) {
     } else {
         segmentDB = historicalDB;
     }
-    const years = Object.keys(segmentDB[currentHotel] || {}).sort().reverse();
-    currentYear = years[0] || '';
+    const years = Object.keys(segmentDB[currentHotel] || {}).filter(y => /^20\d{2}$/.test(y) && SegmentAnalysis.segments(segmentDB[currentHotel][y]).length).sort().reverse();
+    if (!currentYear || !years.includes(currentYear)) currentYear = years[0] || '';
     if (triggerRender) initControls(); setupDragDrop();
 }
 function loadData() {

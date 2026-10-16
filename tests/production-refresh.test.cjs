@@ -52,3 +52,20 @@ test('heatmap filters year and month and clears old hotel values when daily data
     assert.match(document.getElementById('weekday-heatmap').innerHTML,/Sin datos diarios/);
     assert.doesNotMatch(document.getElementById('weekday-heatmap').innerHTML,/12\.0 RN/);
 });
+test('refreshYears and initControls preserve user-selected 2027 instead of resetting to 2026', () => {
+    const controlsCode = html.slice(html.indexOf('        function refreshYears()'), html.indexOf('        function render()'));
+    const document = elements();
+    const ctx = vm.createContext({
+        document,
+        MONTH_ORDER: ['Enero', 'Febrero'],
+        currentHotel: 'Cumbria',
+        currentYear: '2027',
+        db: { Cumbria: { '2026': {}, '2027': {} }, Guadiana: { '2026': {}, '2027': {} } },
+        render() {}
+    });
+    vm.runInContext(controlsCode, ctx);
+    vm.runInContext('refreshYears(); initControls();', ctx);
+    assert.equal(ctx.currentYear, '2027');
+    assert.equal(document.getElementById('yearSelector').value, '2027');
+});
+

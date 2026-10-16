@@ -752,7 +752,11 @@
         window.onload = function () { loadData(); document.getElementById('hotelSelector').value = currentHotel; };
 
         // Escuchar cambios desde la nube para recargar variables locales
-        window.addEventListener('capasuite-data-synced', () => {
+        window.addEventListener('capasuite-data-synced', (e) => {
+            const changedKeys = e?.detail?.keys;
+            if (Array.isArray(changedKeys) && !changedKeys.some(k => k === STORAGE_KEY || k === 'upload_config_db_v2' || k === 'manual_cupos_v1')) {
+                return;
+            }
             const s = CapaStorage.getItem(STORAGE_KEY);
             if (s) {
                 try {
@@ -762,7 +766,7 @@
                     if (currentYear) {
                         initControls();
                     }
-                } catch (e) { console.error("Error recargando DB desde nube", e); }
+                } catch (err) { console.error("Error recargando DB desde nube", err); }
             }
         });
 
@@ -835,6 +839,10 @@
                 ? Object.keys(db[currentHotel]).filter(k => /^(20\d{2})$/.test(k)) 
                 : [];
             if (y.length) {
+                if (currentYear && y.includes(String(currentYear))) {
+                    currentYear = String(currentYear);
+                    return;
+                }
                 const systemYear = new Date().getFullYear().toString();
                 if (y.includes(systemYear)) {
                     currentYear = systemYear;
@@ -842,7 +850,7 @@
                     currentYear = y.sort((a, b) => parseInt(b) - parseInt(a))[0];
                 }
             } else {
-                currentYear = "2026";
+                currentYear = currentYear || "2026";
             }
         }
 
@@ -870,9 +878,14 @@
             if (!sortedYears.length) sortedYears.push("2026");
             const ys = document.getElementById('yearSelector'); 
             ys.innerHTML = sortedYears.map(y => `<option value="${y}">${y}</option>`).join(''); 
-            ys.value = currentYear || sortedYears[0];
+            ys.value = (currentYear && sortedYears.includes(String(currentYear))) ? String(currentYear) : sortedYears[0];
+            currentYear = ys.value;
             const ms = document.getElementById('monthSelector'); 
+            const prevMonth = ms && ms.value ? ms.value : 'All';
             ms.innerHTML = '<option value="All">Todos los meses</option>' + MONTH_ORDER.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+            if (prevMonth === 'All' || (parseInt(prevMonth, 10) >= 0 && parseInt(prevMonth, 10) < MONTH_ORDER.length)) {
+                ms.value = prevMonth;
+            }
             updateView();
         }
 

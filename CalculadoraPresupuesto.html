@@ -5032,12 +5032,22 @@
                 };
 
                 const docKey = `nexus_target_${hotelKey}_${targetYearStr}`;
-                CapaStorage.setItem(docKey, JSON.stringify(targetDoc));
-                if (typeof window !== 'undefined' && window.localStorage) {
-                    window.localStorage.setItem(docKey, JSON.stringify(targetDoc));
-                    window.localStorage.setItem('v3_' + docKey, JSON.stringify(targetDoc));
-                    window.localStorage.setItem(`nexus_target_${targetHotelName}_${targetYearStr}`, JSON.stringify(targetDoc));
-                    window.localStorage.setItem(`v3_nexus_target_${targetHotelName}_${targetYearStr}`, JSON.stringify(targetDoc));
+                let prevDoc = null;
+                try { prevDoc = JSON.parse(CapaStorage.getItem(docKey) || 'null'); } catch (_) {}
+                const sameTarget = prevDoc
+                    && JSON.stringify(prevDoc.monthly) === JSON.stringify(targetDoc.monthly)
+                    && JSON.stringify(prevDoc.overall) === JSON.stringify(targetDoc.overall);
+                if (sameTarget) {
+                    targetDoc.officialSavedAt = prevDoc.officialSavedAt || targetDoc.officialSavedAt;
+                    targetDoc.updatedAt = prevDoc.updatedAt || targetDoc.updatedAt;
+                } else {
+                    CapaStorage.setItem(docKey, JSON.stringify(targetDoc));
+                    if (typeof window !== 'undefined' && window.localStorage) {
+                        window.localStorage.setItem(docKey, JSON.stringify(targetDoc));
+                        window.localStorage.setItem('v3_' + docKey, JSON.stringify(targetDoc));
+                        window.localStorage.setItem(`nexus_target_${targetHotelName}_${targetYearStr}`, JSON.stringify(targetDoc));
+                        window.localStorage.setItem(`v3_nexus_target_${targetHotelName}_${targetYearStr}`, JSON.stringify(targetDoc));
+                    }
                 }
 
                 // Sincronizar también con la base general hotel_manager_db_v2 en el segmento GRUPOS
@@ -5046,12 +5056,15 @@
                 if (!db[targetHotelName][targetYearStr]) db[targetHotelName][targetYearStr] = {};
                 if (!db[targetHotelName][targetYearStr].segments) db[targetHotelName][targetYearStr].segments = {};
 
-                db[targetHotelName][targetYearStr].segments['GRUPOS'] = {
+                const nextGrupos = {
                     revenue: Object.values(monthly).map(x => x.revenue),
                     rooms: Object.values(monthly).map(x => x.rooms),
                     pax: Object.values(monthly).map(x => x.pax)
                 };
-                CapaStorage.setItem('hotel_manager_db_v2', JSON.stringify(db));
+                if (JSON.stringify(db[targetHotelName][targetYearStr].segments['GRUPOS']) !== JSON.stringify(nextGrupos)) {
+                    db[targetHotelName][targetYearStr].segments['GRUPOS'] = nextGrupos;
+                    CapaStorage.setItem('hotel_manager_db_v2', JSON.stringify(db));
+                }
 
                 // Sincronizar en Firestore con el proyecto de Nexus Groups (gest-grupos-hotel)
                 try {
