@@ -9,43 +9,57 @@
     background: rgba(15, 23, 42, 0.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    padding: 0 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 10000;
-    height: 60px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    width: 100%;
-    box-sizing: border-box;
+    padding: 0 clamp(14px, 2vw, 28px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10000 !important;
+    height: 60px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: clip;
+    gap: 12px;
 }
 
 [data-theme="light"] .top-nav {
-    background: rgba(255, 255, 255, 0.97);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.97) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06) !important;
 }
 
 /* ─── LINKS ──────────────────────────────────────────────── */
 .nav-links {
-    display: flex;
-    gap: 4px;
-    align-items: center;
+    display: flex !important;
+    gap: 3px !important;
+    align-items: center !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.nav-links::-webkit-scrollbar {
+    display: none !important;
 }
 
 .nav-links a {
     color: #94a3b8;
     text-decoration: none;
-    font-size: 0.72rem;
+    font-size: 0.70rem !important;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 7px 11px;
+    letter-spacing: 0.4px !important;
+    padding: 6px 9px !important;
     border-radius: 8px;
     transition: color 0.2s ease, background 0.2s ease;
-    white-space: nowrap;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
 }
 
 .nav-links a:hover {
@@ -54,8 +68,9 @@
 }
 
 .nav-links a.active {
-    color: #818cf8;
-    background: rgba(129, 140, 248, 0.12);
+    color: #818cf8 !important;
+    background: rgba(129, 140, 248, 0.12) !important;
+    border-bottom: none !important;
 }
 
 [data-theme="light"] .nav-links a {
@@ -68,26 +83,28 @@
 }
 
 [data-theme="light"] .nav-links a.active {
-    color: var(--primary-dark);
-    background: rgba(79, 70, 229, 0.08);
+    color: var(--primary-dark, #4338ca) !important;
+    background: rgba(79, 70, 229, 0.08) !important;
 }
 
 /* ─── ZONA USUARIO ───────────────────────────────────────── */
 .nav-user {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-shrink: 0;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
 }
 
 .user-chip {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
     background: rgba(255, 255, 255, 0.05);
-    padding: 5px 14px;
-    border-radius: 50px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 4px 12px !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    white-space: nowrap !important;
 }
 
 [data-theme="light"] .user-chip {
@@ -98,16 +115,18 @@
 
 /* ─── SELECTOR DE HOTEL ──────────────────────────────────── */
 .nav-hotel-select {
-    background: transparent;
+    background: transparent !important;
     color: #f1f5f9;
-    border: none;
-    font-size: 0.78rem;
+    border: none !important;
+    font-size: 0.76rem !important;
     font-weight: 800;
     outline: none;
     cursor: pointer;
     font-family: inherit;
-    padding: 2px 4px;
-    max-width: 130px;
+    padding: 2px 4px !important;
+    max-width: 125px !important;
+    margin: 0 !important;
+    box-shadow: none !important;
 }
 
 [data-theme="light"] .nav-hotel-select {
@@ -127,9 +146,9 @@
 #userEmailNav {
     font-size: 0.78rem;
     font-weight: 600;
-    color: var(--text-main);
+    color: var(--text-main, #0f172a);
     white-space: nowrap;
-    max-width: 120px;
+    max-width: 110px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -144,6 +163,7 @@
     transition: opacity 0.2s;
     white-space: nowrap;
     user-select: none;
+    margin-left: 4px;
 }
 
 .logout-btn:hover {
@@ -155,33 +175,82 @@
     font-size: 10px;
     color: #64748b;
     white-space: nowrap;
+    max-width: 115px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ─── RESPONSIVE ─────────────────────────────────────────── */
+@media (max-width: 1550px) {
+    .top-nav {
+        padding: 0 16px !important;
+    }
+    .nav-links a {
+        font-size: 0.67rem !important;
+        padding: 5px 7px !important;
+    }
+    #capasuiteSyncStatus {
+        display: none !important;
+    }
+}
+
+@media (max-width: 1366px) {
+    .top-nav {
+        padding: 0 12px !important;
+    }
+    .nav-links {
+        gap: 2px !important;
+    }
+    .nav-links a {
+        font-size: 0.63rem !important;
+        padding: 4px 6px !important;
+        letter-spacing: 0.1px !important;
+    }
+    .user-chip {
+        padding: 4px 8px !important;
+        gap: 6px !important;
+    }
+    .nav-hotel-select {
+        font-size: 0.72rem !important;
+        max-width: 105px !important;
+    }
+}
+
+@media (max-width: 1100px) {
+    .nav-links a {
+        font-size: 0.60rem !important;
+        padding: 4px 5px !important;
+    }
+    #userEmailNav {
+        max-width: 75px !important;
+    }
+}
+
 @media (max-width: 900px) {
     .top-nav {
-        padding: 0 16px;
-        height: auto;
-        min-height: 60px;
-        flex-wrap: wrap;
-        gap: 8px;
-        padding-top: 8px;
-        padding-bottom: 8px;
+        padding: 6px 12px !important;
+        height: auto !important;
+        min-height: 52px !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
     }
 
     .nav-links {
-        gap: 2px;
-        flex-wrap: wrap;
+        order: 2;
+        width: 100% !important;
+        overflow-x: auto !important;
+        padding-bottom: 2px;
     }
 
-    .nav-links a {
-        font-size: 0.65rem;
-        padding: 5px 7px;
+    .nav-user {
+        order: 1;
+        width: 100% !important;
+        justify-content: flex-end;
     }
 }
 
 @media (max-width: 600px) {
     .nav-links a span.label { display: none; }
-    #userEmailNav { display: none; }
-    .user-chip { padding: 5px 8px; gap: 6px; }
+    #userEmailNav { display: none !important; }
+    .user-chip { padding: 4px 8px !important; gap: 5px !important; }
 }
