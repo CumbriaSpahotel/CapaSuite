@@ -3471,8 +3471,10 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
 
         function populateMonths() {
             const sel = document.getElementById('monthSelector');
+            const selectedMonth = sel.value;
             sel.innerHTML = '<option value="all">📅 Todo el Año</option>';
             distinctMonths.forEach(m => sel.innerHTML += `<option value="${m}">${m}</option>`);
+            sel.value = distinctMonths.includes(selectedMonth) ? selectedMonth : 'all';
         }
 
         // --- RENDER ---
