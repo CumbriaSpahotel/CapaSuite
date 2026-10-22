@@ -316,15 +316,16 @@
             border-radius: var(--radius-xl);
             padding: 14px;
             box-shadow: var(--shadow-premium);
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
             position: relative;
             overflow: hidden;
             width: 100%;
             cursor: pointer;
+            backface-visibility: hidden;
+            transform: translateZ(0);
         }
 
         .month-card:hover {
-            transform: translateY(-2px);
             border-color: var(--primary);
             box-shadow: 0 10px 25px rgba(99, 102, 241, 0.12);
         }
@@ -585,12 +586,14 @@
             justify-content: space-between;
             position: relative;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
             color: var(--text-main);
             min-height: 80px;
             border-radius: var(--radius-md);
             z-index: 1;
             overflow: hidden;
+            backface-visibility: hidden;
+            transform: translateZ(0);
         }
         [data-theme="light"] .day-cell { 
             border-color: #e2e8f0; 
@@ -599,16 +602,15 @@
         }
 
         .day-cell:hover {
-            transform: translateY(-4px);
             z-index: 10;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 0 2px var(--primary), 0 8px 20px rgba(0, 0, 0, 0.25);
             border-color: var(--primary);
             background: rgba(255, 255, 255, 0.08);
         }
         [data-theme="light"] .day-cell:hover { 
-            background: #ffffff; 
+            background: #f8fafc; 
             border-color: var(--primary);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08); 
+            box-shadow: 0 0 0 2px var(--primary), 0 6px 18px rgba(99, 102, 241, 0.18); 
         }
 
         .day-num-container {
@@ -849,9 +851,10 @@
             box-sizing: border-box;
             border: 1px solid var(--border);
             color: var(--text-main);
-            backdrop-filter: blur(25px);
-            animation: tooltipAppear 0.15s ease-out;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             scrollbar-width: thin;
+            will-change: left, top;
         }
         #tooltip::-webkit-scrollbar {
             width: 4px;
@@ -859,10 +862,6 @@
         #tooltip::-webkit-scrollbar-thumb {
             background: rgba(148, 163, 184, 0.4);
             border-radius: 4px;
-        }
-        @keyframes tooltipAppear {
-            from { opacity: 0; transform: scale(0.96) translateY(6px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
         }
         .tt-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 15px; }
         .tt-date { font-weight: 800; font-size: 1rem; color: var(--text-main); }
@@ -914,14 +913,14 @@
         
         /* ANIMATIONS */
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .month-card { animation: fadeInUp 0.6s ease-out both; }
-        .month-card:nth-child(1) { animation-delay: 0.1s; }
-        .month-card:nth-child(2) { animation-delay: 0.15s; }
-        .month-card:nth-child(3) { animation-delay: 0.2s; }
-        .month-card:nth-child(4) { animation-delay: 0.25s; }
+        .calendar-container.initial-load .month-card { animation: fadeInUp 0.4s ease-out both; }
+        .calendar-container.initial-load .month-card:nth-child(1) { animation-delay: 0.05s; }
+        .calendar-container.initial-load .month-card:nth-child(2) { animation-delay: 0.1s; }
+        .calendar-container.initial-load .month-card:nth-child(3) { animation-delay: 0.15s; }
+        .calendar-container.initial-load .month-card:nth-child(4) { animation-delay: 0.2s; }
         /* and so on... */
 
         /* SYNC INDICATOR */
@@ -1136,7 +1135,7 @@
         <!-- JS Injected -->
     </div>
 
-    <main id="calendarGrid" class="calendar-container"></main>
+    <main id="calendarGrid" class="calendar-container initial-load"></main>
 
     <section class="event-sidebar" style="max-width: 1700px; margin: 0 auto 60px; padding: 0 40px;">
         <h3 id="eventListTitle" style="margin-top:0; font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: -0.5px;">Eventos del Periodo</h3>
@@ -1194,11 +1193,24 @@
             
             document.getElementById('excelEvents').onchange = (e) => handleExcel(e.target);
 
+            let syncDebounceTimer = null;
+            let lastSyncHash = '';
             window.addEventListener('capasuite-data-synced', () => {
-                const toast = document.getElementById('syncToast');
-                if (toast) toast.style.display = 'block';
-                loadAllData();
-                setTimeout(() => { if (toast) toast.style.display = 'none'; }, 800);
+                if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+                syncDebounceTimer = setTimeout(() => {
+                    const compRaw = CapaStorage.getItem('revenue_data_v2') || '';
+                    const prodRaw = CapaStorage.getItem('hotel_manager_db_v2') || '';
+                    const evRaw = CapaStorage.getItem('custom_events') || '';
+                    const currentHash = `${compRaw.length}_${prodRaw.length}_${evRaw.length}`;
+
+                    if (currentHash !== lastSyncHash) {
+                        lastSyncHash = currentHash;
+                        const toast = document.getElementById('syncToast');
+                        if (toast) toast.style.display = 'block';
+                        loadAllData();
+                        setTimeout(() => { if (toast) toast.style.display = 'none'; }, 800);
+                    }
+                }, 250);
             });
 
             function syncThemeIcon() {
@@ -1304,6 +1316,10 @@
             renderCalendar();
             renderEventList();
             renderInsights();
+            setTimeout(() => {
+                const gridEl = document.getElementById('calendarGrid');
+                if (gridEl) gridEl.classList.remove('initial-load');
+            }, 700);
         }
 
         function onFilterChange() {
@@ -1908,6 +1924,8 @@
                 
                 const grid = document.createElement('div');
                 grid.className = 'days-grid';
+                grid.title = '';
+                grid.onclick = (e) => e.stopPropagation();
 
                 const firstDay = new Date(year, m, 1);
                 let startOffset = firstDay.getDay(); if (startOffset === 0) startOffset = 7;
@@ -2315,7 +2333,7 @@
             // Si el cursor está en la mitad inferior de la pantalla o si se desbordaría hacia abajo, elevar el tooltip
             let y = e.clientY - 30;
             if (e.clientY > viewH * 0.5) {
-                y = e.clientY - tipH + 20;
+                y = e.clientY - tipH - 12;
             }
 
             // Clamping estricto: nunca permitir que sobresalga ni por arriba ni por abajo
