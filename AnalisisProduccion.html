@@ -593,7 +593,7 @@
                 <div class="card">
                     <div class="kpi-label">Habitaciones (RN)</div>
                     <div class="kpi-value" id="kpi-rn">0</div>
-                    <div class="kpi-trend" id="trend-rn">--</div>
+                    <div class="kpi-trend" id="trend-rn">--</div><div class="kpi-progress-container" id="prog-cont-rn"><div class="kpi-progress-bar" id="prog-bar-rn"></div></div><div class="kpi-target-label" id="target-label-rn">Obj: --</div>
                 </div>
                 <div class="card">
                     <div class="kpi-label">Total Pax</div>
@@ -610,12 +610,12 @@
                 <div class="card">
                     <div class="kpi-label">Ocupación</div>
                     <div class="kpi-value" id="kpi-occ">0 %</div>
-                    <div class="kpi-trend" id="trend-occ">--</div>
+                    <div class="kpi-trend" id="trend-occ">--</div><div class="kpi-progress-container" id="prog-cont-occ"><div class="kpi-progress-bar" id="prog-bar-occ"></div></div><div class="kpi-target-label" id="target-label-occ">Obj: --</div>
                 </div>
                 <div class="card" style="background: rgba(245, 158, 11, 0.1) !important;">
                     <div class="kpi-label" style="color: #f59e0b;">RevPAR (Hab/Disp)</div>
                     <div class="kpi-value" id="kpi-revpar" style="color: #f59e0b;">0 €</div>
-                    <div class="kpi-trend" id="trend-revpar">--</div>
+                    <div class="kpi-trend" id="trend-revpar">--</div><div class="kpi-progress-container" id="prog-cont-revpar"><div class="kpi-progress-bar" id="prog-bar-revpar" style="background:#f59e0b;"></div></div><div class="kpi-target-label" id="target-label-revpar">Obj: --</div>
                 </div>
             </div>
 
@@ -738,6 +738,24 @@
         const MONTH_ORDER = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
         const SHORT_MONTHS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         const HOTELS = { "Guadiana": { rooms: 108 }, "Cumbria": { rooms: 59 } };
+        // Presupuestos por defecto (se usan solo si no hay un custom_budget_<año> guardado desde la Calculadora)
+        const DEFAULT_BUDGETS = {
+            "Guadiana": {
+                // Presupuesto Oficial 2026 (BGT 2026 aprobado por Dirección General) - mismo que CalculadoraPresupuesto
+                "2026": {
+                    rev: [66789, 71441, 106875, 130251, 125308, 118652, 121962, 131039, 148593, 163911, 114738, 95813],
+                    adr: [61.50, 61.80, 75.00, 70.33, 69.50, 70.50, 69.10, 61.09, 62.91, 62.16, 64.28, 62.50],
+                    rn: [1086, 1156, 1425, 1852, 1803, 1683, 1765, 2145, 2362, 2637, 1785, 1533]
+                }
+            },
+            "Cumbria": {
+                // Propuesta Habitación (Original) 2026 - mismo que CalculadoraPresupuesto
+                "2026": {
+                    rev: [66000, 69000, 81000, 101000, 118000, 108000, 126000, 118000, 116000, 111000, 96000, 86000],
+                    adr: [70.00, 70.00, 75.00, 78.00, 87.00, 83.00, 91.00, 87.00, 86.00, 81.00, 78.00, 77.00]
+                }
+            }
+        };
         function fmtNum(n) { return new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(n); }
         function fmt(n) { return fmtNum(n) + "\u00A0€"; }
 
@@ -1541,21 +1559,29 @@
             // --- BUDGET PROGRESS INTEGRATION ---
             const otbData = data.otb || { revenue: new Array(12).fill(0) };
             const customKey = `custom_budget_${currentYear}`;
-            const budgetData = (db[currentHotel] && db[currentHotel][customKey]) ? db[currentHotel][customKey] : null;
+            let budgetData = (db[currentHotel] && db[currentHotel][customKey]) ? db[currentHotel][customKey] : null;
+            // Fallback: presupuesto por defecto del hotel si no hay uno guardado desde la Calculadora
+            if ((!budgetData || !budgetData.rev) && DEFAULT_BUDGETS[currentHotel] && DEFAULT_BUDGETS[currentHotel][currentYear]) {
+                budgetData = DEFAULT_BUDGETS[currentHotel][currentYear];
+            }
 
-            function updateProgress(id, current, target, isCurrency = true) {
+            const fmtDec = (n, d) => n.toFixed(d).replace('.', ',');
+            const BUDGET_IDS = ['total', 'hab', 'rn', 'adr', 'occ', 'revpar'];
+
+            function updateProgress(id, current, target, formatter) {
                 const cont = document.getElementById(`prog-cont-${id}`);
                 const bar = document.getElementById(`prog-bar-${id}`);
                 const label = document.getElementById(`target-label-${id}`);
                 if (!cont || !bar || !label) return;
 
-                if (target > 0) {
-                    const pct = Math.min(100, (current / target) * 100);
+                if (target > 0 && isFinite(target) && isFinite(current)) {
+                    const rawPct = (current / target) * 100;
+                    const pct = Math.max(0, Math.min(100, rawPct));
                     cont.style.display = 'block';
                     label.style.display = 'block';
                     bar.style.width = pct + '%';
-                    label.innerText = `Obj: ${isCurrency ? fmtNum(target)+'€' : target}`;
-                    label.title = `${pct.toFixed(1)}% del objetivo cumplido`;
+                    label.innerText = `Obj: ${formatter(target)} (${fmtDec(rawPct, 0)}%)`;
+                    label.title = `${fmtDec(rawPct, 1)}% del objetivo cumplido`;
                 } else {
                     cont.style.display = 'none';
                     label.style.display = 'none';
@@ -1563,21 +1589,55 @@
             }
 
             if (budgetData && budgetData.rev) {
-                const bRev = midx === -1 ? budgetData.rev.reduce((a, b) => a + b, 0) : (budgetData.rev[midx] || 0);
-                const bAdr = midx === -1 ? (budgetData.adr.reduce((a, b) => a + b, 0) / 12) : (budgetData.adr[midx] || 0);
-                
-                // For 'Total Production', we compare Projected (Real + OTB) vs Budget
-                const projTotal = revTY + (midx === -1 ? otbData.revenue.reduce((a, b) => a + b, 0) : (otbData.revenue[midx] || 0));
-                updateProgress('total', projTotal, bRev);
-                
-                // For 'Room Production', we compare Room Real + Room OTB vs Budget
-                const roomTY = (groupedTY.HABITACION && groupedTY.HABITACION.revenue) ? (midx === -1 ? groupedTY.HABITACION.revenue.reduce((a, b) => (a || 0) + (b || 0), 0) : (groupedTY.HABITACION.revenue[midx] || 0)) : 0;
-                const roomOtb = midx === -1 ? otbData.revenue.reduce((a, b) => a + b, 0) : (otbData.revenue[midx] || 0);
-                updateProgress('hab', roomTY + roomOtb, bRev); 
-                
-                updateProgress('adr', adrTY, bAdr);
+                const yrInt = parseInt(currentYear);
+                const nowB = new Date();
+                const isClosedB = (i) => (yrInt < nowB.getFullYear()) || (yrInt === nowB.getFullYear() && i < nowB.getMonth());
+                const pick = (arr) => {
+                    if (!arr) return 0;
+                    return midx === -1 ? arr.reduce((a, b) => (a || 0) + (b || 0), 0) : (arr[midx] || 0);
+                };
+                // OTB solo para meses no cerrados (igual que "Proy. Cierre")
+                const pickOtb = (arr) => {
+                    if (!arr) return 0;
+                    if (midx === -1) return arr.reduce((a, b, i) => a + (isClosedB(i) ? 0 : (b || 0)), 0);
+                    return isClosedB(midx) ? 0 : (arr[midx] || 0);
+                };
+
+                // Objetivos derivados del presupuesto
+                const bRevArr = budgetData.rev.map(v => parseFloat(v) || 0);
+                const bRnArr = bRevArr.map((r, i) => {
+                    if (budgetData.rn && budgetData.rn[i]) return parseFloat(budgetData.rn[i]) || 0;
+                    const a = budgetData.adr ? parseFloat(budgetData.adr[i]) : 0;
+                    return a > 0 ? r / a : 0;
+                });
+                const bRev = pick(bRevArr);
+                const bRn = pick(bRnArr);
+                const bAdr = bRn > 0 ? bRev / bRn : 0;
+                const rooms = HOTELS[currentHotel] ? HOTELS[currentHotel].rooms : 0;
+                const periodDays = midx === -1
+                    ? (((yrInt % 4 === 0 && yrInt % 100 !== 0) || yrInt % 400 === 0) ? 366 : 365)
+                    : new Date(yrInt, midx + 1, 0).getDate();
+                const bOcc = (rooms > 0 && periodDays > 0) ? (bRn / (rooms * periodDays) * 100) : 0;
+                const bRevpar = (rooms > 0 && periodDays > 0) ? (bRev / (rooms * periodDays)) : 0;
+
+                // Producción Total: Real + OTB vs Presupuesto
+                const projTotal = revTY + pickOtb(otbData.revenue);
+                updateProgress('total', projTotal, bRev, v => fmtNum(v) + '€');
+
+                // Prod. Habitación: Real Hab + OTB Hab vs Presupuesto
+                const roomOtbArr = (otbData.breakdown && otbData.breakdown.habitacion) ? otbData.breakdown.habitacion : otbData.revenue;
+                updateProgress('hab', habRevTY + pickOtb(roomOtbArr), bRev, v => fmtNum(v) + '€');
+
+                // Habitaciones (RN): Real + OTB vs RN presupuestadas
+                const rnOtbArr = (otbData.breakdown && otbData.breakdown.habitacion_rn) ? otbData.breakdown.habitacion_rn : otbData.rooms;
+                updateProgress('rn', rmsTY + pickOtb(rnOtbArr), bRn, v => fmtNum(v) + ' RN');
+
+                // Ratios: valor actual vs objetivo
+                updateProgress('adr', adrTY, bAdr, v => fmtDec(v, 2) + '€');
+                updateProgress('occ', occTY, bOcc, v => fmtDec(v, 1) + '%');
+                updateProgress('revpar', revparTY, bRevpar, v => fmtDec(v, 2) + '€');
             } else {
-                ['total', 'hab', 'adr'].forEach(id => {
+                BUDGET_IDS.forEach(id => {
                     const el = document.getElementById(`prog-cont-${id}`);
                     if (el) el.style.display = 'none';
                     const label = document.getElementById(`target-label-${id}`);
@@ -2138,7 +2198,7 @@
             // 4. Budget Data (Presupuesto)
             let budgetDataForChart = null;
             const customKey = `custom_budget_${currentYear}`;
-            const customBudget = (db[currentHotel] && db[currentHotel][customKey]) ? db[currentHotel][customKey] : null;
+            const customBudget = (db[currentHotel] && db[currentHotel][customKey]) ? db[currentHotel][customKey] : ((DEFAULT_BUDGETS[currentHotel] && DEFAULT_BUDGETS[currentHotel][currentYear]) || null);
 
             if (customBudget && customBudget.rev && customBudget.rev.length === 12 && customBudget.rev.some(v => v > 0)) {
                 if (chartMetric === 'total' || chartMetric === 'hab') {
