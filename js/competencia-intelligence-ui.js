@@ -8,15 +8,15 @@
 
     let activeIntelTab = 'daily';
     let tableColumnConfig = {
-        occPct: true,
-        pickup24h: true,
+        occPct: false,
+        pickup24h: false,
         pickup3d: false,
-        pickup7d: true,
+        pickup7d: false,
         pickup14d: false,
-        daysOut: true,
-        recPrice: true,
-        diffPrice: true,
-        recReason: true
+        daysOut: false,
+        recPrice: false,
+        diffPrice: false,
+        recReason: false
     };
 
     let dayDetailChartInstance = null;
@@ -25,7 +25,8 @@
 
     function loadColumnConfig() {
         try {
-            const saved = localStorage.getItem('capasuite_table_col_config_v1');
+            localStorage.removeItem('capasuite_table_col_config_v1');
+            const saved = localStorage.getItem('capasuite_table_col_config_v2');
             if (saved) {
                 tableColumnConfig = Object.assign(tableColumnConfig, JSON.parse(saved));
             }
@@ -98,7 +99,7 @@
             if (el) tableColumnConfig[k] = el.checked;
         });
         try {
-            localStorage.setItem('capasuite_table_col_config_v1', JSON.stringify(tableColumnConfig));
+            localStorage.setItem('capasuite_table_col_config_v2', JSON.stringify(tableColumnConfig));
         } catch(e) {}
         closeColumnConfigModal();
         if (typeof refreshActiveView === 'function') refreshActiveView();
