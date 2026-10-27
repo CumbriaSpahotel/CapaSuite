@@ -22,6 +22,8 @@
     <script src="js/nav.js"></script>
     <script src="js/theme-manager.js"></script>
     <script src="js/firebase-auth.js?v=20261001-sync3"></script>
+    <script src="js/pricing-intelligence.js"></script>
+    <script src="js/competencia-intelligence-ui.js"></script>
 
     <link rel="stylesheet" href="css/tokens.css">
     <link rel="stylesheet" href="css/nav.css">
@@ -1291,6 +1293,266 @@
             border-bottom: 1px solid var(--border);
             box-sizing: border-box;
         }
+
+        /* ==========================================================================
+           ESTILOS: CENTRO DE INTELIGENCIA DE PRECIOS - VISTA MENSUAL, DOW & DETALLE
+           ========================================================================== */
+        .intel-tabs-bar {
+            margin-bottom: 14px;
+        }
+        .intel-tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .intel-tab-btn:hover {
+            color: var(--text-main);
+            background: var(--bg-surface);
+        }
+        .intel-tab-btn.active {
+            color: #ffffff;
+            background: var(--primary);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+        }
+
+        /* Tarjetas de Resumen Mensual */
+        .month-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .month-kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: transform 0.2s ease;
+        }
+        .month-kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+        .month-kpi-card .kpi-title {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .month-kpi-card .kpi-num {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+        .month-kpi-card .kpi-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* Tabla DOW y Subfilas */
+        .dow-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.82rem;
+        }
+        .dow-table thead th {
+            background: var(--bg-surface);
+            color: var(--text-muted);
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.4px;
+            padding: 10px 12px;
+            border-bottom: 2px solid var(--border);
+            text-align: center;
+        }
+        .dow-table tbody td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .dow-row-parent {
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .dow-row-parent:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+        .dow-name-cell {
+            text-align: left !important;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dow-chevron {
+            display: inline-block;
+            transition: transform 0.2s ease;
+            font-size: 0.75rem;
+            color: var(--primary);
+        }
+        .dow-chevron.open {
+            transform: rotate(90deg);
+        }
+
+        .dow-subtable-wrap {
+            padding: 12px 16px;
+            background: var(--bg-deep);
+            border-radius: 10px;
+            margin: 6px 12px;
+            border: 1px solid var(--border);
+        }
+        .dow-subtable {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+        }
+        .dow-subtable th {
+            text-align: center;
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+        .dow-subtable td {
+            text-align: center;
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Badges de Acción del Motor */
+        .action-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .action-pill.subir {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .action-pill.bajar {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .action-pill.mantener {
+            background: rgba(100, 116, 139, 0.15);
+            color: #94a3b8;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        .action-pill.manual {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Pickup Chips */
+        .pickup-chip {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.72rem;
+        }
+        .pickup-chip.pos {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+        .pickup-chip.neg {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+        .pickup-chip.neutral {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Ficha de Análisis Diaria (Modal) */
+        .day-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .day-detail-box {
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+        .day-detail-box .box-lbl {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        .day-detail-box .box-val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        /* Matriz de Precios Editor */
+        .bar-matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .bar-matrix-table th {
+            background: var(--bg-deep);
+            color: var(--text-muted);
+            padding: 8px 6px;
+            text-align: center;
+            font-weight: 800;
+            border: 1px solid var(--border);
+        }
+        .bar-matrix-table td {
+            padding: 4px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .matrix-input {
+            width: 58px;
+            padding: 5px 6px;
+            text-align: center;
+            font-weight: 700;
+            border-radius: 6px;
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            outline: none;
+        }
+        .matrix-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
     </style>
 </head>
 
@@ -1316,8 +1578,8 @@
                 <select id="monthSelector" class="form-select" onchange="renderAll()" title="Filtrar por mes">
                     <option value="all">📅 Todo el Año</option>
                 </select>
-                <button class="btn"
-                    onclick="openMinPriceModal()" title="Configurar tarifas mínimas (suelo) para cada hotel">🏷️ Precios Mínimos</button>
+                <button class="btn" onclick="openBarMatrixModal()" title="Ver y editar tarifas base 2027 y escalados">📊 Tarifas Base 2027</button>
+                <button class="btn" onclick="openMinPriceModal()" title="Configurar tarifas mínimas (suelo) para cada hotel">🏷️ Precios Mínimos</button>
                 <button class="btn"
                     onclick="openCompConfig()" title="Configurar lista de competidores y parámetros">⚙️ Competencia</button>
                 <button id="updateBtn" class="btn btn-primary" onclick="clearData()" title="Subir nuevo archivo de datos">↺ Nuevo Archivo</button>
@@ -1404,27 +1666,122 @@
 
         <!-- RIGHT COLUMN -->
         <main>
-            <!-- CHART -->
-
-
-            <!-- TABLE -->
-            <div class="card">
-                <div class="panel-heading">
-                    <span>📋 Detalle Diario</span>
-                    <span id="record-count" style="font-size:0.8rem; color:var(--text-light); font-weight:400;">0
-                        registros</span>
+            <!-- INTEL NAVIGATION TABS -->
+            <div class="intel-tabs-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div style="display:flex; gap:6px; align-items:center; background:var(--bg-card); padding:4px; border-radius:12px; border:1px solid var(--border); box-shadow:var(--shadow-sm);">
+                    <button id="tabBtnDaily" class="intel-tab-btn active" onclick="switchIntelTab('daily')">
+                        📋 Detalle Diario
+                    </button>
+                    <button id="tabBtnMonthDow" class="intel-tab-btn" onclick="switchIntelTab('month_dow')">
+                        📅 Vista Mensual &amp; Días de la Semana
+                    </button>
+                    <button id="tabBtnComparison" class="intel-tab-btn" onclick="switchIntelTab('comparison')">
+                        ⚖️ Comparación &amp; Evolución
+                    </button>
                 </div>
-                <div class="table-wrap">
-                    <table id="dataTable">
-                        <thead>
-                            <tr id="tableHeader">
+                <div id="dailyTableActions" style="display:flex; gap:8px; align-items:center;">
+                    <button class="btn btn-sm" onclick="toggleColumnConfigModal()" title="Configurar columnas visibles de la tabla diaria" style="font-size:0.8rem; display:inline-flex; align-items:center; gap:5px; background:var(--bg-surface); border:1px solid var(--border); color:var(--text-main);">
+                        👁️ Configurar Columnas
+                    </button>
+                </div>
+            </div>
+
+            <!-- CONTAINER 1: DETALLE DIARIO -->
+            <div id="viewContainerDaily">
+                <div class="card">
+                    <div class="panel-heading" style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span>📅 Detalle Diario</span>
+                            <span id="record-count" style="font-size:0.8rem; color:var(--text-light); font-weight:400;">0 registros</span>
+                        </div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); font-style:italic;">
+                            💡 Haz clic en cualquier fecha para abrir su Ficha de Análisis completa
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table id="dataTable">
+                            <thead>
+                                <tr id="tableHeader">
+                                    <!-- Dynamic -->
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
                                 <!-- Dynamic -->
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                            <!-- Dynamic -->
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTAINER 2: VISTA MENSUAL & DÍAS DE LA SEMANA -->
+            <div id="viewContainerMonthDow" style="display:none;">
+                <!-- RESUMEN MENSUAL -->
+                <div id="monthSummaryContainer" style="margin-bottom:16px;">
+                    <!-- JS Injected -->
+                </div>
+
+                <!-- TABLA DOW -->
+                <div class="card">
+                    <div class="panel-heading" style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span>📊 Análisis por Día de la Semana</span>
+                            <span id="dowMonthTitleBadge" style="font-size:0.75rem; background:rgba(99,102,241,0.15); color:var(--primary); padding:2px 8px; border-radius:12px; font-weight:700;">Mes</span>
+                        </div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">
+                            Pulsa sobre cualquier fila para desplegar/contraer las fechas específicas del mes
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table id="dowSummaryTable" class="dow-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:140px; text-align:left;">Día Semana</th>
+                                    <th>BAR Base Excel</th>
+                                    <th>Precio Actual</th>
+                                    <th>Ocupación Media</th>
+                                    <th>Pickup 24h</th>
+                                    <th>Pickup 7d</th>
+                                    <th>Pickup 14d</th>
+                                    <th>Mercado</th>
+                                    <th>Recomendado</th>
+                                    <th style="min-width:240px; text-align:left;">Justificación</th>
+                                    <th style="width:40px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="dowSummaryTableBody">
+                                <!-- JS Injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTAINER 3: COMPARACIÓN & EVOLUCIÓN -->
+            <div id="viewContainerComparison" style="display:none;">
+                <div class="card" style="margin-bottom:16px;">
+                    <div class="panel-heading">
+                        <span>⚖️ Herramienta de Comparación y Evolución</span>
+                    </div>
+                    <div style="padding:16px;">
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:16px; background:var(--bg-deep); padding:12px; border-radius:10px; border:1px solid var(--border);">
+                            <label style="font-size:0.8rem; font-weight:800; color:var(--primary); text-transform:uppercase;">Modalidad:</label>
+                            <select id="compModeSelect" class="form-select" onchange="runComparisonAnalysis()" style="width:auto; padding:6px 12px; font-size:0.85rem; font-weight:700;">
+                                <option value="mon_fri">Lunes vs Viernes (Mismo Mes)</option>
+                                <option value="tue_wed">Martes vs Miércoles (Mismo Mes)</option>
+                                <option value="saturday_cross">Sábados de Distintos Meses</option>
+                                <option value="yoy">Pickup Actual vs Mismo Periodo Año Anterior</option>
+                            </select>
+
+                            <label style="font-size:0.8rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-left:8px;">Mes:</label>
+                            <select id="compMonthSelect" class="form-select" onchange="runComparisonAnalysis()" style="width:auto; padding:6px 12px; font-size:0.85rem;">
+                                <!-- Populate months -->
+                            </select>
+                        </div>
+
+                        <div id="comparisonResultsContainer">
+                            <!-- JS Injected comparison cards, tables and charts -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -3669,6 +4026,11 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
                 
                 updateRecordCountDisplay(data.length);
 
+                if (window.CompetenciaIntelUI) {
+                    CompetenciaIntelUI.renderMonthAndDowView(data, selectedMonth);
+                    CompetenciaIntelUI.runComparisonAnalysis();
+                }
+
             } catch (e) {
                 console.error("renderAll Error:", e);
                 renderTable(processedData);
@@ -4104,7 +4466,20 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
                 ? ` <span class="min-price-pill" onclick="openMinPriceModal()" title="Precio mínimo configurado: ${activeMinP}€. Click para configurar">Mín: ${activeMinP}€</span>` 
                 : ` <span class="min-price-pill empty" onclick="openMinPriceModal()" title="Configurar precio mínimo">+ Mín</span>`;
 
-            let h = `<th class="th-date">Fecha</th><th class="th-active-hotel">${activeHotel}${activeMinBadge}</th><th class="th-market">Mercado</th><th class="th-gap">Gap</th><th class="th-action">Acción</th>`;
+            const cfg = (window.CompetenciaIntelUI && CompetenciaIntelUI.tableColumnConfig) ? CompetenciaIntelUI.tableColumnConfig : {};
+
+            let h = `<th class="th-date">Fecha</th>`;
+            h += `<th class="th-active-hotel">${activeHotel}${activeMinBadge}</th>`;
+            if (cfg.occPct) h += `<th class="th-occ" style="text-align:center;">Ocupación</th>`;
+            if (cfg.pickup24h) h += `<th class="th-pickup" style="text-align:center;">P. 24h</th>`;
+            if (cfg.pickup3d) h += `<th class="th-pickup" style="text-align:center;">P. 3d</th>`;
+            if (cfg.pickup7d) h += `<th class="th-pickup" style="text-align:center;">P. 7d</th>`;
+            if (cfg.pickup14d) h += `<th class="th-pickup" style="text-align:center;">P. 14d</th>`;
+            if (cfg.daysOut) h += `<th class="th-days-out" style="text-align:center;">Antelación</th>`;
+            h += `<th class="th-market">Mercado</th><th class="th-gap">Gap</th><th class="th-action">Acción</th>`;
+            if (cfg.recPrice) h += `<th class="th-rec-price" style="text-align:center; color:#10b981;">Recomendado</th>`;
+            if (cfg.diffPrice) h += `<th class="th-diff-price" style="text-align:center;">Var.</th>`;
+            if (cfg.recReason) h += `<th class="th-rec-reason" style="text-align:left; min-width:180px;">Motivo Recomendación</th>`;
 
             // Add Sibling Header
             let sibMinP = 0;
@@ -4232,7 +4607,7 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
                 }
 
                 let html = `<tr id="row-${d.dayIndex}" data-date="${d.dateISO}" class="${selectedTableDate === d.dateISO ? 'row-selected' : ''}">`;
-                html += `<td>${cellContent}</td>`;
+                html += `<td class="th-date" onclick="CompetenciaIntelUI.openDayDetailModal('${d.dateISO}')" style="cursor:pointer;" title="Click para abrir Ficha de Análisis Diaria">${cellContent}</td>`;
 
                 // My Price (Active Hotel)
                 // === ALERTA CRÍTICA 1: CIERRE CON HABITACIONES DISPONIBLES (FALSO CIERRE) ===
@@ -4346,9 +4721,65 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
                     html += `<td class="price-val" style="font-size:1.05rem;">${priceWrap}${urgentOpenWarning}${occupancyLabel}</td>`;
                 }
 
-                html += `<td style="color:var(--primary); font-weight:600;">${d.compAvg.toFixed(0)}€</td>`;
+                // Columnas opcionales de Inteligencia de Precios
+                const pData = (window.PricingIntelligence) ? PricingIntelligence.calculateDailyPickup(activeHotel, d.dateISO, { rooms: currentOcc, occupancyPct: occPct2 }) : null;
+                const rec = (window.PricingIntelligence) ? PricingIntelligence.evaluateDailyRecommendation({
+                    hotelName: activeHotel,
+                    dateISO: d.dateISO,
+                    currentPrice: myP,
+                    marketAvg: d.compAvg,
+                    otbRooms: currentOcc,
+                    occupancyPct: occPct2,
+                    capacity: capacityVal,
+                    pickupData: pData,
+                    minFloorPrice: getHotelMinPrice(activeHotel)
+                }) : null;
+
+                const todayDt = new Date(); todayDt.setHours(0,0,0,0);
+                const targetDt = new Date(d.dateISO);
+                const daysOutVal = Math.ceil((targetDt.getTime() - todayDt.getTime()) / (1000 * 60 * 60 * 24));
+
+                if (cfg.occPct) {
+                    html += `<td style="text-align:center;"><span style="font-weight:700;">${occPct2.toFixed(0)}%</span> <span style="font-size:0.7rem; color:var(--text-muted);">(${currentOcc}/${capacityVal})</span></td>`;
+                }
+                if (cfg.pickup24h) {
+                    const p24 = pData?.h24h?.available ? `<span class="pickup-chip ${pData.h24h.diffRooms >= 0 ? 'pos' : 'neg'}">${pData.h24h.diffRooms >= 0 ? '+' : ''}${pData.h24h.diffRooms} RN</span>` : '<span class="pickup-chip neutral">-</span>';
+                    html += `<td style="text-align:center;">${p24}</td>`;
+                }
+                if (cfg.pickup3d) {
+                    const p3 = pData?.d3?.available ? `<span class="pickup-chip ${pData.d3.diffRooms >= 0 ? 'pos' : 'neg'}">${pData.d3.diffRooms >= 0 ? '+' : ''}${pData.d3.diffRooms} RN</span>` : '<span class="pickup-chip neutral">-</span>';
+                    html += `<td style="text-align:center;">${p3}</td>`;
+                }
+                if (cfg.pickup7d) {
+                    const p7 = pData?.d7?.available ? `<span class="pickup-chip ${pData.d7.diffRooms >= 0 ? 'pos' : 'neg'}">${pData.d7.diffRooms >= 0 ? '+' : ''}${pData.d7.diffRooms} RN</span>` : '<span class="pickup-chip neutral">-</span>';
+                    html += `<td style="text-align:center;">${p7}</td>`;
+                }
+                if (cfg.pickup14d) {
+                    const p14 = pData?.d14?.available ? `<span class="pickup-chip ${pData.d14.diffRooms >= 0 ? 'pos' : 'neg'}">${pData.d14.diffRooms >= 0 ? '+' : ''}${pData.d14.diffRooms} RN</span>` : '<span class="pickup-chip neutral">-</span>';
+                    html += `<td style="text-align:center;">${p14}</td>`;
+                }
+                if (cfg.daysOut) {
+                    html += `<td style="text-align:center; font-size:0.78rem; color:var(--text-muted);">${daysOutVal > 0 ? daysOutVal + 'd' : 'Hoy'}</td>`;
+                }
+
+                html += `<td style="color:var(--primary); font-weight:600;">${d.compAvg.toFixed(0)} €</td>`;
                 html += `<td>${gapHtml}</td>`;
                 html += `<td>${actionHtml}</td>`;
+
+                if (cfg.recPrice) {
+                    html += `<td style="text-align:center; font-weight:800; color:#10b981; font-size:1.02rem;">${rec ? rec.proposedPrice + ' €' : '-'}</td>`;
+                }
+                if (cfg.diffPrice) {
+                    const diffAmt = rec ? rec.diffAmount : 0;
+                    const diffColor = diffAmt > 0 ? '#10b981' : (diffAmt < 0 ? '#f59e0b' : 'var(--text-muted)');
+                    html += `<td style="text-align:center; font-weight:700; font-size:0.8rem; color:${diffColor};">${diffAmt !== 0 ? (diffAmt > 0 ? '+' : '') + diffAmt + ' €' : '-'}</td>`;
+                }
+                if (cfg.recReason) {
+                    const actCls = rec ? (rec.action === 'SUBIR' ? 'subir' : (rec.action === 'REVISAR BAJADA' ? 'bajar' : (rec.action === 'REVISIÓN MANUAL' ? 'manual' : 'mantener'))) : 'mantener';
+                    const actText = rec ? rec.action : 'MANTENER';
+                    const firstReason = rec?.reasons?.[0] || 'En rango de mercado';
+                    html += `<td style="text-align:left; font-size:0.75rem; line-height:1.3; max-width:240px;" title="${rec ? rec.fullReasonText : ''}"><span class="action-pill ${actCls}" style="font-size:0.65rem; margin-right:4px;">${actText}</span><span style="color:var(--text-main);">${firstReason}</span></td>`;
+                }
 
                 // SIBLING (Cross-hotel comparison and simulation)
                 if (siblingName) {
@@ -5229,6 +5660,179 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
         });
     </script>
 
+    
+    <!-- MODAL: EDITOR DE MATRIZ DE PRECIOS 2027 & ESCALADOS -->
+    <div id="barMatrixModal" class="modal" style="z-index:999999;">
+        <div class="modal-content" style="max-width:960px; width:95vw; max-height:92vh; overflow-y:auto; border-radius:18px; padding:24px; background:var(--bg-surface); border:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:12px;">
+                <div>
+                    <h3 style="margin:0; font-size:1.25rem; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+                        <span>📊</span> Matriz de Tarifas Base 2027 (Excel Precios 2027)
+                    </h3>
+                    <p style="margin:4px 0 0 0; font-size:0.8rem; color:var(--text-muted);">
+                        Configura las BAR base oficiales por mes y día de la semana. Se sincronizan en la nube automáticamente.
+                    </p>
+                </div>
+                <span class="close-modal" onclick="closeBarMatrixModal()" style="font-size:1.6rem; cursor:pointer;">&times;</span>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <div style="font-size:0.82rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:8px;">
+                    1. Tarifas BAR de Partida (12 Meses x 7 Días)
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="bar-matrix-table" id="barMatrixEditorTable">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left; min-width:110px;">Mes</th>
+                                <th>Lunes</th>
+                                <th>Martes</th>
+                                <th>Miércoles</th>
+                                <th>Jueves</th>
+                                <th>Viernes</th>
+                                <th>Sábado</th>
+                                <th>Domingo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="barMatrixEditorBody">
+                            <!-- Injected JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px; background:var(--bg-deep); padding:16px; border-radius:12px; border:1px solid var(--border);">
+                <div style="font-size:0.82rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:8px;">
+                    2. Escalados por Ocupación (Enero y Febrero)
+                </div>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;">
+                    Tramos de ocupación de referencia comercial definidos en las hojas mensuales del Excel.
+                </p>
+                <div id="occTiersEditorContainer" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px;">
+                    <!-- Injected JS -->
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-top:1px solid var(--border); padding-top:14px;">
+                <button type="button" class="btn" onclick="resetBarMatrixToOriginals()" style="background:transparent; border:1px solid var(--border); color:#ef4444; font-size:0.8rem; font-weight:700;">
+                    ↺ Restablecer a Valores del Excel
+                </button>
+                <div style="display:flex; gap:10px;">
+                    <button type="button" class="btn" onclick="closeBarMatrixModal()" style="background:transparent; border:1px solid var(--border); color:var(--text-muted); font-size:0.82rem;">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveBarMatrixFromModal()" style="font-size:0.82rem; font-weight:700;">
+                        💾 Guardar y Aplicar Tarifas Base
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: FICHA DE ANÁLISIS DIARIA (DETALLE DE FECHA) -->
+    <div id="dayDetailModal" class="modal" style="z-index:999999;">
+        <div class="modal-content" style="max-width:1050px; width:95vw; max-height:92vh; overflow-y:auto; border-radius:18px; padding:24px; background:var(--bg-surface); border:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:12px;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                        <h3 id="dayDetailTitle" style="margin:0; font-size:1.3rem; color:var(--text-main);">
+                            Ficha de Análisis: 2027-03-20
+                        </h3>
+                        <span id="dayDetailDowBadge" style="background:var(--primary); color:#fff; font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:6px; text-transform:uppercase;">
+                            Sábado
+                        </span>
+                        <span id="dayDetailStatusBadge" style="background:rgba(16,185,129,0.15); color:#10b981; font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:6px;">
+                            Ventas Abiertas
+                        </span>
+                    </div>
+                    <div id="dayDetailSubtitle" style="font-size:0.8rem; color:var(--text-muted);">
+                        Sercotel Guadiana · Análisis de Yield, Demanda y Ritmo de Reservas
+                    </div>
+                </div>
+                <span class="close-modal" onclick="closeDayDetailModal()" style="font-size:1.6rem; cursor:pointer;">&times;</span>
+            </div>
+
+            <!-- SITUACIÓN ACTUAL (KPIS) -->
+            <div class="day-detail-grid" id="dayDetailKpiGrid">
+                <!-- Injected JS -->
+            </div>
+
+            <!-- EVOLUCIÓN: GRÁFICO PICK-UP ÚLTIMOS 30 DÍAS -->
+            <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:18px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div style="font-size:0.8rem; font-weight:800; color:var(--primary); text-transform:uppercase; display:flex; align-items:center; gap:6px;">
+                        <span>📈</span> Evolución de Habitaciones y Pick-up (Histórico Real)
+                    </div>
+                    <span id="dayDetailHistoryNote" style="font-size:0.72rem; color:var(--text-muted);">
+                        Capturas periódicas inmutables
+                    </span>
+                </div>
+                <div style="position:relative; height:200px; width:100%;">
+                    <canvas id="dayDetailChart"></canvas>
+                </div>
+            </div>
+
+            <!-- BLOQUE DE RECOMENDACIÓN DIARIA INTELIGENTE -->
+            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:18px;" id="dayDetailRecContainer">
+                <!-- Injected JS -->
+            </div>
+
+            <!-- HISTÓRICO DE DECISIONES Y EXCEPCIONES -->
+            <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:18px;">
+                <div style="font-size:0.8rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:10px;">
+                    ⚙️ Fijar Excepción o Tarifa Especial para esta Fecha
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; align-items:end;">
+                    <div>
+                        <label style="display:block; font-size:0.72rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">BAR Especial (€)</label>
+                        <input type="number" id="dayDetailCustomBar" placeholder="Ej: 95" style="width:100%; padding:8px 10px; border-radius:8px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); font-weight:700; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.72rem; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Evento / Motivo</label>
+                        <input type="text" id="dayDetailCustomEvent" placeholder="Ej: Congreso Nacional Médicos" style="width:100%; padding:8px 10px; border-radius:8px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border); box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <button type="button" class="btn" onclick="saveDayCustomException()" style="background:var(--primary); color:#fff; font-weight:700; padding:8px 14px; border:none; border-radius:8px; width:100%;">
+                            Guardar Excepción
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:14px;">
+                <button type="button" class="btn" onclick="closeDayDetailModal()" style="background:transparent; border:1px solid var(--border); color:var(--text-muted); font-size:0.82rem;">
+                    Cerrar
+                </button>
+                <div style="display:flex; gap:10px;">
+                    <button type="button" id="dayDetailApplyBtn" class="btn btn-primary" style="font-weight:700; font-size:0.82rem;">
+                        Aplicar Precio Recomendado
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SELECTOR DE COLUMNAS VISIBLES -->
+    <div id="columnConfigModal" class="modal" style="z-index:999999;">
+        <div class="modal-content" style="max-width:440px; border-radius:16px; padding:20px; background:var(--bg-surface); border:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+                <h3 style="margin:0; font-size:1.1rem; color:var(--text-main);">👁️ Columnas Visibles</h3>
+                <span class="close-modal" onclick="closeColumnConfigModal()" style="font-size:1.4rem; cursor:pointer;">&times;</span>
+            </div>
+            <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:14px;">
+                Selecciona qué métricas mostrar en la tabla de Detalle Diario para adaptar la vista a tu pantalla:
+            </p>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;" id="columnConfigCheckboxes">
+                <!-- Injected JS -->
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button type="button" class="btn" onclick="closeColumnConfigModal()" style="background:transparent; border:1px solid var(--border); font-size:0.8rem;">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="saveColumnConfigFromModal()" style="font-size:0.8rem; font-weight:700;">Aplicar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- COMPETITOR CONFIG MODAL -->
     <div id="compConfigModal" class="modal" style="z-index:999999;">
         <div class="modal-content" style="max-width:500px;">
@@ -5605,6 +6209,12 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
             if (event.target == m) {
                 m.style.display = "none";
             }
+            const mMat = document.getElementById('barMatrixModal');
+            if (mMat && event.target == mMat) closeBarMatrixModal();
+            const mDay = document.getElementById('dayDetailModal');
+            if (mDay && event.target == mDay) closeDayDetailModal();
+            const mCol = document.getElementById('columnConfigModal');
+            if (mCol && event.target == mCol) closeColumnConfigModal();
             const mRev = document.getElementById('emailRevenueModal');
             if (mRev && event.target == mRev) closeEmailRevenueModal();
             const mMin = document.getElementById('minPriceModal');

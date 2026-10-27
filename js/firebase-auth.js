@@ -138,14 +138,20 @@ const syncFields = {
     channel_commissions_Guadiana: 'channelCommissionsGuadiana',
     channel_commissions_Cumbria: 'channelCommissionsCumbria',
     capasuite_room_costs_v1: 'roomCosts',
-    capasuite_yield_strategy_v1: 'yieldStrategy'
+    capasuite_yield_strategy_v1: 'yieldStrategy',
+    capasuite_pricing_matrix_2027_v1: 'pricingMatrix2027',
+    capasuite_occ_tiers_jan_feb_v1: 'occTiersJanFeb',
+    daily_otb_snapshots_v1: 'otbSnapshots',
+    capasuite_pricing_exceptions_v1: 'pricingExceptions'
 };
 // Settings that existed only locally before being synced: upload the local copy once if the cloud lacks it.
 // If the database rules reject these fields, they are dropped so the core data keeps syncing.
 const EXTENDED_SYNC_KEYS = new Set([
     'manual_cupos_v1', 'custom_events', 'custom_segment_mapping_v2',
     'channel_commissions_Guadiana', 'channel_commissions_Cumbria',
-    'capasuite_room_costs_v1', 'capasuite_yield_strategy_v1'
+    'capasuite_room_costs_v1', 'capasuite_yield_strategy_v1',
+    'capasuite_pricing_matrix_2027_v1', 'capasuite_occ_tiers_jan_feb_v1',
+    'daily_otb_snapshots_v1', 'capasuite_pricing_exceptions_v1'
 ]);
 let extendedSyncDisabled = false;
 const isSyncedKey = key => Object.hasOwn(syncFields, key) && !(extendedSyncDisabled && EXTENDED_SYNC_KEYS.has(key));
