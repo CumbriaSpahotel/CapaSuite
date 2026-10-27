@@ -68,15 +68,12 @@
         const container = document.getElementById('columnConfigCheckboxes');
         if (container) {
             const cols = [
-                { key: 'occPct', label: 'Ocupación (%) y Habitaciones' },
-                { key: 'pickup24h', label: 'Pick-up 24 Horas' },
-                { key: 'pickup3d', label: 'Pick-up 3 Días' },
-                { key: 'pickup7d', label: 'Pick-up 7 Días' },
-                { key: 'pickup14d', label: 'Pick-up 14 Días' },
-                { key: 'daysOut', label: 'Días hasta la llegada (Antelación)' },
-                { key: 'recPrice', label: 'Precio Recomendado' },
-                { key: 'diffPrice', label: 'Variación (€ y %) vs Actual' },
-                { key: 'recReason', label: 'Motivo y Acción de Recomendación' }
+                { key: 'occPct', label: 'Columna extra: Ocupación (%) y Habitaciones' },
+                { key: 'pickup24h', label: 'Columna extra: Pick-up 24 Horas' },
+                { key: 'pickup3d', label: 'Columna extra: Pick-up 3 Días' },
+                { key: 'pickup7d', label: 'Columna extra: Pick-up 7 Días' },
+                { key: 'pickup14d', label: 'Columna extra: Pick-up 14 Días' },
+                { key: 'daysOut', label: 'Columna extra: Antelación (Días hasta llegada)' }
             ];
             container.innerHTML = cols.map(c => `
                 <label style="display:flex; align-items:center; gap:8px; font-size:0.84rem; cursor:pointer; color:var(--text-main);">
@@ -99,7 +96,7 @@
             if (el) tableColumnConfig[k] = el.checked;
         });
         try {
-            localStorage.setItem('capasuite_table_col_config_v2', JSON.stringify(tableColumnConfig));
+            localStorage.setItem('capasuite_table_col_config_v3', JSON.stringify(tableColumnConfig));
         } catch(e) {}
         closeColumnConfigModal();
         if (typeof refreshActiveView === 'function') refreshActiveView();

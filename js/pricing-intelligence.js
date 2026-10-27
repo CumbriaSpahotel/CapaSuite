@@ -663,20 +663,28 @@
         const p7d = (pickupData?.d7?.available) ? pickupData.d7.diffRooms : instantPickup;
         const p24h = (pickupData?.h24h?.available) ? pickupData.h24h.diffRooms : instantPickup;
         const p14d = (pickupData?.d14?.available) ? pickupData.d14.diffRooms : 0;
+        const bestPickup = Math.max(p24h || 0, p7d || 0);
 
-        // 4. Lógica de Decisión
+        // 4. Lógica de Decisión Estratégica
         let action = 'MANTENER';
-        let proposedPrice = currentPrice > 0 ? currentPrice : baseBar;
+        let target = (currentPrice > 0) ? currentPrice : baseBar;
+        let triggerText = 'En Rango';
         let reasons = [];
         let riskAssessment = 'Riesgo bajo';
         let confidenceScore = 'Alta';
 
-        let target = (currentPrice > 0) ? currentPrice : baseBar;
+        // Tarifa estratégica de partida según día de semana y escalado
+        // Para domingo con ocupación <= 60%, respeta la tarifa base de domingo (58€)
+        let strategicBase = baseBar;
+        if (occTierRefPrice && occTierRefPrice > 0) {
+            if (dow === 0 && occupancyPct <= 60) {
+                strategicBase = baseBar;
+            } else {
+                strategicBase = Math.max(baseBar, occTierRefPrice);
+            }
+        }
 
-        let triggerText = 'En Rango';
-        const bestPickup = Math.max(p24h || 0, p7d || 0);
-
-        // === SITUACIÓN CRÍTICA / OVERBOOKING (>=100% o >=capacidad) ===
+        // === CASO 1: SITUACIÓN CRÍTICA / OVERBOOKING (>=100% o >=capacidad) ===
         if (occupancyPct >= 100 || otbRooms >= capacity) {
             action = 'REVISIÓN MANUAL';
             const extra = (marketAvg > target) ? Math.round((marketAvg - target) * 0.5) + 15 : 20;
@@ -686,30 +694,35 @@
             riskAssessment = 'Riesgo alto de overbooking / desvíos.';
             confidenceScore = 'Muy Alta';
         }
-        // === OCUPACIÓN MUY ALTA / ÚLTIMAS HABITACIONES (90% - 99%) ===
-        else if (occupancyPct >= 90) {
-            action = 'SUBIR';
+        // === CASO 2: OCUPACIÓN MUY ALTA / ÚLTIMAS HABITACIONES (91% - 99%) ===
+        else if (occupancyPct >= 91) {
             const leftRooms = Math.max(1, capacity - otbRooms);
-            const gap = Math.max(0, marketAvg - target);
-            const step = Math.min(22, Math.max(10, Math.round(gap * 0.40 + 8)));
-            target = target + step;
-            if (highestCompPrice > 0 && target > highestCompPrice * 1.15) {
-                target = Math.round(highestCompPrice * 1.10);
+            if (target < occTierRefPrice) {
+                action = 'SUBIR';
+                target = occTierRefPrice;
+                triggerText = `🔥 Escalado ${occTierRefPrice}€ (${leftRooms} lib)`;
+                reasons.push(`Ocupación crítica (${occupancyPct.toFixed(0)}% · ${leftRooms} habs libres). Subir a tramo de escalado (${occTierRefPrice} €).`);
+            } else {
+                action = 'MANTENER';
+                triggerText = `🔥 Ocup. ${occupancyPct.toFixed(0)}% (${leftRooms} lib)`;
+                reasons.push(`Ocupación crítica (${occupancyPct.toFixed(0)}% · ${leftRooms} habs libres). Tarifa actual (${target} €) cubre el tramo de escalado (${occTierRefPrice} €).`);
             }
-            triggerText = `🔥 Ocup. ${occupancyPct.toFixed(0)}% (${leftRooms} lib)`;
-            reasons.push(`Ocupación crítica (${occupancyPct.toFixed(0)}% · ${leftRooms} habitaciones disponibles). Proteger inventario y capturar ADR máximo.`);
             if (bestPickup > 0) reasons.push(`Pick-up positivo (+${bestPickup} RN) confirma tracción.`);
         }
-        // === OCUPACIÓN ALTA (80% - 89%) ===
-        else if (occupancyPct >= 80) {
-            action = 'SUBIR';
-            const gap = Math.max(0, marketAvg - target);
-            const step = Math.min(16, Math.max(6, Math.round(gap * 0.35 + 4)));
-            target = target + step;
-            triggerText = `📈 Ocup. ${occupancyPct.toFixed(0)}%`;
-            reasons.push(`Ocupación consolidada (${occupancyPct.toFixed(0)}%). Demanda firme, oportunidad de optimizar ADR.`);
+        // === CASO 3: ESCALADO DE OCUPACIÓN ACTIVO (61% - 90%) ===
+        else if (occupancyPct >= 61 && occTierRefPrice) {
+            if (target < occTierRefPrice) {
+                action = 'SUBIR';
+                target = occTierRefPrice;
+                triggerText = `📈 Escalado ${occTierRefPrice}€`;
+                reasons.push(`Ocupación en tramo ${occupancyPct.toFixed(0)}%. Alinear tarifa con escalado estratégico (${occTierRefPrice} €).`);
+            } else {
+                action = 'MANTENER';
+                triggerText = `En Escalado (${occTierRefPrice}€)`;
+                reasons.push(`Tarifa actual (${target} €) cumple con el escalado para ocupación del ${occupancyPct.toFixed(0)}% (${occTierRefPrice} €).`);
+            }
         }
-        // === PICK-UP ACELERADO (MOMENTUM DE VENTAS) ===
+        // === CASO 4: PICK-UP ACELERADO (MOMENTUM DE VENTAS >= 5 RN) ===
         else if (bestPickup >= 5) {
             action = 'SUBIR';
             if (marketAvg > target) {
@@ -727,30 +740,41 @@
                 reasons.push(`Margen de subida respecto a la media de mercado (${marketAvg.toFixed(0)} €).`);
             }
         }
-        // === PRESIÓN COMPETITIVA (COMPETIDORES LLENOS EN LA PLAZA) ===
+        // === CASO 5: PRESIÓN COMPETITIVA (COMPETIDORES LLENOS EN LA PLAZA) ===
         else if (soldCompsCount >= 2 && occupancyPct >= 45) {
             action = 'SUBIR';
             target = target + 5;
             triggerText = `🏢 Comps llenos (${soldCompsCount})`;
             reasons.push(`${soldCompsCount} hoteles competidores llenos o sin ventas abiertas en la plaza.`);
         }
-        // === OCUPACIÓN BAJA DE ÚLTIMA HORA (<7 DÍAS) - REGLA DE SEGURIDAD REVENUE ===
+        // === CASO 6: OCUPACIÓN BAJA DE ÚLTIMA HORA (<7 DÍAS) - REGLA DE SEGURIDAD ===
         else if (daysOut >= 0 && daysOut <= 7 && occupancyPct < 40) {
             action = 'MANTENER';
-            target = Math.max(target, minFloorPrice);
+            target = currentPrice;
             triggerText = `🛡️ Proteger ADR (${daysOut}d)`;
             reasons.push(`Baja ocupación (${occupancyPct.toFixed(0)}%) con antelación corta (${daysOut} días). Criterio Revenue: No bajar BAR general; mantener tarifa para proteger ADR.`);
             riskAssessment = 'Evitar devaluación de tarifa pública de última hora.';
             confidenceScore = 'Media';
         }
-        // === DEMANDA DÉBIL CON ANTELACIÓN SUFICIENTE (>21 DÍAS) ===
-        else if (daysOut > 21 && occupancyPct < 25 && bestPickup <= 0 && target > baseBar) {
-            action = 'REVISAR BAJADA';
-            target = Math.max(baseBar, target - 4);
-            triggerText = `Antelación >21d`;
-            reasons.push(`Demanda débil con antelación amplia (${daysOut} días). Ajustar progresivamente hacia BAR base (${baseBar} €).`);
+        // === CASO 7: ANTELACIÓN AMPLIA (>14 DÍAS) Y BAJA OCUPACIÓN (<25%): ALINEAR CON BAR BASE ===
+        else if (daysOut > 14 && occupancyPct < 25 && bestPickup <= 2) {
+            if (currentPrice > baseBar) {
+                action = 'REVISAR BAJADA';
+                target = baseBar;
+                triggerText = `Alinear a BAR (${baseBar}€)`;
+                reasons.push(`Antelación amplia (${daysOut} días) con baja ocupación (${occupancyPct.toFixed(0)}%). Alinear con BAR base de ${dow === 0 ? 'domingo' : (dow === 5 ? 'viernes' : (dow === 6 ? 'sábado' : 'días laborables'))} (${baseBar} €).`);
+            } else if (currentPrice < baseBar) {
+                action = 'SUBIR';
+                target = baseBar;
+                triggerText = `Alinear a BAR (${baseBar}€)`;
+                reasons.push(`Tarifa actual (${currentPrice} €) por debajo de la BAR base de partida (${baseBar} €).`);
+            } else {
+                action = 'MANTENER';
+                triggerText = `En BAR Base (${baseBar}€)`;
+                reasons.push(`Tarifa alineada exactamente con la BAR base de partida (${baseBar} €).`);
+            }
         }
-        // === ZONA DE ESTABILIDAD / EN RANGO ===
+        // === CASO 8: ZONA DE ESTABILIDAD / EN RANGO ===
         else {
             action = 'MANTENER';
             triggerText = 'En Rango';
