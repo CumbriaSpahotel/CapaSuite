@@ -1438,6 +1438,126 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
 
+        /* UNIFIED YIELD RECOMMENDATION PILL */
+        .yield-unified-pill {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 5px 8px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: left;
+            border: 1px solid var(--border);
+            background: var(--bg-surface);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            user-select: none;
+            width: 100%;
+            max-width: 145px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        .yield-unified-pill:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+            filter: brightness(1.02);
+        }
+        .yield-unified-pill.gap-cheap {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.35);
+        }
+        .yield-unified-pill.gap-expensive {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: rgba(245, 158, 11, 0.35);
+        }
+        .yield-unified-pill.gap-critical {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+        .yield-unified-pill.gap-ok {
+            background: var(--bg-surface);
+            border-color: var(--border);
+        }
+
+        .yield-pill-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+        }
+        .yield-pill-price {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.1;
+        }
+        .yield-pill-diff {
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 1px 4px;
+            border-radius: 4px;
+            line-height: 1.1;
+        }
+        .yield-pill-diff.pos {
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+        }
+        .yield-pill-diff.neg {
+            background: rgba(245, 158, 11, 0.15);
+            color: #d97706;
+        }
+
+        .yield-pill-badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 2px 5px;
+            border-radius: 5px;
+            letter-spacing: 0.3px;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .yield-pill-badge.subir {
+            background: #10b981;
+            color: #ffffff;
+        }
+        .yield-pill-badge.bajar {
+            background: #f59e0b;
+            color: #ffffff;
+        }
+        .yield-pill-badge.manual {
+            background: #ef4444;
+            color: #ffffff;
+        }
+        .yield-pill-badge.mantener {
+            background: rgba(100, 116, 139, 0.15);
+            color: var(--text-muted);
+            border: 1px solid rgba(100, 116, 139, 0.25);
+        }
+
+        .yield-pill-sub {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-top: 1px;
+            gap: 4px;
+        }
+        .yield-pill-trigger {
+            font-weight: 700;
+            color: var(--text-main);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 80px;
+        }
+        .yield-pill-range {
+            font-size: 0.64rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
         /* Badges de Acción del Motor */
         .action-pill {
             display: inline-flex;
@@ -2128,229 +2248,85 @@
                 return null;
             }
 
-            const minPrice = getHotelMinPrice(hotel);
-            const diff = ((myP - mktPrice) / mktPrice) * 100;
-
+            const dynamic = getDynamicDateHtml(d, hotel);
+            const currentOcc = (dynamic.occ > 0) ? dynamic.occ : (dynamic.otb || my.otbRooms || my.occupancy || 0);
             const cap = (hotel === 'Cumbria') ? 59 : 108;
-            let rooms;
-            if (my.otbRooms !== undefined) {
-                rooms = my.otbRooms;
-            } else if (my.occupancy !== undefined) {
-                rooms = my.occupancy;
-            } else {
-                rooms = null;
-            }
-            const occPct = (rooms !== null) ? (rooms / cap) * 100 : 0;
-            const today = new Date(); today.setHours(0, 0, 0, 0);
-            const targetDate = new Date(d.dateISO);
-            const daysOut = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
-            const otbChange = (my.otbChange !== undefined) ? my.otbChange : 0;
+            const occPct = (currentOcc / cap) * 100;
+            const minFloor = getHotelMinPrice(hotel);
+            const otbChange = (my.otbChange !== undefined) ? my.otbChange : (dynamic.pickup || 0);
 
-            let soldComps = d.activeSoldComps || 0;
+            const pData = (window.PricingIntelligence) 
+                ? PricingIntelligence.calculateDailyPickup(hotel, d.dateISO, { rooms: currentOcc, occupancyPct: occPct }) 
+                : null;
+
             let compPricesArr = d.activeCompPrices || [];
-
             const lowestCompPrice = compPricesArr.length > 0 ? Math.min(...compPricesArr) : mktPrice;
             const highestCompPrice = compPricesArr.length > 0 ? Math.max(...compPricesArr) : mktPrice;
 
-            // =========================================================================
-            // 1. PRECIO BASE SEGÚN DEMANDA, OCUPACIÓN Y ANTELACIÓN
-            // =========================================================================
-            let targetPrice = mktPrice;
-            let primaryReason = 'normal';
+            const rec = (window.PricingIntelligence) ? PricingIntelligence.evaluateDailyRecommendation({
+                hotelName: hotel,
+                dateISO: d.dateISO,
+                currentPrice: myP,
+                marketAvg: mktPrice,
+                lowestCompPrice: lowestCompPrice,
+                highestCompPrice: highestCompPrice,
+                soldCompsCount: d.activeSoldComps || 0,
+                otbRooms: currentOcc,
+                occupancyPct: occPct,
+                capacity: cap,
+                otbChange: otbChange,
+                pickupData: pData,
+                minFloorPrice: minFloor
+            }) : null;
 
-            // 1.1 OCUPACIÓN CRÍTICA / OVERBOOKING (>90%) -> Maximizar RevPAR
-            if (occPct >= 90) {
-                primaryReason = 'critical';
-                if (hotel === 'Guadiana') {
-                    targetPrice = Math.max(highestCompPrice * 1.05, mktPrice * 1.30);
-                } else {
-                    targetPrice = Math.max(mktPrice * 1.20, highestCompPrice * 0.95);
-                }
-            }
-            // 1.2 ALTA OCUPACIÓN (70-90%) O PRESIÓN DE COMPETIDORES LLENOS (>= 2)
-            else if (occPct >= 70 || soldComps >= 2) {
-                primaryReason = (soldComps >= 2 && occPct < 70) ? 'comp_sold' : 'high_occ';
-                if (hotel === 'Guadiana') {
-                    targetPrice = Math.max(mktPrice * 1.15, highestCompPrice * 0.95);
-                } else {
-                    targetPrice = Math.max(mktPrice * 1.05, lowestCompPrice * 1.15);
-                }
-            }
-            // 1.3 BAJA OCUPACIÓN DE ÚLTIMA HORA (<40% y <7 días) -> Estimular captación
-            else if (occPct < 40 && daysOut >= 0 && daysOut < 7) {
-                primaryReason = 'last_minute';
-                targetPrice = (hotel === 'Guadiana') ? lowestCompPrice * 1.02 : lowestCompPrice * 0.95;
-            }
-            // 1.4 POSICIONAMIENTO ESTÁNDAR / MEDIO
-            else {
-                // Ponderación continua: a baja ocupación se apoya más en captación (lowestComp),
-                // a medida que la ocupación sube, converge hacia el precio medio de mercado.
-                let weightLowest = 1 - (occPct / 100);
-                targetPrice = (lowestCompPrice * weightLowest) + (mktPrice * (1 - weightLowest));
+            if (!rec) return null;
 
-                // Posicionamiento de marca:
-                // Guadiana: 4 estrellas superior (+10% sobre la base de mercado)
-                // Cumbria: 3 estrellas superior con spa y enfoque comercial (0.95 = -5% para volumen)
-                if (hotel === 'Guadiana') {
-                    targetPrice *= 1.10;
-                } else {
-                    targetPrice *= 0.95;
-                }
-            }
+            const targetPrice = rec.proposedPrice;
+            const diffAmount = rec.diffAmount;
+            const diffPct = ((myP - mktPrice) / mktPrice) * 100;
+            const canApply = (diffAmount !== 0 && myP > 0);
 
-            // =========================================================================
-            // 2. AJUSTES DINÁMICOS POR PICK-UP Y COMPETENCIA
-            // =========================================================================
-            // Impulso de aceleración reciente de ventas (Pick-up rápido de habitaciones):
-            if (otbChange >= 5) {
-                targetPrice *= 1.04;
-            } else if (otbChange >= 2) {
-                targetPrice *= 1.02;
-            } else if (otbChange <= -4) {
-                targetPrice *= 0.97;
-            }
+            const minRange = rec.minRange || Math.max(minFloor || 0, targetPrice - 4);
+            const maxRange = rec.maxRange || (targetPrice + 4);
+            const rangeText = `${minRange}€ - ${maxRange}€`;
 
-            // Si hay exactamente 1 competidor lleno y la ocupación no es crítica:
-            if (soldComps === 1 && occPct < 70) {
-                targetPrice *= 1.03;
-            }
-
-            // =========================================================================
-            // 3. MULTIPLICADOR DE TRAMO SEMANAL (L-J / V-S / DOM)
-            // =========================================================================
-            let dayPartName = 'L-J';
-            let dayPartAdj = 0;
-            if (useDayPartMultipliers && d.dateISO) {
-                const dateParts = d.dateISO.split('-');
-                if (dateParts.length === 3) {
-                    const dt = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-                    const dow = dt.getDay(); // 0 = Domingo, 5 = Viernes, 6 = Sábado
-                    if (dow === 0) {
-                        dayPartName = 'Dom';
-                        dayPartAdj = Number(dayPartMultipliers.sunday) !== undefined ? Number(dayPartMultipliers.sunday) : -10;
-                    } else if (dow === 5 || dow === 6) {
-                        dayPartName = 'V-S';
-                        dayPartAdj = Number(dayPartMultipliers.weekend) || 15;
-                    } else {
-                        dayPartName = 'L-J';
-                        dayPartAdj = Number(dayPartMultipliers.weekday) || 0;
-                    }
-
-                    if (dayPartAdj !== 0) {
-                        targetPrice = targetPrice * (1 + (dayPartAdj / 100));
-                    }
-                }
-            }
-
-            // =========================================================================
-            // 4. APLICACIÓN DE TARIFA SUELO INVIOLABLE (PRECIO MÍNIMO CONFIGURADO)
-            // =========================================================================
-            if (minPrice > 0 && targetPrice < minPrice) {
-                targetPrice = minPrice;
-            }
-
-            // =========================================================================
-            // 5. CÁLCULO DEL RANGO ÓPTIMO SUGERIDO (BANDA DE TOLERANCIA / DEADBAND)
-            // =========================================================================
-            let minPct = 0.93;
-            let maxPct = 1.03;
-
-            if (occPct >= 70) {
-                minPct = 0.95;
-                maxPct = 1.06;
-            } else if (occPct < 40) {
-                minPct = 0.92;
-                maxPct = 1.02;
-            }
-
-            let minRange = Math.round(targetPrice * minPct);
-            let maxRange = Math.round(targetPrice * maxPct);
-
-            if (minPrice > 0) {
-                minRange = Math.max(minPrice, minRange);
-                maxRange = Math.max(minRange, maxRange);
-            }
-
-            if (minRange >= targetPrice) minRange = Math.max(minPrice || 0, Math.round(targetPrice) - 1);
-            if (maxRange <= targetPrice) maxRange = Math.round(targetPrice) + 1;
-
-            const targetRounded = Math.round(targetPrice);
-            const myRounded = Math.round(myP);
-
-            // =========================================================================
-            // 6. EVALUACIÓN COHERENTE DEL ESTADO Y ACCIÓN RECOMENDADA
-            // =========================================================================
+            let actionColor = '#64748b';
             let cls = 'gap-ok';
-            let actionText = "En Rango";
-            let actionColor = "#64748b";
-            let canApply = false;
+            let actionText = 'MANTENER';
 
-            // 6.1 Tarifa actual por debajo del suelo mínimo configurado
-            if (minPrice > 0 && myP < minPrice) {
-                targetPrice = minPrice;
-                actionText = `▲ ${Math.round(minPrice)}€ (Suelo Mín.)`;
-                actionColor = "#16a34a";
-                cls = 'gap-low';
-                canApply = true;
-            }
-            // 6.2 Tarifa actual dentro del rango óptimo recomendado (Zona de estabilidad)
-            else if (myP >= minRange && myP <= maxRange) {
-                actionText = "En Rango";
-                actionColor = "#64748b";
+            if (rec.action === 'SUBIR') {
+                actionColor = '#10b981';
+                cls = 'gap-cheap';
+                actionText = `▲ ${targetPrice}€ (+${diffAmount}€)`;
+            } else if (rec.action === 'REVISAR BAJADA') {
+                actionColor = '#f59e0b';
+                cls = 'gap-expensive';
+                actionText = `▼ ${targetPrice}€ (${diffAmount}€)`;
+            } else if (rec.action === 'REVISIÓN MANUAL') {
+                actionColor = '#ef4444';
+                cls = 'gap-critical';
+                actionText = `⚠️ 100% LLENO`;
+            } else {
+                actionColor = '#64748b';
                 cls = 'gap-ok';
-                canApply = false;
-            }
-            // 6.3 Tarifa actual por debajo del rango recomendado (Oportunidad de subir)
-            else if (myP < minRange) {
-                canApply = (targetRounded !== myRounded);
-                actionColor = "#16a34a";
-                cls = 'gap-low';
-
-                if (primaryReason === 'critical') {
-                    actionText = `▲▲ ${targetRounded}€ (Últimas)`;
-                    actionColor = "#b91c1c";
-                } else if (primaryReason === 'comp_sold') {
-                    actionText = `▲ ${targetRounded}€ (Comp. Llenos)`;
-                } else if (primaryReason === 'high_occ') {
-                    actionText = `▲ ${targetRounded}€ (>70% Ocup.)`;
-                } else if (otbChange >= 4) {
-                    actionText = `▲ ${targetRounded}€ (Pick-up +${otbChange})`;
-                } else if (dayPartName === 'V-S' && dayPartAdj > 0) {
-                    actionText = `▲ ${targetRounded}€ (Fin Semana)`;
-                } else {
-                    actionText = `▲ ${targetRounded}€ (Ajustar)`;
-                }
-            }
-            // 6.4 Tarifa actual por encima del rango recomendado (Riesgo de frenar ventas)
-            else {
-                canApply = (targetRounded !== myRounded);
-                actionColor = "#ea580c";
-                cls = 'gap-high';
-
-                if (primaryReason === 'last_minute') {
-                    actionText = `▼▼ ${targetRounded}€ (Liq.)`;
-                    actionColor = "#dc2626";
-                } else if (dayPartName === 'Dom' && dayPartAdj < 0) {
-                    actionText = `▼ ${targetRounded}€ (Domingo)`;
-                } else if (occPct < 50) {
-                    actionText = `▼ ${targetRounded}€ (Estabilizar)`;
-                } else {
-                    actionText = `▼ ${targetRounded}€ (Ajustar)`;
-                }
+                actionText = `En Rango (${targetPrice}€)`;
             }
 
             return {
-                targetPrice: targetRounded,
+                targetPrice: targetPrice,
+                diffAmount: diffAmount,
                 minRange: minRange,
                 maxRange: maxRange,
-                rangeText: `${minRange}€ - ${maxRange}€`,
+                rangeText: rangeText,
+                action: rec.action,
                 actionText: actionText,
+                triggerText: rec.triggerText || 'En Rango',
                 actionColor: actionColor,
                 cls: cls,
-                diff: diff,
+                diff: diffPct,
                 canApply: canApply,
-                dayPartName: dayPartName,
-                dayPartAdj: dayPartAdj
+                fullReasonText: rec.fullReasonText,
+                reasons: rec.reasons
             };
         }
 
@@ -4504,9 +4480,7 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
             if (cfg.pickup7d) h += `<th class="th-pickup" style="text-align:center; white-space:nowrap;">P. 7d</th>`;
             if (cfg.pickup14d) h += `<th class="th-pickup" style="text-align:center; white-space:nowrap;">P. 14d</th>`;
             if (cfg.daysOut) h += `<th class="th-days-out" style="text-align:center; white-space:nowrap;">Antelación</th>`;
-            h += `<th class="th-market">Mercado</th><th class="th-gap">Gap</th><th class="th-action" style="white-space:nowrap;">Recomendación</th>`;
-            if (cfg.diffPrice) h += `<th class="th-diff-price" style="text-align:center; white-space:nowrap;">Var.</th>`;
-            if (cfg.recReason) h += `<th class="th-rec-reason" style="text-align:center; white-space:nowrap;">Motivo</th>`;
+            h += `<th class="th-market">Mercado</th><th class="th-gap">Gap</th><th class="th-action" style="min-width:140px; text-align:center; white-space:nowrap;">Recomendación y Yield</th>`;
 
             // Add Sibling Header
             let sibMinP = 0;
@@ -4563,21 +4537,31 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
                     const yieldInfo = calculateSmartYield(d, activeHotel);
                     if (yieldInfo) {
                         gapHtml = `<span class="gap-badge ${yieldInfo.cls}">${yieldInfo.diff > 0 ? '+' : ''}${yieldInfo.diff.toFixed(0)}%</span>`;
-                        const rangeTag = yieldInfo.rangeText ? `<span class="action-range-text">${yieldInfo.rangeText}</span>` : '';
-                        if (yieldInfo.canApply) {
-                            actionHtml = `<button class="action-badge-btn clickable" 
-                                style="color:${yieldInfo.actionColor}; border-color:${yieldInfo.actionColor}40; background:${yieldInfo.actionColor}12;" 
-                                onclick="setManualPrice(${d.dayIndex}, '${activeHotel}', ${yieldInfo.targetPrice})" 
-                                title="Click para aplicar recomendación de ${yieldInfo.targetPrice}€ a ${activeHotel} (Rango sugerido: ${yieldInfo.rangeText})">
-                                <span class="action-main-text">${yieldInfo.actionText}</span>
-                                ${rangeTag}
-                            </button>`;
-                        } else {
-                            actionHtml = `<span class="action-badge-btn" style="color:${yieldInfo.actionColor}; font-weight:700;">
-                                <span class="action-main-text">${yieldInfo.actionText}</span>
-                                ${rangeTag}
-                            </span>`;
-                        }
+                        const actCls = yieldInfo.action === 'SUBIR' ? 'subir' : (yieldInfo.action === 'REVISAR BAJADA' ? 'bajar' : (yieldInfo.action === 'REVISIÓN MANUAL' ? 'manual' : 'mantener'));
+                        const diffBadge = (yieldInfo.diffAmount !== 0) 
+                            ? `<span class="yield-pill-diff ${yieldInfo.diffAmount > 0 ? 'pos' : 'neg'}">${yieldInfo.diffAmount > 0 ? '+' : ''}${yieldInfo.diffAmount}€</span>` 
+                            : '';
+
+                        const applyClick = yieldInfo.canApply 
+                            ? `onclick="setManualPrice(${d.dayIndex}, '${activeHotel}', ${yieldInfo.targetPrice})"` 
+                            : `onclick="CompetenciaIntelUI.openDayDetailModal('${d.dateISO}')"`;
+                        const applyTitle = yieldInfo.canApply 
+                            ? `Click para aplicar recomendación de ${yieldInfo.targetPrice}€ a ${activeHotel}\n\nMotivo:\n${yieldInfo.fullReasonText}` 
+                            : `Tarifa actual óptima (${yieldInfo.targetPrice}€).\n\nMotivo:\n${yieldInfo.fullReasonText}`;
+
+                        actionHtml = `
+                            <div class="yield-unified-pill ${yieldInfo.cls}" ${applyClick} title="${applyTitle}">
+                                <div class="yield-pill-top">
+                                    <span class="yield-pill-price">${yieldInfo.targetPrice} €</span>
+                                    ${diffBadge}
+                                    <span class="yield-pill-badge ${actCls}">${yieldInfo.action}</span>
+                                </div>
+                                <div class="yield-pill-sub">
+                                    <span class="yield-pill-trigger" title="${yieldInfo.triggerText}">${yieldInfo.triggerText}</span>
+                                    <span class="yield-pill-range">${yieldInfo.rangeText}</span>
+                                </div>
+                            </div>
+                        `;
                     }
                 }
 
@@ -4791,18 +4775,7 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
 
                 html += `<td style="color:var(--primary); font-weight:600;">${d.compAvg.toFixed(0)} €</td>`;
                 html += `<td>${gapHtml}</td>`;
-                html += `<td>${actionHtml}</td>`;
-
-                if (cfg.diffPrice) {
-                    const diffAmt = rec ? rec.diffAmount : 0;
-                    const diffColor = diffAmt > 0 ? '#10b981' : (diffAmt < 0 ? '#f59e0b' : 'var(--text-muted)');
-                    html += `<td style="text-align:center; font-weight:700; font-size:0.8rem; color:${diffColor}; white-space:nowrap;">${diffAmt !== 0 ? (diffAmt > 0 ? '+' : '') + diffAmt + ' €' : '-'}</td>`;
-                }
-                if (cfg.recReason) {
-                    const actCls = rec ? (rec.action === 'SUBIR' ? 'subir' : (rec.action === 'REVISAR BAJADA' ? 'bajar' : (rec.action === 'REVISIÓN MANUAL' ? 'manual' : 'mantener'))) : 'mantener';
-                    const actText = rec ? rec.action : 'MANTENER';
-                    html += `<td style="text-align:center; white-space:nowrap;" title="${rec ? rec.fullReasonText : ''}"><span class="action-pill ${actCls}">${actText}</span></td>`;
-                }
+                html += `<td style="text-align:center; padding:4px 6px; vertical-align:middle;">${actionHtml}</td>`;
 
                 // SIBLING (Cross-hotel comparison and simulation)
                 if (siblingName) {
