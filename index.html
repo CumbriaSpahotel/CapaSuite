@@ -22,6 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="js/state.js"></script>
     <script src="js/storage.js?v=20261013-1"></script>
+    <script src="js/version.js?v=20261027-1815"></script>
     <script src="js/nav.js"></script>
 
     <!-- Firebase SDKs -->
@@ -88,6 +89,44 @@
             transition: var(--transition);
         }
         .hotel-logos img:hover { opacity: 1; transform: scale(1.05); }
+
+        .app-version-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            color: #4f46e5;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            user-select: none;
+            backdrop-filter: blur(8px);
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+        [data-theme="dark"] .app-version-badge,
+        body.dark-mode .app-version-badge {
+            background: rgba(99, 102, 241, 0.22);
+            border-color: rgba(99, 102, 241, 0.45);
+            color: #a5b4fc;
+        }
+        .app-version-badge .version-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+            display: inline-block;
+            animation: pulse-version-dot 2.5s infinite ease-in-out;
+        }
+        @keyframes pulse-version-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.85); }
+        }
 
         /* TOP NAVIGATION */
         .top-nav {

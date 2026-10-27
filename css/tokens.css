@@ -109,3 +109,49 @@
     --bg-grad-start:    rgba(79, 70, 229, 0.05);
     --bg-grad-end:      rgba(16, 185, 129, 0.03);
 }
+
+/* ─── BADGE DE VERSIÓN GLOBAL CAPASUITE ──────────────────────── */
+.app-version-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px;
+    border-radius: 20px;
+    background: rgba(99, 102, 241, 0.12);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: #4f46e5;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    user-select: none;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .app-version-badge,
+body.dark-mode .app-version-badge {
+    background: rgba(99, 102, 241, 0.22);
+    border-color: rgba(99, 102, 241, 0.45);
+    color: #a5b4fc;
+}
+
+.app-version-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+}
+
+.app-version-badge .version-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 6px #10b981;
+    display: inline-block;
+    animation: pulse-version-dot 2.5s infinite ease-in-out;
+}
+
+@keyframes pulse-version-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+}

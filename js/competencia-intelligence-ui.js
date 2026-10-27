@@ -19,10 +19,36 @@
         recReason: false
     };
 
+    // Polyfill defensivo para asegurar compatibilidad con versiones previas en caché del navegador
+    if (typeof window !== 'undefined' && window.PricingIntelligence && typeof window.PricingIntelligence.getSnapshotsDB !== 'function') {
+        window.PricingIntelligence.getSnapshotsDB = function() {
+            try {
+                const raw = (typeof CapaStorage !== 'undefined' && CapaStorage.getItem) 
+                    ? CapaStorage.getItem('daily_otb_snapshots_v1') 
+                    : localStorage.getItem('daily_otb_snapshots_v1');
+                return raw ? JSON.parse(raw) : { Guadiana: {}, Cumbria: {} };
+            } catch(e) { return { Guadiana: {}, Cumbria: {} }; }
+        };
+    }
+
     let dayDetailChartInstance = null;
     let comparisonChartInstance = null;
     let currentDetailDateISO = null;
     const expandedDowSet = new Set();
+
+    function getSnapshotsSafely() {
+        if (window.PricingIntelligence && typeof window.PricingIntelligence.getSnapshotsDB === 'function') {
+            try { return window.PricingIntelligence.getSnapshotsDB(); } catch(e) {}
+        }
+        try {
+            const raw = (typeof CapaStorage !== 'undefined' && CapaStorage.getItem) 
+                ? CapaStorage.getItem('daily_otb_snapshots_v1') 
+                : localStorage.getItem('daily_otb_snapshots_v1');
+            return raw ? JSON.parse(raw) : { Guadiana: {}, Cumbria: {} };
+        } catch(e) {
+            return { Guadiana: {}, Cumbria: {} };
+        }
+    }
 
     function loadColumnConfig() {
         try {
@@ -656,7 +682,7 @@
         const canvas = document.getElementById('dayDetailChart');
         if (!canvas || !window.PricingIntelligence) return;
 
-        const db = PricingIntelligence.getSnapshotsDB();
+        const db = getSnapshotsSafely();
         const snaps = (db[hotelName] && db[hotelName][dateISO]) ? [...db[hotelName][dateISO]] : [];
 
         if (snaps.length === 0) {

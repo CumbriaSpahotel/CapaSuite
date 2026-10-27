@@ -1203,6 +1203,8 @@
         savePricingExceptions,
         setDateException,
         getBaseBarForDate,
+        getSnapshotsDB,
+        saveSnapshotsDB,
         recordDailySnapshot,
         captureBatchSnapshots,
         calculateDailyPickup,
