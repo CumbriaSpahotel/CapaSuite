@@ -700,7 +700,7 @@
 
         const minRange = commercialFloor;
         const maxRange = Math.max(commercialFloor, commercialCeiling);
-        const rangeText = `${minRange}€ - ${maxRange}€`;
+        const rangeText = (minRange === maxRange) ? `${minRange} €` : `${minRange} € – ${maxRange} €`;
 
         // Banda matemática de tolerancia puramente aritmética (±5% sobre precio publicado actual)
         const currentRef = currentPrice > 0 ? currentPrice : baseBar;
@@ -709,7 +709,7 @@
         const mathToleranceBand = {
             min: mathTolMin,
             max: mathTolMax,
-            text: `${mathTolMin}€ - ${mathTolMax}€`
+            text: (mathTolMin === mathTolMax) ? `${mathTolMin} €` : `${mathTolMin} € – ${mathTolMax} €`
         };
 
         // 5. Lógica de Decisión Estratégica
@@ -860,7 +860,7 @@
                 triggerText = 'En Rango';
                 demandStatus = 'EN RANGO COMERCIAL';
                 isCommerciallyOptimal = true;
-                reasons.push(`Precio actual (${currentPrice} €) comercialmente adecuado dentro del rango estratégico (${minRange}–${maxRange} €).`);
+                reasons.push(`Precio actual (${currentPrice} €) comercialmente adecuado dentro del rango estratégico (${rangeText}).`);
                 reasons.push(`Evolución de ocupación (${occupancyPct.toFixed(0)}%) y pickup en parámetros previstos.`);
                 reasons.push(`Cálculo de rango: ${rangeCalculation}.`);
             }
@@ -928,9 +928,6 @@
             { dow: 7, name: 'Domingo',    short: 'Dom' }
         ];
 
-        const matrix = getBarMatrix(hotelName, year);
-        const mRow = matrix[selectedMonthNum] || {};
-
         const seenDates = new Set();
         const filteredDates = [];
 
@@ -945,6 +942,10 @@
                 }
             }
         });
+
+        const activeYear = (filteredDates[0]?.dateISO) ? parseInt(filteredDates[0].dateISO.split('-')[0], 10) : year;
+        const matrix = getBarMatrix(hotelName, activeYear);
+        const mRow = matrix[selectedMonthNum] || {};
 
         return daysOfWeek.map(dayObj => {
             const matchingDates = filteredDates.filter(d => {
@@ -1092,8 +1093,10 @@
         });
 
         const totalDays = monthDates.length;
+        const detectedYear = (monthDates[0]?.dateISO) ? monthDates[0].dateISO.split('-')[0] : String(year);
         if (totalDays === 0) {
             return {
+                year: detectedYear,
                 monthNum: selectedMonthNum,
                 monthName: MONTH_NAMES_ES[selectedMonthNum - 1],
                 totalDays: 0,
@@ -1167,6 +1170,7 @@
         const compGap = (avgCur > 0 && avgMkt > 0) ? (((avgCur - avgMkt) / avgMkt) * 100) : 0;
 
         return {
+            year: detectedYear,
             monthNum: selectedMonthNum,
             monthName: MONTH_NAMES_ES[selectedMonthNum - 1],
             totalDays: totalDays,

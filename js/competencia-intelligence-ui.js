@@ -147,11 +147,17 @@
             monthNum = parseInt(datesList[0].dateISO.split('-')[1], 10) || 1;
         }
 
+        const monthDates = datesList.filter(d => {
+            if (!d || !d.dateISO) return false;
+            const parts = d.dateISO.split('-');
+            return parts.length >= 2 && parseInt(parts[1], 10) === monthNum;
+        });
+
         const monthSummary = PricingIntelligence.aggregateMonthSummary(datesList, monthNum, currentHotel);
         const dowData = PricingIntelligence.aggregateByDayOfWeek(datesList, monthNum, currentHotel);
 
-        // Actualizar título de mes
-        const currentYear = (datesList[0]?.dateISO) ? datesList[0].dateISO.split('-')[0] : '2027';
+        // Actualizar título de mes con el año correcto del mes seleccionado
+        const currentYear = monthDates[0]?.dateISO ? monthDates[0].dateISO.split('-')[0] : (monthSummary.year || '2027');
         const badge = document.getElementById('dowMonthTitleBadge');
         if (badge) badge.innerText = `${monthSummary.monthName} ${currentYear}`;
 
@@ -173,9 +179,21 @@
         // 1. Tarjetas de Resumen Mensual
         const sumContainer = document.getElementById('monthSummaryContainer');
         if (sumContainer) {
-            const p7Text = (monthSummary.pickupAccum7d !== null) ? `${monthSummary.pickupAccum7d >= 0 ? '+' : ''}${monthSummary.pickupAccum7d} RN` : 'Sin histórico suficiente';
-            const p14Text = (monthSummary.pickupAccum14d !== null) ? `${monthSummary.pickupAccum14d >= 0 ? '+' : ''}${monthSummary.pickupAccum14d} RN` : 'Sin histórico suficiente';
-            const p30Text = (monthSummary.pickupAccum30d !== null) ? `${monthSummary.pickupAccum30d >= 0 ? '+' : ''}${monthSummary.pickupAccum30d} RN` : 'Sin histórico suficiente';
+            const hasPickup = (monthSummary.pickupAccum7d !== null || monthSummary.pickupAccum14d !== null || monthSummary.pickupAccum30d !== null);
+            let pickupMainHtml = '';
+            let pickupSubHtml = '';
+            if (hasPickup) {
+                const p7Val = monthSummary.pickupAccum7d !== null ? monthSummary.pickupAccum7d : 0;
+                const p7Sign = p7Val >= 0 ? '+' : '';
+                pickupMainHtml = `${p7Sign}${p7Val} RN <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted);">(7d)</span>`;
+                const p14Text = (monthSummary.pickupAccum14d !== null) ? `${monthSummary.pickupAccum14d >= 0 ? '+' : ''}${monthSummary.pickupAccum14d} RN` : '—';
+                const p30Text = (monthSummary.pickupAccum30d !== null) ? `${monthSummary.pickupAccum30d >= 0 ? '+' : ''}${monthSummary.pickupAccum30d} RN` : '—';
+                pickupSubHtml = `14d: <strong>${p14Text}</strong> &nbsp;·&nbsp; 30d: <strong>${p30Text}</strong>`;
+            } else {
+                pickupMainHtml = `<span style="font-size:1.05rem; font-weight:800; color:var(--primary); letter-spacing:-0.2px;">En captura inicial</span>`;
+                pickupSubHtml = `<span style="color:var(--text-muted);">Sin snapshots previos (7d / 14d / 30d)</span>`;
+            }
+
             const gapText = (monthSummary.compGapPct !== 0) ? `${monthSummary.compGapPct > 0 ? '+' : ''}${monthSummary.compGapPct.toFixed(1)}%` : '0.0%';
 
             sumContainer.innerHTML = `
@@ -192,13 +210,13 @@
                     </div>
                     <div class="month-kpi-card" style="border-left:4px solid #f59e0b;">
                         <div class="kpi-title">Precio Actual vs Rec.</div>
-                        <div class="kpi-num">${monthSummary.avgCurrentPrice} € <span style="font-size:0.95rem; color:var(--text-muted); font-weight:400;">/ ${monthSummary.avgRecommendedPrice} €</span></div>
-                        <div class="kpi-sub">${monthSummary.avgRecommendedPrice > monthSummary.avgCurrentPrice ? '▲ Oportunidad de subida' : 'En zona óptima'}</div>
+                        <div class="kpi-num">${monthSummary.avgCurrentPrice} € <span style="font-size:0.92rem; color:var(--text-muted); font-weight:600;">→ Rec: <strong style="color:#10b981;">${monthSummary.avgRecommendedPrice} €</strong></span></div>
+                        <div class="kpi-sub">${monthSummary.avgRecommendedPrice > monthSummary.avgCurrentPrice ? '▲ Oportunidad de optimización' : (monthSummary.avgRecommendedPrice < monthSummary.avgCurrentPrice ? '▼ Revisión preventiva' : '✓ En zona comercial óptima')}</div>
                     </div>
                     <div class="month-kpi-card" style="border-left:4px solid #06b6d4;">
                         <div class="kpi-title">Pick-up Acumulado</div>
-                        <div class="kpi-num" style="font-size:1.15rem;">${p7Text}</div>
-                        <div class="kpi-sub">14d: ${p14Text} | 30d: ${p30Text}</div>
+                        <div class="kpi-num">${pickupMainHtml}</div>
+                        <div class="kpi-sub">${pickupSubHtml}</div>
                     </div>
                     <div class="month-kpi-card" style="border-left:4px solid #8b5cf6;">
                         <div class="kpi-title">Comparación Competencia</div>
@@ -243,71 +261,144 @@
                         <td style="text-align:left; font-size:0.78rem; color:var(--text-main); line-height:1.3;">
                             ${row.justification}
                         </td>
-                        <td>
-                            <button type="button" class="btn btn-sm" onclick="event.stopPropagation(); CompetenciaIntelUI.toggleDowSubrow(${row.dow});" style="font-size:0.75rem; padding:4px 10px; background:var(--bg-card); border:1px solid var(--border); border-radius:6px; cursor:pointer;">
-                                ${isOpen ? 'Cerrar' : 'Ver fechas'}
+                        <td style="text-align:center; min-width:115px;">
+                            <button type="button" class="btn btn-sm ${isOpen ? 'btn-active' : ''}" onclick="event.stopPropagation(); CompetenciaIntelUI.toggleDowSubrow(${row.dow});" style="font-size:0.75rem; padding:5px 12px; border-radius:8px; font-weight:700; white-space:nowrap; cursor:pointer; background:${isOpen ? 'var(--primary)' : 'var(--bg-surface)'}; color:${isOpen ? '#fff' : 'var(--text-main)'}; border:1px solid ${isOpen ? 'var(--primary)' : 'var(--border)'}; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                                ${isOpen ? '▴ Plegar' : '▾ Ver fechas'}
                             </button>
                         </td>
                     </tr>
-                    <tr id="dowDetailRow_${row.dow}" style="display:${isOpen ? 'table-row' : 'none'}; background:var(--bg-deep);">
-                        <td colspan="11" style="padding:0;">
-                            <div class="dow-subtable-wrap" style="padding:14px; background:var(--bg-deep); border-bottom:2px solid var(--border);">
-                                <div style="font-size:0.78rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-                                    <span>📅 Fechas Concretas: ${row.name} de ${monthSummary.monthName} ${currentYear}</span>
-                                    <span style="font-size:0.72rem; color:var(--text-muted); font-weight:600; text-transform:none;">Haz clic en cualquier fecha o botón para abrir su Ficha Diaria de Yield</span>
+                    <tr id="dowDetailRow_${row.dow}" style="display:${isOpen ? 'table-row' : 'none'};">
+                        <td colspan="11" style="padding:12px 14px; background:var(--bg-deep);">
+                            <div class="dow-subtable-wrap" style="padding:16px 20px; background:var(--bg-card); border-radius:12px; border:1px solid var(--border); box-shadow:0 4px 14px rgba(0,0,0,0.04);">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:8px;">
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <span style="font-size:0.85rem; font-weight:800; color:var(--text-main);">
+                                            📅 Fechas Concretas: <span style="color:var(--primary);">${row.name} de ${monthSummary.monthName} ${currentYear}</span>
+                                        </span>
+                                        <span style="font-size:0.72rem; font-weight:700; background:rgba(99,102,241,0.1); color:var(--primary); padding:2px 8px; border-radius:10px;">
+                                            ${row.count} fechas
+                                        </span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:12px;">
+                                        <span style="font-size:0.75rem; color:var(--text-muted); font-weight:500;">
+                                            💡 Clic en cualquier fila para abrir la Ficha Diaria de Yield
+                                        </span>
+                                        <button type="button" class="btn btn-sm" onclick="CompetenciaIntelUI.toggleDowSubrow(${row.dow});" style="font-size:0.72rem; padding:3px 10px; border-radius:6px; background:var(--bg-surface); border:1px solid var(--border); cursor:pointer; color:var(--text-muted); font-weight:600;">
+                                            ✕ Plegar
+                                        </button>
+                                    </div>
                                 </div>
-                                <table class="dow-subtable" style="width:100%; border-collapse:collapse; background:var(--bg-surface); border-radius:8px; overflow:hidden;">
-                                    <thead>
-                                        <tr style="border-bottom:1px solid var(--border); font-size:0.72rem; color:var(--text-muted);">
-                                            <th style="padding:8px 10px; text-align:left;">Fecha</th>
-                                            <th style="padding:8px 10px;">Ocupación PMS</th>
-                                            <th style="padding:8px 10px;">Pickup 24h</th>
-                                            <th style="padding:8px 10px;">Pickup 7d</th>
-                                            <th style="padding:8px 10px;">Precio Publicado</th>
-                                            <th style="padding:8px 10px;">Precio Mercado</th>
-                                            <th style="padding:8px 10px;">Rango Sugerido</th>
-                                            <th style="padding:8px 10px;">Precio Recomendado</th>
-                                            <th style="padding:8px 10px;">Estado / Acción</th>
-                                            <th style="padding:8px 10px;">Ficha</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${row.dates.map(dItem => {
-                                            const r = dItem.recommendation;
-                                            const p24d = (dItem.pickup24h !== null) ? `<span class="pickup-chip ${dItem.pickup24h >= 0 ? 'pos' : 'neg'}">${dItem.pickup24h >= 0 ? '+' : ''}${dItem.pickup24h} RN</span>` : '<span class="pickup-chip neutral">-</span>';
-                                            const p7d = (dItem.pickup7d !== null) ? `<span class="pickup-chip ${dItem.pickup7d >= 0 ? 'pos' : 'neg'}">${dItem.pickup7d >= 0 ? '+' : ''}${dItem.pickup7d} RN</span>` : '<span class="pickup-chip neutral">-</span>';
-                                            const mktSingle = dItem.marketPrice > 0 ? `${Math.round(dItem.marketPrice)} €` : '-';
-                                            const isPendingDem = (r.demandStatus === 'PENDIENTE DE EVALUACIÓN DE DEMANDA' || r.triggerText?.includes('Pend. Demanda'));
-                                            const actCls = isPendingDem ? 'alerta' : (r.action === 'SUBIR' ? 'subir' : (r.action === 'REVISAR BAJADA' ? 'bajar' : (r.action === 'REVISIÓN MANUAL' ? 'manual' : 'mantener')));
-                                            const actLabel = isPendingDem ? '⚠️ PENDIENTE DEMANDA' : r.action;
+                                <div style="overflow-x:auto;">
+                                    <table class="dow-subtable" style="width:100%; border-collapse:collapse; background:var(--bg-surface); border-radius:8px; overflow:hidden;">
+                                        <thead>
+                                            <tr style="border-bottom:1px solid var(--border); font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.3px;">
+                                                <th style="padding:8px 12px; text-align:left;">Fecha</th>
+                                                <th style="padding:8px 10px;">Ocupación PMS</th>
+                                                <th style="padding:8px 10px;">Pickup (24h / 7d)</th>
+                                                <th style="padding:8px 10px;">Precio Publicado</th>
+                                                <th style="padding:8px 10px;">Mercado Comp.</th>
+                                                <th style="padding:8px 10px;">Rango Sugerido</th>
+                                                <th style="padding:8px 10px;">Recomendado</th>
+                                                <th style="padding:8px 10px;">Estrategia / Acción</th>
+                                                <th style="padding:8px 10px; text-align:center;">Ficha</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${row.dates.map(dItem => {
+                                                const r = dItem.recommendation;
+                                                
+                                                // Pickup chips compactos
+                                                const p24Val = (dItem.pickup24h !== null) ? `${dItem.pickup24h >= 0 ? '+' : ''}${dItem.pickup24h}` : '-';
+                                                const p7Val = (dItem.pickup7d !== null) ? `${dItem.pickup7d >= 0 ? '+' : ''}${dItem.pickup7d}` : '-';
+                                                const p24Cls = (dItem.pickup24h !== null && dItem.pickup24h > 0) ? 'pos' : ((dItem.pickup24h !== null && dItem.pickup24h < 0) ? 'neg' : 'neutral');
+                                                const p7Cls = (dItem.pickup7d !== null && dItem.pickup7d > 0) ? 'pos' : ((dItem.pickup7d !== null && dItem.pickup7d < 0) ? 'neg' : 'neutral');
+                                                
+                                                const pickupDualHtml = `
+                                                    <div style="display:inline-flex; gap:4px; align-items:center; justify-content:center;">
+                                                        <span class="pickup-chip ${p24Cls}" title="Pickup 24 horas: ${p24Val} RN">${p24Val}</span>
+                                                        <span style="color:var(--text-muted); font-size:0.72rem; opacity:0.6;">/</span>
+                                                        <span class="pickup-chip ${p7Cls}" title="Pickup 7 días: ${p7Val} RN">${p7Val}</span>
+                                                    </div>
+                                                `;
 
-                                            return `
-                                                <tr style="border-bottom:1px solid rgba(0,0,0,0.05); font-size:0.8rem;">
-                                                    <td style="font-weight:700; text-align:left; padding:8px 10px;">
-                                                        <a href="javascript:void(0)" onclick="CompetenciaIntelUI.openDayDetailModal('${dItem.dateISO}')" style="color:var(--primary); text-decoration:none; font-weight:800;">
-                                                            ${dItem.label}
-                                                        </a>
-                                                    </td>
-                                                    <td style="padding:8px 10px;">${dItem.occPct.toFixed(0)}% (${dItem.rooms} habs)</td>
-                                                    <td style="padding:8px 10px;">${p24d}</td>
-                                                    <td style="padding:8px 10px;">${p7d}</td>
-                                                    <td style="font-weight:700; padding:8px 10px;">${dItem.price} €</td>
-                                                    <td style="padding:8px 10px; color:var(--text-muted);">${mktSingle}</td>
-                                                    <td style="padding:8px 10px; font-size:0.75rem; color:var(--text-muted); font-weight:600;" title="${r.rangeCalculation || ''}">${r.rangeText || '-'}</td>
-                                                    <td style="font-weight:800; color:#10b981; padding:8px 10px;">${r.proposedPrice} €</td>
-                                                    <td style="padding:8px 10px;">
-                                                        <span class="action-pill ${actCls}" style="font-size:0.72rem; padding:3px 8px; border-radius:4px;" title="${r.fullReasonText || ''}">${actLabel}</span>
-                                                    </td>
-                                                    <td style="padding:8px 10px;">
-                                                        <button type="button" class="btn btn-sm" onclick="CompetenciaIntelUI.openDayDetailModal('${dItem.dateISO}')" style="font-size:0.72rem; padding:3px 8px; background:var(--bg-surface); border:1px solid var(--border); border-radius:6px; cursor:pointer;">
-                                                            📊 Ficha
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            `;
-                                        }).join('')}
-                                    </tbody>
-                                </table>
+                                                // Limpieza y formateo elegante del rango sugerido
+                                                let cleanRange = '-';
+                                                if (r.minRange && r.maxRange) {
+                                                    cleanRange = (r.minRange === r.maxRange) ? `${r.minRange} €` : `${r.minRange} € – ${r.maxRange} €`;
+                                                } else if (r.rangeText) {
+                                                    const clean = r.rangeText.replace(/€/g, '').split('-').map(s => s.trim());
+                                                    if (clean.length === 2 && clean[0] === clean[1]) {
+                                                        cleanRange = `${clean[0]} €`;
+                                                    } else if (clean.length === 2) {
+                                                        cleanRange = `${clean[0]} € – ${clean[1]} €`;
+                                                    } else {
+                                                        cleanRange = r.rangeText;
+                                                    }
+                                                }
+
+                                                const mktSingle = dItem.marketPrice > 0 ? `${Math.round(dItem.marketPrice)} €` : '-';
+                                                const isPendingDem = (r.demandStatus === 'PENDIENTE DE EVALUACIÓN DE DEMANDA' || r.triggerText?.includes('Pend. Demanda'));
+                                                let actCls = 'mantener';
+                                                let actLabel = r.action;
+                                                let actIcon = '✓';
+
+                                                if (isPendingDem) {
+                                                    actCls = 'alerta';
+                                                    actLabel = 'Pend. Demanda';
+                                                    actIcon = '⏳';
+                                                } else if (r.action === 'SUBIR') {
+                                                    actCls = 'subir';
+                                                    actLabel = 'Subir Tarifa';
+                                                    actIcon = '▲';
+                                                } else if (r.action === 'REVISAR BAJADA') {
+                                                    actCls = 'bajar';
+                                                    actLabel = 'Revisar Bajada';
+                                                    actIcon = '▼';
+                                                } else if (r.action === 'REVISIÓN MANUAL') {
+                                                    actCls = 'manual';
+                                                    actLabel = 'Revisión Manual';
+                                                    actIcon = '⚙️';
+                                                } else {
+                                                    actCls = 'mantener';
+                                                    actLabel = 'Mantener';
+                                                    actIcon = '✓';
+                                                }
+
+                                                return `
+                                                    <tr style="border-bottom:1px solid rgba(0,0,0,0.05); font-size:0.8rem; cursor:pointer;" onclick="CompetenciaIntelUI.openDayDetailModal('${dItem.dateISO}')">
+                                                        <td style="font-weight:800; text-align:left; padding:9px 12px; white-space:nowrap;">
+                                                            <a href="javascript:void(0)" onclick="event.stopPropagation(); CompetenciaIntelUI.openDayDetailModal('${dItem.dateISO}')" style="color:var(--primary); text-decoration:none;">
+                                                                ${dItem.label}
+                                                            </a>
+                                                        </td>
+                                                        <td style="padding:9px 10px; white-space:nowrap;">
+                                                            <strong>${dItem.occPct.toFixed(0)}%</strong> <span style="font-size:0.72rem; color:var(--text-muted);">(${dItem.rooms} habs)</span>
+                                                        </td>
+                                                        <td style="padding:9px 10px; white-space:nowrap;">
+                                                            ${pickupDualHtml}
+                                                        </td>
+                                                        <td style="font-weight:700; padding:9px 10px; white-space:nowrap;">${dItem.price} €</td>
+                                                        <td style="padding:9px 10px; color:var(--text-muted); white-space:nowrap;">${mktSingle}</td>
+                                                        <td style="padding:9px 10px; font-size:0.75rem; color:var(--text-muted); font-weight:700; white-space:nowrap;" title="${r.rangeCalculation || ''}">${cleanRange}</td>
+                                                        <td style="padding:9px 10px; white-space:nowrap;">
+                                                            <span style="font-weight:800; color:#10b981; font-size:0.95rem; background:rgba(16,185,129,0.08); padding:3px 8px; border-radius:6px; border:1px solid rgba(16,185,129,0.2);">${r.proposedPrice} €</span>
+                                                        </td>
+                                                        <td style="padding:9px 10px; white-space:nowrap;">
+                                                            <span class="action-pill ${actCls}" style="font-size:0.72rem; padding:4px 8px; border-radius:6px; font-weight:700; display:inline-flex; align-items:center; gap:4px;" title="${r.fullReasonText || ''}">
+                                                                <span>${actIcon}</span><span>${actLabel}</span>
+                                                            </span>
+                                                        </td>
+                                                        <td style="padding:9px 10px; text-align:center; white-space:nowrap;">
+                                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); CompetenciaIntelUI.openDayDetailModal('${dItem.dateISO}')" style="font-size:0.72rem; padding:3px 9px; border-radius:6px; font-weight:700; cursor:pointer;">
+                                                                📊 Ficha
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                `;
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </td>
                     </tr>
