@@ -1543,6 +1543,11 @@
             color: var(--text-muted);
             border: 1px solid rgba(100, 116, 139, 0.25);
         }
+        .yield-pill-badge.pendiente {
+            background: rgba(245, 158, 11, 0.18);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
 
         .yield-pill-sub {
             display: flex;
@@ -1707,7 +1712,7 @@
         <header class="app-header">
             <div class="header-brand">
                 <a href="index.html" title="Volver al Inicio" style="display:flex; align-items:center;">
-                    <img src="Imagen/logo, CapaSuite.png" alt="CapaSuite" style="height: 40px; width: auto;">
+                    <img src="Imagen/Icono_CapaSuite.png" alt="CapaSuite" style="height: 40px; width: auto;">
                 </a>
                 <div class="header-brand-sep"></div>
                 <img id="hotelLogo" src="Imagen/logo-cumbria.svg" alt="Hotel" style="height: 38px; width: auto; max-width: 120px; object-fit: contain;">
@@ -2317,6 +2322,10 @@
                 actionColor = '#ef4444';
                 cls = 'gap-critical';
                 actionText = `⚠️ 100% LLENO`;
+            } else if (rec.demandStatus === 'PENDIENTE DE EVALUACIÓN DE DEMANDA' || rec.triggerText?.includes('Pend. Demanda')) {
+                actionColor = '#b45309';
+                cls = 'gap-warning';
+                actionText = `MANTENER (Demanda Pendiente)`;
             } else {
                 actionColor = '#64748b';
                 cls = 'gap-ok';
@@ -2337,7 +2346,11 @@
                 diff: diffPct,
                 canApply: canApply,
                 fullReasonText: rec.fullReasonText,
-                reasons: rec.reasons
+                reasons: rec.reasons,
+                demandStatus: rec.demandStatus,
+                rangeCalculation: rec.rangeCalculation,
+                baseBar: rec.baseBar,
+                mathToleranceBand: rec.mathToleranceBand
             };
         }
 
@@ -4548,7 +4561,8 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
                     const yieldInfo = calculateSmartYield(d, activeHotel);
                     if (yieldInfo) {
                         gapHtml = `<span class="gap-badge ${yieldInfo.cls}">${yieldInfo.diff > 0 ? '+' : ''}${yieldInfo.diff.toFixed(0)}%</span>`;
-                        const actCls = yieldInfo.action === 'SUBIR' ? 'subir' : (yieldInfo.action === 'REVISAR BAJADA' ? 'bajar' : (yieldInfo.action === 'REVISIÓN MANUAL' ? 'manual' : 'mantener'));
+                        const isPendingDem = (yieldInfo.demandStatus === 'PENDIENTE DE EVALUACIÓN DE DEMANDA' || yieldInfo.triggerText?.includes('Pend. Demanda'));
+                        const actCls = isPendingDem ? 'pendiente' : (yieldInfo.action === 'SUBIR' ? 'subir' : (yieldInfo.action === 'REVISAR BAJADA' ? 'bajar' : (yieldInfo.action === 'REVISIÓN MANUAL' ? 'manual' : 'mantener')));
                         const diffBadge = (yieldInfo.diffAmount !== 0) 
                             ? `<span class="yield-pill-diff ${yieldInfo.diffAmount > 0 ? 'pos' : 'neg'}">${yieldInfo.diffAmount > 0 ? '+' : ''}${yieldInfo.diffAmount}€</span>` 
                             : '';
@@ -4556,9 +4570,11 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
                         const applyClick = yieldInfo.canApply 
                             ? `onclick="setManualPrice(${d.dayIndex}, '${activeHotel}', ${yieldInfo.targetPrice})"` 
                             : `onclick="CompetenciaIntelUI.openDayDetailModal('${d.dateISO}')"`;
-                        const applyTitle = yieldInfo.canApply 
-                            ? `Click para aplicar recomendación de ${yieldInfo.targetPrice}€ a ${activeHotel}\n\nMotivo:\n${yieldInfo.fullReasonText}` 
-                            : `Tarifa actual óptima (${yieldInfo.targetPrice}€).\n\nMotivo:\n${yieldInfo.fullReasonText}`;
+                        const applyTitle = isPendingDem
+                            ? `MANTENER — PENDIENTE DE EVALUACIÓN DE DEMANDA\n\n• Tarifa Publicada: ${yieldInfo.targetPrice} €\n• BAR Base: ${yieldInfo.baseBar || '-'} €\n• Media Mercado: ${Math.round(d.compAvg || 0)} €\n• Rango Comercial Recomendado: ${yieldInfo.rangeText}\n• Cálculo de Rango: ${yieldInfo.rangeCalculation || ''}\n\nMotivo:\n${yieldInfo.fullReasonText}`
+                            : (yieldInfo.canApply 
+                                ? `Click para aplicar recomendación de ${yieldInfo.targetPrice}€ a ${activeHotel}\n\nMotivo:\n${yieldInfo.fullReasonText}` 
+                                : `Tarifa actual (${yieldInfo.targetPrice}€).\n\nRango Comercial: ${yieldInfo.rangeText}\n${yieldInfo.rangeCalculation ? 'Cálculo: ' + yieldInfo.rangeCalculation + '\n\n' : ''}Motivo:\n${yieldInfo.fullReasonText}`);
 
                         actionHtml = `
                             <div class="yield-unified-pill ${yieldInfo.cls}" ${applyClick} title="${applyTitle}">

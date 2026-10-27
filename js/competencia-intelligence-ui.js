@@ -22,6 +22,7 @@
     let dayDetailChartInstance = null;
     let comparisonChartInstance = null;
     let currentDetailDateISO = null;
+    const expandedDowSet = new Set();
 
     function loadColumnConfig() {
         try {
@@ -195,12 +196,14 @@
                 const p24 = (row.pickupNet24h !== null) ? `<span class="pickup-chip ${row.pickupNet24h >= 0 ? 'pos' : 'neg'}">${row.pickupNet24h >= 0 ? '+' : ''}${row.pickupNet24h} RN</span>` : `<span class="pickup-chip neutral">-</span>`;
                 const p7  = (row.pickupNet7d !== null)  ? `<span class="pickup-chip ${row.pickupNet7d >= 0 ? 'pos' : 'neg'}">${row.pickupNet7d >= 0 ? '+' : ''}${row.pickupNet7d} RN</span>` : `<span class="pickup-chip neutral">-</span>`;
                 const p14 = (row.pickupNet14d !== null) ? `<span class="pickup-chip ${row.pickupNet14d >= 0 ? 'pos' : 'neg'}">${row.pickupNet14d >= 0 ? '+' : ''}${row.pickupNet14d} RN</span>` : `<span class="pickup-chip neutral">-</span>`;
+                const isOpen = expandedDowSet.has(row.dow);
+                const mktRounded = row.avgMarketPrice > 0 ? `${Math.round(row.avgMarketPrice)} €` : '-';
 
                 htmlRows += `
                     <tr class="dow-row-parent" onclick="CompetenciaIntelUI.toggleDowSubrow(${row.dow})">
-                        <td class="dow-name-cell">
-                            <span class="dow-chevron" id="dowChevron_${row.dow}">▶</span>
-                            <span>${row.name}</span>
+                        <td class="dow-name-cell" style="white-space:nowrap; min-width:135px;">
+                            <span class="dow-chevron ${isOpen ? 'open' : ''}" id="dowChevron_${row.dow}">${isOpen ? '▼' : '▶'}</span>
+                            <span style="font-weight:700;">${row.name}</span>
                             <span style="font-size:0.7rem; color:var(--text-muted); font-weight:600;">(${row.count} días)</span>
                         </td>
                         <td style="font-weight:700; color:var(--text-muted);">${row.baseBar} €</td>
@@ -209,36 +212,37 @@
                         <td>${p24}</td>
                         <td>${p7}</td>
                         <td>${p14}</td>
-                        <td style="color:var(--primary); font-weight:700;">${row.avgMarketPrice > 0 ? row.avgMarketPrice + ' €' : '-'}</td>
+                        <td style="color:var(--primary); font-weight:700;">${mktRounded}</td>
                         <td style="font-weight:800; color:#10b981; font-size:1.02rem;">${row.recommendedPrice} €</td>
                         <td style="text-align:left; font-size:0.78rem; color:var(--text-main); line-height:1.3;">
                             ${row.justification}
                         </td>
                         <td>
-                            <button type="button" class="btn btn-sm" onclick="event.stopPropagation(); CompetenciaIntelUI.toggleDowSubrow(${row.dow});" style="font-size:0.75rem; padding:3px 8px; background:var(--bg-card); border:1px solid var(--border);">
-                                Ver
+                            <button type="button" class="btn btn-sm" onclick="event.stopPropagation(); CompetenciaIntelUI.toggleDowSubrow(${row.dow});" style="font-size:0.75rem; padding:4px 10px; background:var(--bg-card); border:1px solid var(--border); border-radius:6px; cursor:pointer;">
+                                ${isOpen ? 'Cerrar' : 'Ver fechas'}
                             </button>
                         </td>
                     </tr>
-                    <tr id="dowDetailRow_${row.dow}" style="display:none; background:var(--bg-deep);">
+                    <tr id="dowDetailRow_${row.dow}" style="display:${isOpen ? 'table-row' : 'none'}; background:var(--bg-deep);">
                         <td colspan="11" style="padding:0;">
-                            <div class="dow-subtable-wrap">
-                                <div style="font-size:0.75rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-                                    <span>📅 Fechas Concretas: ${row.name} de ${monthSummary.monthName} 2027</span>
-                                    <span style="font-size:0.7rem; color:var(--text-muted); font-weight:600;">Haz clic en cualquier fecha para abrir su Ficha Diaria</span>
+                            <div class="dow-subtable-wrap" style="padding:14px; background:var(--bg-deep); border-bottom:2px solid var(--border);">
+                                <div style="font-size:0.78rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                                    <span>📅 Fechas Concretas: ${row.name} de ${monthSummary.monthName} ${currentYear}</span>
+                                    <span style="font-size:0.72rem; color:var(--text-muted); font-weight:600; text-transform:none;">Haz clic en cualquier fecha o botón para abrir su Ficha Diaria de Yield</span>
                                 </div>
-                                <table class="dow-subtable">
+                                <table class="dow-subtable" style="width:100%; border-collapse:collapse; background:var(--bg-surface); border-radius:8px; overflow:hidden;">
                                     <thead>
-                                        <tr>
-                                            <th>Fecha</th>
-                                            <th>Ocupación PMS</th>
-                                            <th>Pickup 24h</th>
-                                            <th>Pickup 7d</th>
-                                            <th>Precio Publicado</th>
-                                            <th>Precio Mercado</th>
-                                            <th>Precio Recomendado</th>
-                                            <th>Acción Sugerida</th>
-                                            <th>Ficha</th>
+                                        <tr style="border-bottom:1px solid var(--border); font-size:0.72rem; color:var(--text-muted);">
+                                            <th style="padding:8px 10px; text-align:left;">Fecha</th>
+                                            <th style="padding:8px 10px;">Ocupación PMS</th>
+                                            <th style="padding:8px 10px;">Pickup 24h</th>
+                                            <th style="padding:8px 10px;">Pickup 7d</th>
+                                            <th style="padding:8px 10px;">Precio Publicado</th>
+                                            <th style="padding:8px 10px;">Precio Mercado</th>
+                                            <th style="padding:8px 10px;">Rango Sugerido</th>
+                                            <th style="padding:8px 10px;">Precio Recomendado</th>
+                                            <th style="padding:8px 10px;">Estado / Acción</th>
+                                            <th style="padding:8px 10px;">Ficha</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -246,27 +250,31 @@
                                             const r = dItem.recommendation;
                                             const p24d = (dItem.pickup24h !== null) ? `<span class="pickup-chip ${dItem.pickup24h >= 0 ? 'pos' : 'neg'}">${dItem.pickup24h >= 0 ? '+' : ''}${dItem.pickup24h} RN</span>` : '<span class="pickup-chip neutral">-</span>';
                                             const p7d = (dItem.pickup7d !== null) ? `<span class="pickup-chip ${dItem.pickup7d >= 0 ? 'pos' : 'neg'}">${dItem.pickup7d >= 0 ? '+' : ''}${dItem.pickup7d} RN</span>` : '<span class="pickup-chip neutral">-</span>';
-                                            const actCls = r.action === 'SUBIR' ? 'subir' : (r.action === 'REVISAR BAJADA' ? 'bajar' : (r.action === 'REVISIÓN MANUAL' ? 'manual' : 'mantener'));
+                                            const mktSingle = dItem.marketPrice > 0 ? `${Math.round(dItem.marketPrice)} €` : '-';
+                                            const isPendingDem = (r.demandStatus === 'PENDIENTE DE EVALUACIÓN DE DEMANDA' || r.triggerText?.includes('Pend. Demanda'));
+                                            const actCls = isPendingDem ? 'alerta' : (r.action === 'SUBIR' ? 'subir' : (r.action === 'REVISAR BAJADA' ? 'bajar' : (r.action === 'REVISIÓN MANUAL' ? 'manual' : 'mantener')));
+                                            const actLabel = isPendingDem ? '⚠️ PENDIENTE DEMANDA' : r.action;
 
                                             return `
-                                                <tr>
-                                                    <td style="font-weight:700; text-align:left;">
+                                                <tr style="border-bottom:1px solid rgba(0,0,0,0.05); font-size:0.8rem;">
+                                                    <td style="font-weight:700; text-align:left; padding:8px 10px;">
                                                         <a href="javascript:void(0)" onclick="CompetenciaIntelUI.openDayDetailModal('${dItem.dateISO}')" style="color:var(--primary); text-decoration:none; font-weight:800;">
                                                             ${dItem.label}
                                                         </a>
                                                     </td>
-                                                    <td>${dItem.occPct.toFixed(0)}% (${dItem.rooms} habs)</td>
-                                                    <td>${p24d}</td>
-                                                    <td>${p7d}</td>
-                                                    <td style="font-weight:700;">${dItem.price} €</td>
-                                                    <td>${dItem.marketPrice > 0 ? dItem.marketPrice + ' €' : '-'}</td>
-                                                    <td style="font-weight:800; color:#10b981;">${r.proposedPrice} €</td>
-                                                    <td>
-                                                        <span class="action-pill ${actCls}">${r.action}</span>
+                                                    <td style="padding:8px 10px;">${dItem.occPct.toFixed(0)}% (${dItem.rooms} habs)</td>
+                                                    <td style="padding:8px 10px;">${p24d}</td>
+                                                    <td style="padding:8px 10px;">${p7d}</td>
+                                                    <td style="font-weight:700; padding:8px 10px;">${dItem.price} €</td>
+                                                    <td style="padding:8px 10px; color:var(--text-muted);">${mktSingle}</td>
+                                                    <td style="padding:8px 10px; font-size:0.75rem; color:var(--text-muted); font-weight:600;" title="${r.rangeCalculation || ''}">${r.rangeText || '-'}</td>
+                                                    <td style="font-weight:800; color:#10b981; padding:8px 10px;">${r.proposedPrice} €</td>
+                                                    <td style="padding:8px 10px;">
+                                                        <span class="action-pill ${actCls}" style="font-size:0.72rem; padding:3px 8px; border-radius:4px;" title="${r.fullReasonText || ''}">${actLabel}</span>
                                                     </td>
-                                                    <td>
-                                                        <button type="button" class="btn btn-sm" onclick="CompetenciaIntelUI.openDayDetailModal('${dItem.dateISO}')" style="font-size:0.72rem; padding:2px 8px; background:var(--bg-surface); border:1px solid var(--border);">
-                                                            Ficha
+                                                    <td style="padding:8px 10px;">
+                                                        <button type="button" class="btn btn-sm" onclick="CompetenciaIntelUI.openDayDetailModal('${dItem.dateISO}')" style="font-size:0.72rem; padding:3px 8px; background:var(--bg-surface); border:1px solid var(--border); border-radius:6px; cursor:pointer;">
+                                                            📊 Ficha
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -287,12 +295,20 @@
         const row = document.getElementById('dowDetailRow_' + dow);
         const chev = document.getElementById('dowChevron_' + dow);
         if (!row) return;
-        if (row.style.display === 'none') {
-            row.style.display = 'table-row';
-            if (chev) chev.classList.add('open');
-        } else {
+        if (expandedDowSet.has(dow)) {
+            expandedDowSet.delete(dow);
             row.style.display = 'none';
-            if (chev) chev.classList.remove('open');
+            if (chev) {
+                chev.classList.remove('open');
+                chev.innerText = '▶';
+            }
+        } else {
+            expandedDowSet.add(dow);
+            row.style.display = 'table-row';
+            if (chev) {
+                chev.classList.add('open');
+                chev.innerText = '▼';
+            }
         }
     }
 
@@ -557,7 +573,9 @@
         // 3. Recomendación
         const recCont = document.getElementById('dayDetailRecContainer');
         if (recCont) {
-            const actCls = rec.action === 'SUBIR' ? 'subir' : (rec.action === 'REVISAR BAJADA' ? 'bajar' : (rec.action === 'REVISIÓN MANUAL' ? 'manual' : 'mantener'));
+            const isPendingDem = (rec.demandStatus === 'PENDIENTE DE EVALUACIÓN DE DEMANDA' || rec.triggerText?.includes('Pend. Demanda'));
+            const actCls = isPendingDem ? 'alerta' : (rec.action === 'SUBIR' ? 'subir' : (rec.action === 'REVISAR BAJADA' ? 'bajar' : (rec.action === 'REVISIÓN MANUAL' ? 'manual' : 'mantener')));
+            const actLabel = isPendingDem ? '⚠️ PENDIENTE DE EVALUACIÓN DE DEMANDA' : rec.action;
             const diffBadge = (rec.diffAmount !== 0) 
                 ? `<span style="font-size:0.95rem; font-weight:700; color:${rec.diffAmount > 0 ? '#10b981' : '#f59e0b'};">(${rec.diffAmount > 0 ? '+' : ''}${rec.diffAmount} € / ${rec.diffPct.toFixed(1)}%)</span>` 
                 : '';
@@ -565,16 +583,41 @@
             recCont.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <span class="action-pill ${actCls}" style="font-size:0.85rem; padding:4px 10px;">${rec.action}</span>
+                        <span class="action-pill ${actCls}" style="font-size:0.82rem; padding:4px 10px; font-weight:800;">${actLabel}</span>
                         <span style="font-size:1.3rem; font-weight:800; color:var(--text-main);">
                             ${rec.proposedPrice} € ${diffBadge}
                         </span>
                     </div>
                     <div style="display:flex; gap:8px; font-size:0.75rem;">
                         <span style="background:var(--bg-deep); padding:3px 8px; border-radius:6px; border:1px solid var(--border);">Confianza: <b>${rec.confidenceScore}</b></span>
-                        <span style="background:var(--bg-deep); padding:3px 8px; border-radius:6px; border:1px solid var(--border);">Evaluación: <b>${rec.riskAssessment}</b></span>
+                        <span style="background:var(--bg-deep); padding:3px 8px; border-radius:6px; border:1px solid var(--border);">Diagnóstico: <b>${rec.demandStatus || 'Evaluado'}</b></span>
                     </div>
                 </div>
+
+                <!-- DESGLOSE: RANGO COMERCIAL vs BANDA MATEMÁTICA -->
+                <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span style="font-weight:800; font-size:0.75rem; color:var(--primary); text-transform:uppercase;">📐 Cálculo y Justificación del Rango de Precios</span>
+                        <span style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Diferenciación entre Banda Matemática y Rango Comercial</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px;">
+                        <div style="background:var(--bg-surface); padding:10px; border-radius:8px; border-left:4px solid #10b981;">
+                            <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted);">RANGO COMERCIAL RECOMENDADO</div>
+                            <div style="font-size:1.1rem; font-weight:800; color:#10b981; margin:2px 0;">${rec.rangeText}</div>
+                            <div style="font-size:0.72rem; color:var(--text-main); line-height:1.3;">
+                                ${rec.rangeCalculation || 'Basado en BAR base y set competitivo.'}
+                            </div>
+                        </div>
+                        <div style="background:var(--bg-surface); padding:10px; border-radius:8px; border-left:4px solid #94a3b8;">
+                            <div style="font-size:0.7rem; font-weight:700; color:var(--text-muted);">BANDA MATEMÁTICA DE TOLERANCIA (±5%)</div>
+                            <div style="font-size:1.1rem; font-weight:800; color:var(--text-muted); margin:2px 0;">${rec.mathToleranceBand ? rec.mathToleranceBand.text : '-'}</div>
+                            <div style="font-size:0.72rem; color:var(--text-muted); line-height:1.3;">
+                                Rango meramente aritmético sobre tarifa publicada; no convalida idoneidad comercial.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div style="font-size:0.83rem; line-height:1.5; color:var(--text-main); margin-bottom:10px;">
                     <b>Justificación de la recomendación:</b>
                     <ul style="margin:6px 0 0 18px; padding:0;">

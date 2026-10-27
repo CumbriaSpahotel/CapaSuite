@@ -57,46 +57,46 @@
         },
         Cumbria: {
             2027: {
-                1:  { name: "Enero",      1: 52, 2: 54, 3: 54, 4: 52, 5: 60, 6: 65, 7: 48 },
-                2:  { name: "Febrero",    1: 52, 2: 54, 3: 54, 4: 52, 5: 60, 6: 65, 7: 48 },
-                3:  { name: "Marzo",      1: 56, 2: 58, 3: 58, 4: 56, 5: 64, 6: 68, 7: 50 },
-                4:  { name: "Abril",      1: 62, 2: 64, 3: 64, 4: 62, 5: 68, 6: 75, 7: 54 },
-                5:  { name: "Mayo",       1: 58, 2: 60, 3: 60, 4: 58, 5: 66, 6: 75, 7: 52 },
-                6:  { name: "Junio",      1: 58, 2: 60, 3: 60, 4: 58, 5: 66, 6: 75, 7: 52 },
-                7:  { name: "Julio",      1: 56, 2: 58, 3: 58, 4: 56, 5: 66, 6: 68, 7: 50 },
-                8:  { name: "Agosto",     1: 58, 2: 60, 3: 60, 4: 58, 5: 66, 6: 70, 7: 52 },
-                9:  { name: "Septiembre", 1: 62, 2: 64, 3: 64, 4: 62, 5: 68, 6: 75, 7: 54 },
-                10: { name: "Octubre",    1: 62, 2: 64, 3: 64, 4: 62, 5: 68, 6: 75, 7: 54 },
-                11: { name: "Noviembre",  1: 56, 2: 58, 3: 58, 4: 56, 5: 64, 6: 68, 7: 50 },
-                12: { name: "Diciembre",  1: 52, 2: 54, 3: 54, 4: 52, 5: 60, 6: 65, 7: 48 }
+                1:  { name: "Enero",      1: 59, 2: 61, 3: 61, 4: 59, 5: 67, 6: 72, 7: 55 },
+                2:  { name: "Febrero",    1: 59, 2: 61, 3: 61, 4: 59, 5: 67, 6: 72, 7: 55 },
+                3:  { name: "Marzo",      1: 63, 2: 65, 3: 65, 4: 63, 5: 70, 6: 75, 7: 57 },
+                4:  { name: "Abril",      1: 69, 2: 71, 3: 71, 4: 69, 5: 75, 6: 82, 7: 61 },
+                5:  { name: "Mayo",       1: 65, 2: 67, 3: 67, 4: 65, 5: 72, 6: 82, 7: 59 },
+                6:  { name: "Junio",      1: 65, 2: 67, 3: 67, 4: 65, 5: 72, 6: 82, 7: 59 },
+                7:  { name: "Julio",      1: 63, 2: 65, 3: 65, 4: 63, 5: 72, 6: 75, 7: 57 },
+                8:  { name: "Agosto",     1: 65, 2: 67, 3: 67, 4: 65, 5: 72, 6: 77, 7: 59 },
+                9:  { name: "Septiembre", 1: 69, 2: 71, 3: 71, 4: 69, 5: 75, 6: 82, 7: 61 },
+                10: { name: "Octubre",    1: 69, 2: 71, 3: 71, 4: 69, 5: 75, 6: 82, 7: 61 },
+                11: { name: "Noviembre",  1: 63, 2: 65, 3: 65, 4: 63, 5: 70, 6: 75, 7: 57 },
+                12: { name: "Diciembre",  1: 59, 2: 61, 3: 61, 4: 59, 5: 67, 6: 72, 7: 55 }
             },
             2026: {
-                1:  { name: "Enero",      1: 50, 2: 52, 3: 52, 4: 50, 5: 58, 6: 62, 7: 46 },
-                2:  { name: "Febrero",    1: 50, 2: 52, 3: 52, 4: 50, 5: 58, 6: 62, 7: 46 },
-                3:  { name: "Marzo",      1: 54, 2: 56, 3: 56, 4: 54, 5: 62, 6: 65, 7: 48 },
-                4:  { name: "Abril",      1: 60, 2: 62, 3: 62, 4: 60, 5: 66, 6: 72, 7: 52 },
-                5:  { name: "Mayo",       1: 56, 2: 58, 3: 58, 4: 56, 5: 64, 6: 72, 7: 50 },
-                6:  { name: "Junio",      1: 56, 2: 58, 3: 58, 4: 56, 5: 64, 6: 72, 7: 50 },
-                7:  { name: "Julio",      1: 54, 2: 56, 3: 56, 4: 54, 5: 64, 6: 65, 7: 48 },
-                8:  { name: "Agosto",     1: 56, 2: 58, 3: 58, 4: 56, 5: 64, 6: 68, 7: 50 },
-                9:  { name: "Septiembre", 1: 60, 2: 62, 3: 62, 4: 60, 5: 66, 6: 72, 7: 52 },
-                10: { name: "Octubre",    1: 60, 2: 62, 3: 62, 4: 60, 5: 66, 6: 72, 7: 52 },
-                11: { name: "Noviembre",  1: 54, 2: 56, 3: 56, 4: 54, 5: 62, 6: 65, 7: 48 },
-                12: { name: "Diciembre",  1: 50, 2: 52, 3: 52, 4: 50, 5: 58, 6: 62, 7: 46 }
+                1:  { name: "Enero",      1: 57, 2: 59, 3: 59, 4: 57, 5: 65, 6: 69, 7: 52 },
+                2:  { name: "Febrero",    1: 57, 2: 59, 3: 59, 4: 57, 5: 65, 6: 69, 7: 52 },
+                3:  { name: "Marzo",      1: 61, 2: 63, 3: 63, 4: 61, 5: 67, 6: 72, 7: 55 },
+                4:  { name: "Abril",      1: 67, 2: 69, 3: 69, 4: 67, 5: 72, 6: 79, 7: 59 },
+                5:  { name: "Mayo",       1: 63, 2: 65, 3: 65, 4: 63, 5: 69, 6: 79, 7: 57 },
+                6:  { name: "Junio",      1: 63, 2: 65, 3: 65, 4: 63, 5: 69, 6: 79, 7: 57 },
+                7:  { name: "Julio",      1: 61, 2: 63, 3: 63, 4: 61, 5: 69, 6: 72, 7: 55 },
+                8:  { name: "Agosto",     1: 63, 2: 65, 3: 65, 4: 63, 5: 69, 6: 75, 7: 57 },
+                9:  { name: "Septiembre", 1: 67, 2: 69, 3: 69, 4: 67, 5: 72, 6: 79, 7: 59 },
+                10: { name: "Octubre",    1: 67, 2: 69, 3: 69, 4: 67, 5: 72, 6: 79, 7: 59 },
+                11: { name: "Noviembre",  1: 61, 2: 63, 3: 63, 4: 61, 5: 67, 6: 72, 7: 55 },
+                12: { name: "Diciembre",  1: 57, 2: 59, 3: 59, 4: 57, 5: 65, 6: 69, 7: 52 }
             },
             2028: {
-                1:  { name: "Enero",      1: 55, 2: 57, 3: 57, 4: 55, 5: 63, 6: 68, 7: 50 },
-                2:  { name: "Febrero",    1: 55, 2: 57, 3: 57, 4: 55, 5: 63, 6: 68, 7: 50 },
-                3:  { name: "Marzo",      1: 59, 2: 61, 3: 61, 4: 59, 5: 67, 6: 71, 7: 53 },
-                4:  { name: "Abril",      1: 65, 2: 67, 3: 67, 4: 65, 5: 71, 6: 78, 7: 57 },
-                5:  { name: "Mayo",       1: 61, 2: 63, 3: 63, 4: 61, 5: 69, 6: 78, 7: 55 },
-                6:  { name: "Junio",      1: 61, 2: 63, 3: 63, 4: 61, 5: 69, 6: 78, 7: 55 },
-                7:  { name: "Julio",      1: 59, 2: 61, 3: 61, 4: 59, 5: 69, 6: 71, 7: 53 },
-                8:  { name: "Agosto",     1: 61, 2: 63, 3: 63, 4: 61, 5: 69, 6: 73, 7: 55 },
-                9:  { name: "Septiembre", 1: 65, 2: 67, 3: 67, 4: 65, 5: 71, 6: 78, 7: 57 },
-                10: { name: "Octubre",    1: 65, 2: 67, 3: 67, 4: 65, 5: 71, 6: 78, 7: 57 },
-                11: { name: "Noviembre",  1: 59, 2: 61, 3: 61, 4: 59, 5: 67, 6: 71, 7: 53 },
-                12: { name: "Diciembre",  1: 55, 2: 57, 3: 57, 4: 55, 5: 63, 6: 68, 7: 50 }
+                1:  { name: "Enero",      1: 62, 2: 64, 3: 64, 4: 62, 5: 70, 6: 75, 7: 58 },
+                2:  { name: "Febrero",    1: 62, 2: 64, 3: 64, 4: 62, 5: 70, 6: 75, 7: 58 },
+                3:  { name: "Marzo",      1: 66, 2: 68, 3: 68, 4: 66, 5: 73, 6: 79, 7: 60 },
+                4:  { name: "Abril",      1: 72, 2: 75, 3: 75, 4: 72, 5: 79, 6: 86, 7: 64 },
+                5:  { name: "Mayo",       1: 68, 2: 71, 3: 71, 4: 68, 5: 76, 6: 86, 7: 62 },
+                6:  { name: "Junio",      1: 68, 2: 71, 3: 71, 4: 68, 5: 76, 6: 86, 7: 62 },
+                7:  { name: "Julio",      1: 66, 2: 68, 3: 68, 4: 66, 5: 76, 6: 79, 7: 60 },
+                8:  { name: "Agosto",     1: 68, 2: 71, 3: 71, 4: 68, 5: 76, 6: 81, 7: 62 },
+                9:  { name: "Septiembre", 1: 72, 2: 75, 3: 75, 4: 72, 5: 79, 6: 86, 7: 64 },
+                10: { name: "Octubre",    1: 72, 2: 75, 3: 75, 4: 72, 5: 79, 6: 86, 7: 64 },
+                11: { name: "Noviembre",  1: 66, 2: 68, 3: 68, 4: 66, 5: 73, 6: 79, 7: 60 },
+                12: { name: "Diciembre",  1: 62, 2: 64, 3: 64, 4: 62, 5: 70, 6: 75, 7: 58 }
             }
         }
     };
@@ -296,12 +296,14 @@
             if (master[hKey][yKey]['all']) return master[hKey][yKey]['all'];
         }
 
-        // Factor según hotel: Cumbria suele tener escalados acordes a su categoría
-        const factor = (hKey === 'Cumbria') ? 0.85 : 1.0;
-        return DEFAULT_OCC_TIERS.map(t => ({
-            ...t,
-            price: Math.round(t.price * factor)
-        }));
+        // Factor según hotel: Cumbria tiene escalados de partida 3€ inferiores a Guadiana
+        if (hKey === 'Cumbria') {
+            return DEFAULT_OCC_TIERS.map(t => ({
+                ...t,
+                price: Math.max(45, t.price - 3)
+            }));
+        }
+        return DEFAULT_OCC_TIERS.map(t => ({ ...t }));
     }
 
     function saveOccTiers(hotel = 'Guadiana', year = 2027, month = 'all', tiers) {
@@ -665,24 +667,60 @@
         const p14d = (pickupData?.d14?.available) ? pickupData.d14.diffRooms : 0;
         const bestPickup = Math.max(p24h || 0, p7d || 0);
 
-        // 4. Lógica de Decisión Estratégica
+        // Indicador de histórico suficiente de pickup (al menos 2 capturas o métrica de 24h/7d disponible)
+        const hasSufficientPickupHistory = !!(
+            (pickupData && (pickupData.h24h?.available || pickupData.d7?.available || (pickupData.snapshotsCount && pickupData.snapshotsCount >= 2))) ||
+            (params.otbChange !== undefined && params.otbChange !== null && params.otbChange !== 0)
+        );
+
+        const effectiveFloor = Math.max(minFloorPrice, 45);
+
+        // 4. Cálculo del Rango Comercial Recomendado (Suelo y Techo objetivos)
+        // Suelo: BAR Base de la fecha o tramo de escalado según ocupación (nunca inferior al suelo mínimo)
+        const commercialFloor = Math.max(effectiveFloor, (occupancyPct >= 61 && occTierRefPrice) ? occTierRefPrice : baseBar);
+        let commercialCeiling = commercialFloor;
+        let rangeCalculation = '';
+
+        if (marketAvg > 0) {
+            if (occupancyPct <= 60) {
+                // Con ocupación <= 60%, el techo comercial respeta el set competitivo con margen según antelación
+                const mktCeil = Math.round(marketAvg * (daysOut > 30 ? 1.05 : 1.10));
+                commercialCeiling = Math.max(commercialFloor, mktCeil);
+                rangeCalculation = `Suelo: BAR base configurada (${commercialFloor} €) · Techo: Media competidores (${Math.round(marketAvg)} €) +${daysOut > 30 ? '5%' : '10%'} antelación (${commercialCeiling} €)`;
+            } else {
+                // Con ocupación > 60%, el techo lo marca el escalado superior o mercado +15%
+                const highCeil = Math.round(Math.max((occTierRefPrice || baseBar) * 1.10, marketAvg * 1.15));
+                commercialCeiling = Math.max(commercialFloor, highCeil);
+                rangeCalculation = `Suelo: Escalado ocupación ${occupancyPct.toFixed(0)}% (${commercialFloor} €) · Techo: Presión demanda sobre mercado (${commercialCeiling} €)`;
+            }
+        } else {
+            commercialCeiling = Math.round(commercialFloor * (occupancyPct >= 61 ? 1.15 : 1.08));
+            rangeCalculation = `Suelo: ${occupancyPct >= 61 ? 'Escalado ocupación' : 'BAR base'} (${commercialFloor} €) · Techo: Margen estratégico de antelación (${commercialCeiling} €)`;
+        }
+
+        const minRange = commercialFloor;
+        const maxRange = Math.max(commercialFloor, commercialCeiling);
+        const rangeText = `${minRange}€ - ${maxRange}€`;
+
+        // Banda matemática de tolerancia puramente aritmética (±5% sobre precio publicado actual)
+        const currentRef = currentPrice > 0 ? currentPrice : baseBar;
+        const mathTolMin = Math.round(currentRef * 0.95);
+        const mathTolMax = Math.round(currentRef * 1.05);
+        const mathToleranceBand = {
+            min: mathTolMin,
+            max: mathTolMax,
+            text: `${mathTolMin}€ - ${mathTolMax}€`
+        };
+
+        // 5. Lógica de Decisión Estratégica
         let action = 'MANTENER';
         let target = (currentPrice > 0) ? currentPrice : baseBar;
         let triggerText = 'En Rango';
+        let demandStatus = 'EN RANGO COMERCIAL';
+        let isCommerciallyOptimal = false;
         let reasons = [];
         let riskAssessment = 'Riesgo bajo';
         let confidenceScore = 'Alta';
-
-        // Tarifa estratégica de partida según día de semana y escalado
-        // Para domingo con ocupación <= 60%, respeta la tarifa base de domingo (58€)
-        let strategicBase = baseBar;
-        if (occTierRefPrice && occTierRefPrice > 0) {
-            if (dow === 0 && occupancyPct <= 60) {
-                strategicBase = baseBar;
-            } else {
-                strategicBase = Math.max(baseBar, occTierRefPrice);
-            }
-        }
 
         // === CASO 1: SITUACIÓN CRÍTICA / OVERBOOKING (>=100% o >=capacidad) ===
         if (occupancyPct >= 100 || otbRooms >= capacity) {
@@ -690,6 +728,7 @@
             const extra = (marketAvg > target) ? Math.round((marketAvg - target) * 0.5) + 15 : 20;
             target = Math.max(target + extra, Math.round(marketAvg * 1.15));
             triggerText = '100% LLENO';
+            demandStatus = 'OVERBOOKING / LLENO';
             reasons.push(`Hotel al 100% de capacidad (${otbRooms}/${capacity} habs). Proteger inventario y cerrar canales de distribución.`);
             riskAssessment = 'Riesgo alto de overbooking / desvíos.';
             confidenceScore = 'Muy Alta';
@@ -701,10 +740,13 @@
                 action = 'SUBIR';
                 target = occTierRefPrice;
                 triggerText = `🔥 Escalado ${occTierRefPrice}€ (${leftRooms} lib)`;
+                demandStatus = 'SUBIDA POR ESCALADO CRÍTICO';
                 reasons.push(`Ocupación crítica (${occupancyPct.toFixed(0)}% · ${leftRooms} habs libres). Subir a tramo de escalado (${occTierRefPrice} €).`);
             } else {
                 action = 'MANTENER';
                 triggerText = `🔥 Ocup. ${occupancyPct.toFixed(0)}% (${leftRooms} lib)`;
+                demandStatus = 'EN ESCALADO CRÍTICO';
+                isCommerciallyOptimal = true;
                 reasons.push(`Ocupación crítica (${occupancyPct.toFixed(0)}% · ${leftRooms} habs libres). Tarifa actual (${target} €) cubre el tramo de escalado (${occTierRefPrice} €).`);
             }
             if (bestPickup > 0) reasons.push(`Pick-up positivo (+${bestPickup} RN) confirma tracción.`);
@@ -715,10 +757,13 @@
                 action = 'SUBIR';
                 target = occTierRefPrice;
                 triggerText = `📈 Escalado ${occTierRefPrice}€`;
+                demandStatus = 'SUBIDA POR ESCALADO';
                 reasons.push(`Ocupación en tramo ${occupancyPct.toFixed(0)}%. Alinear tarifa con escalado estratégico (${occTierRefPrice} €).`);
             } else {
                 action = 'MANTENER';
                 triggerText = `En Escalado (${occTierRefPrice}€)`;
+                demandStatus = 'EN ESCALADO';
+                isCommerciallyOptimal = true;
                 reasons.push(`Tarifa actual (${target} €) cumple con el escalado para ocupación del ${occupancyPct.toFixed(0)}% (${occTierRefPrice} €).`);
             }
         }
@@ -735,6 +780,7 @@
                 target = target + step;
             }
             triggerText = `⚡ Pick-up +${bestPickup}`;
+            demandStatus = 'MOMENTUM DE VENTAS';
             reasons.push(`Aceleración notable de reservas (Pick-up +${bestPickup} RN). Ritmo superior a la media.`);
             if (marketAvg > 0 && target < marketAvg) {
                 reasons.push(`Margen de subida respecto a la media de mercado (${marketAvg.toFixed(0)} €).`);
@@ -745,6 +791,7 @@
             action = 'SUBIR';
             target = target + 5;
             triggerText = `🏢 Comps llenos (${soldCompsCount})`;
+            demandStatus = 'PRESIÓN COMPETITIVA';
             reasons.push(`${soldCompsCount} hoteles competidores llenos o sin ventas abiertas en la plaza.`);
         }
         // === CASO 6: OCUPACIÓN BAJA DE ÚLTIMA HORA (<7 DÍAS) - REGLA DE SEGURIDAD ===
@@ -752,36 +799,70 @@
             action = 'MANTENER';
             target = currentPrice;
             triggerText = `🛡️ Proteger ADR (${daysOut}d)`;
+            demandStatus = 'PROTECCIÓN ADR ÚLTIMA HORA';
             reasons.push(`Baja ocupación (${occupancyPct.toFixed(0)}%) con antelación corta (${daysOut} días). Criterio Revenue: No bajar BAR general; mantener tarifa para proteger ADR.`);
             riskAssessment = 'Evitar devaluación de tarifa pública de última hora.';
             confidenceScore = 'Media';
         }
-        // === CASO 7: ANTELACIÓN AMPLIA (>14 DÍAS) Y BAJA OCUPACIÓN (<25%): ALINEAR CON BAR BASE ===
-        else if (daysOut > 14 && occupancyPct < 25 && bestPickup <= 2) {
-            if (currentPrice > baseBar) {
-                action = 'REVISAR BAJADA';
-                target = baseBar;
-                triggerText = `Alinear a BAR (${baseBar}€)`;
-                reasons.push(`Antelación amplia (${daysOut} días) con baja ocupación (${occupancyPct.toFixed(0)}%). Alinear con BAR base de ${dow === 0 ? 'domingo' : (dow === 5 ? 'viernes' : (dow === 6 ? 'sábado' : 'días laborables'))} (${baseBar} €).`);
-            } else if (currentPrice < baseBar) {
-                action = 'SUBIR';
-                target = baseBar;
-                triggerText = `Alinear a BAR (${baseBar}€)`;
-                reasons.push(`Tarifa actual (${currentPrice} €) por debajo de la BAR base de partida (${baseBar} €).`);
+        // === CASO 7: SIN HISTÓRICO SUFICIENTE DE PICK-UP (OBSERVACIÓN Y PRUDENCIA) ===
+        else if (!hasSufficientPickupHistory) {
+            action = 'MANTENER';
+            target = currentPrice > 0 ? currentPrice : baseBar;
+            confidenceScore = 'Media';
+            riskAssessment = 'Pendiente de verificar tracción real de reservas.';
+
+            if (currentPrice > 0 && currentPrice !== baseBar) {
+                triggerText = '⚠️ Pend. Demanda';
+                demandStatus = 'PENDIENTE DE EVALUACIÓN DE DEMANDA';
+                isCommerciallyOptimal = false;
+                const gapVsMkt = (marketAvg > 0) ? Math.round(((currentPrice - marketAvg) / marketAvg) * 100) : 0;
+                reasons.push(`Antelación de ${daysOut} días con ocupación del ${occupancyPct.toFixed(0)}% (tramo base 0–60%).`);
+                reasons.push(`Precio publicado actual (${currentPrice} €) difiere de la BAR base (${baseBar} €)${marketAvg > 0 ? ` y se sitúa ${gapVsMkt > 0 ? '+' : ''}${gapVsMkt}% sobre la media de mercado (${Math.round(marketAvg)} €)` : ''}.`);
+                reasons.push(`MANTENER — PENDIENTE DE EVALUACIÓN DE DEMANDA: Sin histórico de pickup suficiente para confirmar sobredemanda que justifique la prima sobre el mercado y la BAR base. Se mantiene tarifa en observación.`);
+                reasons.push(`Rango comercial recomendado para este tramo: ${rangeText} (${rangeCalculation}).`);
             } else {
-                action = 'MANTENER';
                 triggerText = `En BAR Base (${baseBar}€)`;
+                demandStatus = 'EN BAR BASE';
+                isCommerciallyOptimal = true;
                 reasons.push(`Tarifa alineada exactamente con la BAR base de partida (${baseBar} €).`);
+                reasons.push(`Histórico de pickup en fase de captura inicial.`);
+                reasons.push(`Rango comercial recomendado: ${rangeText} (${rangeCalculation}).`);
             }
         }
-        // === CASO 8: ZONA DE ESTABILIDAD / EN RANGO ===
+        // === CASO 8: CON HISTÓRICO DE PICK-UP - OCUPACIÓN MODERADA (0–60%) ===
         else {
-            action = 'MANTENER';
-            triggerText = 'En Rango';
-            if (marketAvg > 0 && Math.abs(target - marketAvg) <= 4) {
-                reasons.push(`Tarifa alineada con el mercado (${marketAvg.toFixed(0)} €) y ritmo de reservas estable.`);
+            if (bestPickup >= 3) {
+                action = 'MANTENER';
+                triggerText = `⚡ Tracción +${bestPickup}`;
+                demandStatus = 'DEMANDA ACTIVA';
+                isCommerciallyOptimal = true;
+                reasons.push(`Tracción positiva de reservas (Pick-up +${bestPickup} RN) confirma solidez de la tarifa.`);
+                reasons.push(`Rango comercial recomendado: ${rangeText} (${rangeCalculation}).`);
+            } else if (currentPrice > maxRange && daysOut > 14 && bestPickup <= 1) {
+                action = 'REVISAR BAJADA';
+                target = Math.max(minRange, Math.round(marketAvg || baseBar));
+                triggerText = `Alinear a Rango (${target}€)`;
+                demandStatus = 'POR ENCIMA DE RANGO';
+                isCommerciallyOptimal = false;
+                reasons.push(`Antelación de ${daysOut} días con ocupación moderada (${occupancyPct.toFixed(0)}%) y sin ritmo de pickup.`);
+                reasons.push(`Precio publicado (${currentPrice} €) supera el rango comercial máximo (${maxRange} €). Revisar hacia ${target} €.`);
+                reasons.push(`Rango comercial de referencia: ${rangeText} (${rangeCalculation}).`);
+            } else if (currentPrice < minRange) {
+                action = 'SUBIR';
+                target = minRange;
+                triggerText = `Alinear a BAR (${minRange}€)`;
+                demandStatus = 'POR DEBAJO DE RANGO';
+                isCommerciallyOptimal = false;
+                reasons.push(`Tarifa actual (${currentPrice} €) por debajo del suelo comercial (${minRange} €). Subir a BAR base.`);
+                reasons.push(`Rango comercial de referencia: ${rangeText} (${rangeCalculation}).`);
             } else {
-                reasons.push(`Evolución de ocupación (${occupancyPct.toFixed(0)}%) y pickup dentro de los parámetros esperados.`);
+                action = 'MANTENER';
+                triggerText = 'En Rango';
+                demandStatus = 'EN RANGO COMERCIAL';
+                isCommerciallyOptimal = true;
+                reasons.push(`Precio actual (${currentPrice} €) comercialmente adecuado dentro del rango estratégico (${minRange}–${maxRange} €).`);
+                reasons.push(`Evolución de ocupación (${occupancyPct.toFixed(0)}%) y pickup en parámetros previstos.`);
+                reasons.push(`Cálculo de rango: ${rangeCalculation}.`);
             }
         }
 
@@ -789,7 +870,6 @@
             reasons.push(`Referencia de escalado (${occupancyPct.toFixed(0)}% ocupación): ${occTierRefPrice} €.`);
         }
 
-        const effectiveFloor = Math.max(minFloorPrice, 45);
         if (target < effectiveFloor) {
             target = effectiveFloor;
             reasons.push(`Aplicado suelo mínimo inviolable configurado (${effectiveFloor} €).`);
@@ -822,9 +902,14 @@
             isException,
             eventName,
             triggerText,
-            minRange: Math.max(effectiveFloor, roundedProposed - 4),
-            maxRange: roundedProposed + 4,
-            rangeText: `${Math.max(effectiveFloor, roundedProposed - 4)}€ - ${roundedProposed + 4}€`
+            demandStatus,
+            isCommerciallyOptimal,
+            hasSufficientPickupHistory,
+            minRange,
+            maxRange,
+            rangeText,
+            rangeCalculation,
+            mathToleranceBand
         };
     }
 

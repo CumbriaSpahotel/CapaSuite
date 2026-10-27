@@ -192,8 +192,18 @@ console.log('✅ Test 6 Superado: Motor de Recomendación con justificación y r
     console.log('Test 7: Gestión Multi-Hotel, Multi-Año y Multi-Mes...');
     const mGuadiana27 = PricingIntelligence.getBarMatrix('Guadiana', 2027);
     const mCumbria27 = PricingIntelligence.getBarMatrix('Cumbria', 2027);
-    assert(mGuadiana27[1][1] === 62, 'Guadiana Enero Lunes debe ser 62');
-    assert(mCumbria27[1][1] === 52, 'Cumbria Enero Lunes debe ser 52');
+    assert.strictEqual(mGuadiana27[1][1], 62, 'Guadiana Enero Lunes debe ser 62');
+    assert.strictEqual(mCumbria27[1][1], 59, 'Cumbria Enero Lunes debe ser 59 € (62 - 3)');
+
+    // Comprobación obligatoria: Las 84 combinaciones de Cumbria 2027 deben ser exactamente Guadiana 2027 - 3 €
+    for (let m = 1; m <= 12; m++) {
+        for (let d = 1; d <= 7; d++) {
+            const gVal = mGuadiana27[m][d];
+            const cVal = mCumbria27[m][d];
+            assert.strictEqual(cVal, gVal - 3, `Cumbria Mes ${m} Día ${d} (${cVal}€) debe ser exactamente Guadiana (${gVal}€) - 3€`);
+        }
+    }
+    console.log('✅ Verificación 84 BARs: Cumbria 2027 es exactamente Guadiana 2027 - 3 € en todas las celdas.');
 
     // Test copyBarMatrix con ajuste +5%
     PricingIntelligence.copyBarMatrix('Guadiana', 2027, 'Guadiana', 2029, 5);
@@ -208,6 +218,40 @@ console.log('✅ Test 6 Superado: Motor de Recomendación con justificación y r
     const reloadedJan = PricingIntelligence.getOccTiers('Guadiana', 2027, 1);
     assert.strictEqual(reloadedJan[0].price, 65, 'El precio del tramo guardado debe persistir');
     console.log('✅ Test 7 Superado: Gestión Multi-Hotel, Multi-Año y Multi-Mes verificada.');
+
+    // -------------------------------------------------------------
+    // Test 8: Caso Real de Clasificación Comercial vs Banda Matemática
+    // Lunes 7 de junio de 2027: BAR base: 68€, Precio actual: 80€,
+    // Ocupación: 26%, Antelación: 224d, Mercado: 72€ (+11%), sin pickup suficiente
+    // -------------------------------------------------------------
+    console.log('Test 8: Evaluación comercial vs matemática (Ejemplo real Lunes 7 Junio 2027)...');
+    const recReal = PricingIntelligence.evaluateDailyRecommendation({
+        hotelName: 'Guadiana',
+        dateISO: '2027-06-07',
+        currentPrice: 80,
+        marketAvg: 72,
+        otbRooms: 28,
+        occupancyPct: 26,
+        capacity: 108,
+        pickupData: {
+            snapshotsCount: 0,
+            h24h: { available: false, diffRooms: 0 },
+            d7:   { available: false, diffRooms: 0 }
+        }
+    });
+
+    assert.strictEqual(recReal.baseBar, 68, 'BAR base debe ser 68 €');
+    assert.strictEqual(recReal.currentPrice, 80, 'Precio actual debe ser 80 €');
+    assert.strictEqual(recReal.action, 'MANTENER', 'Debe ser MANTENER');
+    assert.strictEqual(recReal.triggerText, '⚠️ Pend. Demanda', 'Debe mostrar advertencia de demanda pendiente');
+    assert.strictEqual(recReal.demandStatus, 'PENDIENTE DE EVALUACIÓN DE DEMANDA', 'Status debe ser PENDIENTE DE EVALUACIÓN DE DEMANDA');
+    assert.strictEqual(recReal.isCommerciallyOptimal, false, 'NO debe indicar que 80 € es óptimo');
+    assert.strictEqual(recReal.minRange, 68, 'Suelo comercial recomendado debe ser BAR base (68 €)');
+    assert(recReal.maxRange <= 76, 'Techo comercial recomendado no debe exceder 76 €');
+    assert.strictEqual(recReal.mathToleranceBand.min, 76, 'Banda matemática inferior ±5% es 76 €');
+    assert.strictEqual(recReal.mathToleranceBand.max, 84, 'Banda matemática superior ±5% es 84 €');
+    assert.ok(recReal.reasons.some(r => r.includes('PENDIENTE DE EVALUACIÓN DE DEMANDA')), 'Debe incluir justificación explícita de demanda pendiente');
+    console.log('✅ Test 8 Superado: Clasificación comercial correcta; no se clasifica como «EN RANGO» por banda matemática.');
 
 console.log('\n============================================================');
 console.log('🎉 TODOS LOS TESTS DE PRICING INTELLIGENCE HAN FINALIZADO CON ÉXITO.');
