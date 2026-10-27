@@ -124,9 +124,8 @@
         const dowData = PricingIntelligence.aggregateByDayOfWeek(datesList, monthNum, currentHotel);
 
         // Actualizar título de mes
-        const badge = document.getElementById('dowMonthTitleBadge');
-        if (badge) // Obtener año de los datos o 2027
         const currentYear = (datesList[0]?.dateISO) ? datesList[0].dateISO.split('-')[0] : '2027';
+        const badge = document.getElementById('dowMonthTitleBadge');
         if (badge) badge.innerText = `${monthSummary.monthName} ${currentYear}`;
 
         // Renderizar pills de mes en la barra rápida

@@ -22,8 +22,8 @@
     <script src="js/nav.js"></script>
     <script src="js/theme-manager.js"></script>
     <script src="js/firebase-auth.js?v=20261001-sync3"></script>
-    <script src="js/pricing-intelligence.js?v=20261027-strat3"></script>
-    <script src="js/competencia-intelligence-ui.js?v=20261027-strat3"></script>
+    <script src="js/pricing-intelligence.js?v=20261027-fix2"></script>
+    <script src="js/competencia-intelligence-ui.js?v=20261027-fix2"></script>
 
     <link rel="stylesheet" href="css/tokens.css">
     <link rel="stylesheet" href="css/nav.css">
@@ -968,8 +968,8 @@
         }
 
         thead th.th-action {
-            width: 14%;
-            min-width: 140px;
+            width: 15%;
+            min-width: 160px;
             white-space: nowrap !important;
             text-align: center;
         }
@@ -1455,7 +1455,8 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
             user-select: none;
             width: 100%;
-            max-width: 145px;
+            min-width: 155px;
+            max-width: 180px;
             margin: 0 auto;
             box-sizing: border-box;
         }
@@ -1485,20 +1486,26 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 4px;
+            gap: 6px;
+            white-space: nowrap !important;
         }
         .yield-pill-price {
-            font-size: 0.92rem;
+            font-size: 0.96rem;
             font-weight: 800;
             color: var(--text-main);
-            line-height: 1.1;
+            line-height: 1;
+            white-space: nowrap !important;
+            display: inline-flex;
+            align-items: baseline;
+            letter-spacing: -0.2px;
         }
         .yield-pill-diff {
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             font-weight: 800;
-            padding: 1px 4px;
+            padding: 1px 5px;
             border-radius: 4px;
             line-height: 1.1;
+            white-space: nowrap !important;
         }
         .yield-pill-diff.pos {
             background: rgba(16, 185, 129, 0.15);
@@ -1510,14 +1517,14 @@
         }
 
         .yield-pill-badge {
-            font-size: 0.65rem;
+            font-size: 0.66rem;
             font-weight: 800;
             text-transform: uppercase;
-            padding: 2px 5px;
+            padding: 2px 6px;
             border-radius: 5px;
             letter-spacing: 0.3px;
             line-height: 1;
-            white-space: nowrap;
+            white-space: nowrap !important;
         }
         .yield-pill-badge.subir {
             background: #10b981;
@@ -1541,23 +1548,25 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 0.68rem;
+            font-size: 0.7rem;
             color: var(--text-muted);
-            margin-top: 1px;
-            gap: 4px;
+            margin-top: 2px;
+            gap: 6px;
+            white-space: nowrap !important;
         }
         .yield-pill-trigger {
             font-weight: 700;
             color: var(--text-main);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 80px;
+            white-space: nowrap !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
         }
         .yield-pill-range {
-            font-size: 0.64rem;
+            font-size: 0.66rem;
             color: var(--text-muted);
-            white-space: nowrap;
+            white-space: nowrap !important;
+            opacity: 0.85;
         }
 
         /* Badges de Acción del Motor */

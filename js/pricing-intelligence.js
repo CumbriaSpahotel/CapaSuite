@@ -734,7 +734,7 @@
                 const step = (bestPickup >= 10) ? 8 : 4;
                 target = target + step;
             }
-            triggerText = `⚡ Pick-up +${bestPickup} RN`;
+            triggerText = `⚡ Pick-up +${bestPickup}`;
             reasons.push(`Aceleración notable de reservas (Pick-up +${bestPickup} RN). Ritmo superior a la media.`);
             if (marketAvg > 0 && target < marketAvg) {
                 reasons.push(`Margen de subida respecto a la media de mercado (${marketAvg.toFixed(0)} €).`);
