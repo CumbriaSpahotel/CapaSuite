@@ -36,6 +36,12 @@
         const email = nav.querySelector('#userEmailNav');
         if (email && window._capasuite_local_mode && !user) email.textContent = 'Modo local';
         if (email && user) email.textContent = window.getUserDisplayName ? window.getUserDisplayName(user) : user.email;
+        if (window.CAPASUITE_VERSION) {
+            nav.querySelectorAll('.app-version-badge, [data-version-badge]').forEach(el => {
+                el.innerHTML = `<span class="version-dot"></span><span>v${window.CAPASUITE_VERSION.version}</span>`;
+                el.title = `CapaSuite v${window.CAPASUITE_VERSION.version} · Compilación: ${window.CAPASUITE_VERSION.buildDate}`;
+            });
+        }
     }
     async function injectNav() {
         const existing = document.getElementById('mainNav') || document.querySelector('nav.top-nav');
