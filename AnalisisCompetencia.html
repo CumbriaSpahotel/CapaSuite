@@ -1589,7 +1589,7 @@
                 <select id="monthSelector" class="form-select" onchange="renderAll()" title="Filtrar por mes">
                     <option value="all">📅 Todo el Año</option>
                 </select>
-                <button class="btn" onclick="openBarMatrixModal()" title="Ver y editar tarifas base 2027 y escalados">📊 Tarifas Base 2027</button>
+                <button class="btn" onclick="openBarMatrixModal()" title="Gestor de Tarifas Base y Estrategia Yield por Hotel, Año y Mes">🏷️ Gestor de Tarifas y Yield</button>
                 <button class="btn" onclick="openMinPriceModal()" title="Configurar tarifas mínimas (suelo) para cada hotel">🏷️ Precios Mínimos</button>
                 <button class="btn"
                     onclick="openCompConfig()" title="Configurar lista de competidores y parámetros">⚙️ Competencia</button>
@@ -1726,6 +1726,23 @@
 
             <!-- CONTAINER 2: VISTA MENSUAL & DÍAS DE LA SEMANA -->
             <div id="viewContainerMonthDow" style="display:none;">
+                <!-- BARRA DE NAVEGACIÓN RÁPIDA DE MES Y HERRAMIENTAS -->
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:var(--bg-card); padding:10px 16px; border-radius:14px; border:1px solid var(--border); margin-bottom:16px;">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <span style="font-size:0.8rem; font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                            <span>📅</span> Mes:
+                        </span>
+                        <div id="monthDowPillsStrip" style="display:flex; gap:4px; flex-wrap:wrap;">
+                            <!-- Injected JS pills: Ene, Feb, Mar, Abr, May, Jun, Jul, Ago, Sep, Oct, Nov, Dic -->
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button class="btn btn-sm" onclick="openBarMatrixModal()" title="Abrir gestor de tarifas base y estrategia yield" style="font-size:0.78rem; font-weight:700; background:var(--bg-surface); border:1px solid var(--border); display:inline-flex; align-items:center; gap:5px;">
+                            🏷️ Estrategia y Tarifas Base
+                        </button>
+                    </div>
+                </div>
+
                 <!-- RESUMEN MENSUAL -->
                 <div id="monthSummaryContainer" style="margin-bottom:16px;">
                     <!-- JS Injected -->
@@ -1747,7 +1764,7 @@
                             <thead>
                                 <tr>
                                     <th style="width:140px; text-align:left;">Día Semana</th>
-                                    <th>BAR Base Excel</th>
+                                    <th>BAR Base</th>
                                     <th>Precio Actual</th>
                                     <th>Ocupación Media</th>
                                     <th>Pickup 24h</th>
@@ -5668,26 +5685,136 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
 
     
     <!-- MODAL: EDITOR DE MATRIZ DE PRECIOS 2027 & ESCALADOS -->
+        <!-- MODAL: GESTOR DE TARIFAS BASE Y ESTRATEGIA YIELD (MULTI-HOTEL, MULTI-AÑO, MULTI-MES) -->
     <div id="barMatrixModal" class="modal" style="z-index:999999;">
-        <div class="modal-content" style="max-width:960px; width:95vw; max-height:92vh; overflow-y:auto; border-radius:18px; padding:24px; background:var(--bg-surface); border:1px solid var(--border);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:12px;">
+        <div class="modal-content" style="max-width:1050px; width:95vw; max-height:92vh; overflow-y:auto; border-radius:18px; padding:24px; background:var(--bg-surface); border:1px solid var(--border);">
+            
+            <!-- HEADER DEL MODAL -->
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:14px; gap:12px;">
                 <div>
-                    <h3 style="margin:0; font-size:1.25rem; color:var(--text-main); display:flex; align-items:center; gap:8px;">
-                        <span>📊</span> Matriz de Tarifas Base 2027 (Excel Precios 2027)
+                    <h3 style="margin:0; font-size:1.3rem; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+                        <span>🏷️</span> Gestor de Tarifas Base y Estrategia Yield
                     </h3>
-                    <p style="margin:4px 0 0 0; font-size:0.8rem; color:var(--text-muted);">
-                        Configura las BAR base oficiales por mes y día de la semana. Se sincronizan en la nube automáticamente.
+                    <p style="margin:4px 0 0 0; font-size:0.82rem; color:var(--text-muted);">
+                        Configura y gestiona las tarifas base comerciales y los escalados de ocupación por Hotel, Año y Mes. Sin dependencias externas, sincronizado en tiempo real.
                     </p>
                 </div>
-                <span class="close-modal" onclick="closeBarMatrixModal()" style="font-size:1.6rem; cursor:pointer;">&times;</span>
+                <span class="close-modal" onclick="closeBarMatrixModal()" style="font-size:1.6rem; cursor:pointer;" title="Cerrar">&times;</span>
             </div>
 
-            <div style="margin-bottom:20px;">
-                <div style="font-size:0.82rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:8px;">
-                    1. Tarifas BAR de Partida (12 Meses x 7 Días)
+            <!-- BARRA DE SELECTORES PRINCIPALES: HOTEL, AÑO, MES Y HERRAMIENTAS -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; background:var(--bg-card); padding:12px 16px; border-radius:14px; border:1px solid var(--border); margin-bottom:20px;">
+                <!-- SELECTOR DE HOTEL -->
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Hotel:</span>
+                    <div style="display:flex; background:var(--bg-deep); padding:3px; border-radius:10px; border:1px solid var(--border);">
+                        <button type="button" id="matrixHotelBtnGuadiana" class="btn btn-sm" onclick="CompetenciaIntelUI.switchMatrixHotel('Guadiana')" style="border-radius:8px; font-weight:700; font-size:0.8rem; padding:4px 12px; border:none; background:var(--primary); color:#fff; cursor:pointer;">
+                            🏨 Sercotel Guadiana
+                        </button>
+                        <button type="button" id="matrixHotelBtnCumbria" class="btn btn-sm" onclick="CompetenciaIntelUI.switchMatrixHotel('Cumbria')" style="border-radius:8px; font-weight:700; font-size:0.8rem; padding:4px 12px; border:none; background:transparent; color:var(--text-muted); cursor:pointer;">
+                            🏨 Hotel Cumbria
+                        </button>
+                    </div>
                 </div>
-                <div style="overflow-x:auto;">
-                    <table class="bar-matrix-table" id="barMatrixEditorTable">
+
+                <!-- SELECTOR DE AÑO -->
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Año:</span>
+                    <div id="matrixYearSelectorGroup" style="display:flex; gap:4px; align-items:center;">
+                        <!-- Injected JS pills: 2026, 2027, 2028, etc. -->
+                    </div>
+                </div>
+
+                <!-- FILTRO / ENFOQUE DE MES -->
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Mes:</span>
+                    <select id="matrixMonthSelector" onchange="CompetenciaIntelUI.switchMatrixMonth(this.value)" class="form-select" style="height:32px; font-size:0.8rem; padding:0 10px; border-radius:8px; min-width:140px;">
+                        <option value="all">📅 Todos los Meses (12M)</option>
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+
+                <!-- HERRAMIENTAS RÁPIDAS -->
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button type="button" class="btn btn-sm" onclick="CompetenciaIntelUI.toggleCopyMatrixPanel()" title="Copiar matriz entre hoteles o años con ajuste porcentual" style="font-size:0.78rem; font-weight:700; background:var(--bg-surface); border:1px solid var(--border);">
+                        📋 Copiar Tarifas
+                    </button>
+                    <button type="button" class="btn btn-sm" onclick="CompetenciaIntelUI.resetActiveMatrixToDefaults()" title="Restablecer tarifas de partida recomendadas para este hotel y año" style="font-size:0.78rem; font-weight:700; color:#ef4444; background:var(--bg-surface); border:1px solid var(--border);">
+                        ↺ Restablecer
+                    </button>
+                </div>
+            </div>
+
+            <!-- PANEL DESPLEGABLE: COPIAR TARIFAS ENTRE HOTELES/AÑOS -->
+            <div id="copyMatrixSubPanel" style="display:none; background:rgba(99,102,241,0.06); border:1px dashed var(--primary); border-radius:12px; padding:14px; margin-bottom:18px;">
+                <div style="font-size:0.8rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:8px;">
+                    📋 Copiar y Ajustar Tarifas Base
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:end;">
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Copiar desde:</label>
+                        <div style="display:flex; gap:4px;">
+                            <select id="copyFromHotel" class="form-select" style="height:32px; font-size:0.78rem;">
+                                <option value="Guadiana">Guadiana</option>
+                                <option value="Cumbria">Cumbria</option>
+                            </select>
+                            <select id="copyFromYear" class="form-select" style="height:32px; font-size:0.78rem;">
+                                <option value="2026">2026</option>
+                                <option value="2027" selected>2027</option>
+                                <option value="2028">2028</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Hacia destino:</label>
+                        <div style="display:flex; gap:4px;">
+                            <select id="copyToHotel" class="form-select" style="height:32px; font-size:0.78rem;">
+                                <option value="Guadiana">Guadiana</option>
+                                <option value="Cumbria" selected>Cumbria</option>
+                            </select>
+                            <select id="copyToYear" class="form-select" style="height:32px; font-size:0.78rem;">
+                                <option value="2026">2026</option>
+                                <option value="2027" selected>2027</option>
+                                <option value="2028">2028</option>
+                                <option value="2029">2029</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size:0.72rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Ajuste Porcentual (%):</label>
+                        <input type="number" id="copyPctAdjust" value="0" placeholder="Ej: 5 o -10" class="form-select" style="height:32px; font-size:0.78rem;">
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="CompetenciaIntelUI.applyCopyMatrix()" style="width:100%; height:32px; font-size:0.8rem; font-weight:700;">
+                            ✓ Ejecutar Copia
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 1: MATRIZ DE TARIFAS BASE (12 MESES X 7 DÍAS) -->
+            <div style="margin-bottom:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div style="font-size:0.82rem; font-weight:800; color:var(--primary); text-transform:uppercase;">
+                        1. Tarifas BAR Base de Partida (<span id="matrixActiveHotelLabel">Guadiana</span> · <span id="matrixActiveYearLabel">2027</span>)
+                    </div>
+                    <span style="font-size:0.72rem; color:var(--text-muted);">
+                        Valores en Euros (€) por tipo de día (L-D)
+                    </span>
+                </div>
+                <div style="overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--bg-card);">
+                    <table class="bar-matrix-table" id="barMatrixEditorTable" style="width:100%; margin:0;">
                         <thead>
                             <tr>
                                 <th style="text-align:left; min-width:110px;">Mes</th>
@@ -5698,6 +5825,7 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
                                 <th>Viernes</th>
                                 <th>Sábado</th>
                                 <th>Domingo</th>
+                                <th style="background:rgba(99,102,241,0.08); color:var(--primary);">Media Mes</th>
                             </tr>
                         </thead>
                         <tbody id="barMatrixEditorBody">
@@ -5707,28 +5835,37 @@ Sample Guad Cell: "${gRowData ? gRowData[startCol] : 'Undefined'}"
                 </div>
             </div>
 
-            <div style="margin-bottom:20px; background:var(--bg-deep); padding:16px; border-radius:12px; border:1px solid var(--border);">
-                <div style="font-size:0.82rem; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:8px;">
-                    2. Escalados por Ocupación (Enero y Febrero)
+            <!-- SECCIÓN 2: ESCALADOS POR OCUPACIÓN -->
+            <div style="margin-bottom:20px; background:var(--bg-deep); padding:16px; border-radius:14px; border:1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                    <div style="font-size:0.82rem; font-weight:800; color:var(--primary); text-transform:uppercase;">
+                        2. Escalados por Ocupación — Tramos Yield (<span id="occTiersContextLabel">Sercotel Guadiana · 2027 · Todos los meses</span>)
+                    </div>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <button type="button" class="btn btn-sm" onclick="CompetenciaIntelUI.copyTiersToAllMonths()" title="Aplicar los tramos actuales a todos los meses del año" style="font-size:0.72rem; padding:3px 8px; background:var(--bg-surface); border:1px solid var(--border);">
+                            🔄 Aplicar a Todos los Meses
+                        </button>
+                    </div>
                 </div>
-                <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;">
-                    Tramos de ocupación de referencia comercial definidos en las hojas mensuales del Excel.
+                <p style="font-size:0.76rem; color:var(--text-muted); margin:0 0 12px 0;">
+                    Tarifas orientativas de referencia según tramo de ocupación prevista. Se integran con el ritmo de pick-up y antelación.
                 </p>
                 <div id="occTiersEditorContainer" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px;">
                     <!-- Injected JS -->
                 </div>
             </div>
 
+            <!-- FOOTER CON ACCIONES -->
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-top:1px solid var(--border); padding-top:14px;">
-                <button type="button" class="btn" onclick="resetBarMatrixToOriginals()" style="background:transparent; border:1px solid var(--border); color:#ef4444; font-size:0.8rem; font-weight:700;">
-                    ↺ Restablecer a Valores del Excel
-                </button>
+                <div style="display:flex; align-items:center; gap:8px; font-size:0.76rem; color:var(--text-muted);">
+                    <span>☁️ Sincronización en la nube activa</span>
+                </div>
                 <div style="display:flex; gap:10px;">
                     <button type="button" class="btn" onclick="closeBarMatrixModal()" style="background:transparent; border:1px solid var(--border); color:var(--text-muted); font-size:0.82rem;">
                         Cancelar
                     </button>
-                    <button type="button" class="btn btn-primary" onclick="saveBarMatrixFromModal()" style="font-size:0.82rem; font-weight:700;">
-                        💾 Guardar y Aplicar Tarifas Base
+                    <button type="button" class="btn btn-primary" onclick="CompetenciaIntelUI.saveBarMatrixFromModal()" style="font-size:0.82rem; font-weight:700;">
+                        💾 Guardar y Aplicar Estrategia
                     </button>
                 </div>
             </div>

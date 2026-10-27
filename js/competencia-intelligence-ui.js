@@ -128,7 +128,24 @@
 
         // Actualizar título de mes
         const badge = document.getElementById('dowMonthTitleBadge');
-        if (badge) badge.innerText = `${monthSummary.monthName} 2027`;
+        if (badge) // Obtener año de los datos o 2027
+        const currentYear = (datesList[0]?.dateISO) ? datesList[0].dateISO.split('-')[0] : '2027';
+        if (badge) badge.innerText = `${monthSummary.monthName} ${currentYear}`;
+
+        // Renderizar pills de mes en la barra rápida
+        const pillsStrip = document.getElementById('monthDowPillsStrip');
+        if (pillsStrip) {
+            const shortNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            pillsStrip.innerHTML = shortNames.map((sn, idx) => {
+                const mIdx = idx + 1;
+                const isSelected = (mIdx === monthNum);
+                return `
+                    <button type="button" class="btn btn-sm ${isSelected ? 'btn-primary' : ''}" onclick="CompetenciaIntelUI.selectMonthFromStrip(${mIdx})" style="height:28px; padding:0 8px; font-size:0.75rem; font-weight:700; border-radius:6px; border:1px solid ${isSelected ? 'var(--primary)' : 'var(--border)'}; background:${isSelected ? 'var(--primary)' : 'var(--bg-surface)'}; color:${isSelected ? '#fff' : 'var(--text-main)'}; cursor:pointer;">
+                        ${sn}
+                    </button>
+                `;
+            }).join('');
+        }
 
         // 1. Tarjetas de Resumen Mensual
         const sumContainer = document.getElementById('monthSummaryContainer');
@@ -679,48 +696,38 @@
     }
 
     // =========================================================================
-    // EDITOR DE MATRIZ DE PRECIOS BASE 2027 & ESCALADOS
     // =========================================================================
-    function openBarMatrixModal() {
+    // GESTOR INTEGRAL DE TARIFAS BASE Y ESTRATEGIA YIELD (MULTI-HOTEL, MULTI-AÑO, MULTI-MES)
+    // =========================================================================
+    let matrixModalActiveHotel = 'Guadiana';
+    let matrixModalActiveYear = 2027;
+    let matrixModalActiveMonth = 'all';
+
+    function selectMonthFromStrip(monthNum) {
+        if (!window.PricingIntelligence) return;
+        const mName = PricingIntelligence.MONTH_NAMES_ES[monthNum - 1];
+        
+        const sel = document.getElementById('monthSelector');
+        if (sel) {
+            const matchOpt = Array.from(sel.options).find(o => o.value.toLowerCase().includes(mName.toLowerCase()) || mName.toLowerCase().includes(o.value.toLowerCase()));
+            if (matchOpt) sel.value = matchOpt.value;
+        }
+
+        let data = (typeof processedData !== 'undefined' && Array.isArray(processedData)) ? [...processedData] : [];
+        renderMonthAndDowView(data, mName);
+    }
+
+    function openBarMatrixModal(optHotel, optYear, optMonth) {
         const modal = document.getElementById('barMatrixModal');
         if (!modal || !window.PricingIntelligence) return;
 
-        const matrix = PricingIntelligence.getBarMatrix();
-        const tiers = PricingIntelligence.getOccTiersJanFeb();
+        matrixModalActiveHotel = optHotel || window.activeHotel || (window.CapaState && window.CapaState.activeHotel) || 'Guadiana';
+        matrixModalActiveYear = optYear || 2027;
+        matrixModalActiveMonth = optMonth || 'all';
 
-        // 1. Rellenar Tabla 12 Meses x 7 Días
-        const tbody = document.getElementById('barMatrixEditorBody');
-        if (tbody) {
-            let rowsHtml = '';
-            for (let m = 1; m <= 12; m++) {
-                const rowData = matrix[m] || {};
-                const mName = PricingIntelligence.MONTH_NAMES_ES[m - 1];
-                rowsHtml += `
-                    <tr>
-                        <td style="font-weight:800; text-align:left;">${mName}</td>
-                        <td><input type="number" class="matrix-input" id="mat_${m}_1" value="${rowData[1] || 62}"></td>
-                        <td><input type="number" class="matrix-input" id="mat_${m}_2" value="${rowData[2] || 64}"></td>
-                        <td><input type="number" class="matrix-input" id="mat_${m}_3" value="${rowData[3] || 64}"></td>
-                        <td><input type="number" class="matrix-input" id="mat_${m}_4" value="${rowData[4] || 62}"></td>
-                        <td><input type="number" class="matrix-input" id="mat_${m}_5" value="${rowData[5] || 70}"></td>
-                        <td><input type="number" class="matrix-input" id="mat_${m}_6" value="${rowData[6] || 75}"></td>
-                        <td><input type="number" class="matrix-input" id="mat_${m}_7" value="${rowData[7] || 58}"></td>
-                    </tr>
-                `;
-            }
-            tbody.innerHTML = rowsHtml;
-        }
-
-        // 2. Rellenar Escalados Enero y Febrero
-        const tiersCont = document.getElementById('occTiersEditorContainer');
-        if (tiersCont) {
-            tiersCont.innerHTML = tiers.map((t, idx) => `
-                <div style="background:var(--bg-card); padding:8px 10px; border-radius:8px; border:1px solid var(--border); text-align:center;">
-                    <div style="font-size:0.7rem; color:var(--text-muted); font-weight:700;">${t.minOcc} - ${t.maxOcc}%</div>
-                    <input type="number" id="tier_input_${idx}" value="${t.price}" class="matrix-input" style="width:50px; margin-top:4px;">
-                </div>
-            `).join('');
-        }
+        renderMatrixModalControls();
+        renderMatrixModalGrid();
+        renderMatrixModalTiers();
 
         modal.style.display = 'block';
     }
@@ -728,6 +735,144 @@
     function closeBarMatrixModal() {
         const modal = document.getElementById('barMatrixModal');
         if (modal) modal.style.display = 'none';
+    }
+
+    function renderMatrixModalControls() {
+        const btnG = document.getElementById('matrixHotelBtnGuadiana');
+        const btnC = document.getElementById('matrixHotelBtnCumbria');
+        const isG = matrixModalActiveHotel.toLowerCase().includes('guadiana');
+        if (btnG) {
+            btnG.style.background = isG ? 'var(--primary)' : 'transparent';
+            btnG.style.color = isG ? '#fff' : 'var(--text-muted)';
+        }
+        if (btnC) {
+            btnC.style.background = !isG ? 'var(--primary)' : 'transparent';
+            btnC.style.color = !isG ? '#fff' : 'var(--text-muted)';
+        }
+
+        const lblH = document.getElementById('matrixActiveHotelLabel');
+        if (lblH) lblH.innerText = isG ? 'Sercotel Guadiana' : 'Hotel Cumbria';
+
+        const yrContainer = document.getElementById('matrixYearSelectorGroup');
+        if (yrContainer) {
+            const years = [2026, 2027, 2028, 2029];
+            yrContainer.innerHTML = years.map(y => {
+                const isAct = (y === matrixModalActiveYear);
+                return `<button type="button" class="btn btn-sm" onclick="CompetenciaIntelUI.switchMatrixYear(${y})" style="height:28px; padding:0 10px; font-size:0.78rem; font-weight:700; border-radius:8px; border:1px solid ${isAct ? 'var(--primary)' : 'var(--border)'}; background:${isAct ? 'var(--primary)' : 'transparent'}; color:${isAct ? '#fff' : 'var(--text-main)'}; cursor:pointer;">${y}</button>`;
+            }).join('');
+        }
+
+        const lblY = document.getElementById('matrixActiveYearLabel');
+        if (lblY) lblY.innerText = matrixModalActiveYear;
+
+        const mSel = document.getElementById('matrixMonthSelector');
+        if (mSel) mSel.value = matrixModalActiveMonth;
+    }
+
+    function switchMatrixHotel(hotel) {
+        matrixModalActiveHotel = hotel;
+        renderMatrixModalControls();
+        renderMatrixModalGrid();
+        renderMatrixModalTiers();
+    }
+
+    function switchMatrixYear(year) {
+        matrixModalActiveYear = parseInt(year, 10);
+        renderMatrixModalControls();
+        renderMatrixModalGrid();
+        renderMatrixModalTiers();
+    }
+
+    function switchMatrixMonth(month) {
+        matrixModalActiveMonth = month;
+        renderMatrixModalControls();
+        renderMatrixModalGrid();
+        renderMatrixModalTiers();
+    }
+
+    function renderMatrixModalGrid() {
+        const matrix = PricingIntelligence.getBarMatrix(matrixModalActiveHotel, matrixModalActiveYear);
+        const tbody = document.getElementById('barMatrixEditorBody');
+        if (!tbody) return;
+
+        let rowsHtml = '';
+        const filterM = (matrixModalActiveMonth !== 'all') ? parseInt(matrixModalActiveMonth, 10) : null;
+
+        for (let m = 1; m <= 12; m++) {
+            const rowData = matrix[m] || {};
+            const mName = PricingIntelligence.MONTH_NAMES_ES[m - 1];
+            const isHighlighted = (filterM === m);
+            const isDimmed = (filterM !== null && !isHighlighted);
+
+            const v1 = rowData[1] || 62;
+            const v2 = rowData[2] || 64;
+            const v3 = rowData[3] || 64;
+            const v4 = rowData[4] || 62;
+            const v5 = rowData[5] || 70;
+            const v6 = rowData[6] || 75;
+            const v7 = rowData[7] || 58;
+            const avg = Math.round((v1 + v2 + v3 + v4 + v5 + v6 + v7) / 7);
+
+            rowsHtml += `
+                <tr id="mat_row_${m}" style="${isHighlighted ? 'background:rgba(99,102,241,0.08); font-weight:bold;' : (isDimmed ? 'opacity:0.4;' : '')}">
+                    <td style="font-weight:800; text-align:left;">
+                        ${isHighlighted ? '👉 ' : ''}${mName}
+                    </td>
+                    <td><input type="number" class="matrix-input" id="mat_${m}_1" value="${v1}" oninput="CompetenciaIntelUI.calcMatrixRowAvg(${m})"></td>
+                    <td><input type="number" class="matrix-input" id="mat_${m}_2" value="${v2}" oninput="CompetenciaIntelUI.calcMatrixRowAvg(${m})"></td>
+                    <td><input type="number" class="matrix-input" id="mat_${m}_3" value="${v3}" oninput="CompetenciaIntelUI.calcMatrixRowAvg(${m})"></td>
+                    <td><input type="number" class="matrix-input" id="mat_${m}_4" value="${v4}" oninput="CompetenciaIntelUI.calcMatrixRowAvg(${m})"></td>
+                    <td><input type="number" class="matrix-input" id="mat_${m}_5" value="${v5}" oninput="CompetenciaIntelUI.calcMatrixRowAvg(${m})"></td>
+                    <td><input type="number" class="matrix-input" id="mat_${m}_6" value="${v6}" oninput="CompetenciaIntelUI.calcMatrixRowAvg(${m})"></td>
+                    <td><input type="number" class="matrix-input" id="mat_${m}_7" value="${v7}" oninput="CompetenciaIntelUI.calcMatrixRowAvg(${m})"></td>
+                    <td style="font-weight:800; color:var(--primary); background:rgba(99,102,241,0.04);" id="mat_avg_${m}">
+                        ${avg} €
+                    </td>
+                </tr>
+            `;
+        }
+        tbody.innerHTML = rowsHtml;
+    }
+
+    function calcMatrixRowAvg(m) {
+        const v1 = parseFloat(document.getElementById(`mat_${m}_1`)?.value) || 0;
+        const v2 = parseFloat(document.getElementById(`mat_${m}_2`)?.value) || 0;
+        const v3 = parseFloat(document.getElementById(`mat_${m}_3`)?.value) || 0;
+        const v4 = parseFloat(document.getElementById(`mat_${m}_4`)?.value) || 0;
+        const v5 = parseFloat(document.getElementById(`mat_${m}_5`)?.value) || 0;
+        const v6 = parseFloat(document.getElementById(`mat_${m}_6`)?.value) || 0;
+        const v7 = parseFloat(document.getElementById(`mat_${m}_7`)?.value) || 0;
+        const avg = Math.round((v1 + v2 + v3 + v4 + v5 + v6 + v7) / 7);
+        const cell = document.getElementById(`mat_avg_${m}`);
+        if (cell) cell.innerText = `${avg} €`;
+    }
+
+    function renderMatrixModalTiers() {
+        const tiers = PricingIntelligence.getOccTiers(matrixModalActiveHotel, matrixModalActiveYear, matrixModalActiveMonth);
+        const tiersCont = document.getElementById('occTiersEditorContainer');
+        const contextLbl = document.getElementById('occTiersContextLabel');
+
+        if (contextLbl) {
+            const hStr = matrixModalActiveHotel.toLowerCase().includes('guadiana') ? 'Sercotel Guadiana' : 'Hotel Cumbria';
+            let mStr = 'Todos los meses';
+            if (matrixModalActiveMonth !== 'all') {
+                const mIdx = parseInt(matrixModalActiveMonth, 10) - 1;
+                mStr = PricingIntelligence.MONTH_NAMES_ES[mIdx] || matrixModalActiveMonth;
+            }
+            contextLbl.innerText = `${hStr} · ${matrixModalActiveYear} · ${mStr}`;
+        }
+
+        if (tiersCont) {
+            tiersCont.innerHTML = tiers.map((t, idx) => `
+                <div style="background:var(--bg-card); padding:8px 10px; border-radius:10px; border:1px solid var(--border); text-align:center;">
+                    <div style="font-size:0.7rem; color:var(--text-muted); font-weight:700;">${t.minOcc} - ${t.maxOcc}%</div>
+                    <div style="display:flex; align-items:center; justify-content:center; gap:2px; margin-top:4px;">
+                        <input type="number" id="tier_input_${idx}" value="${t.price}" class="matrix-input" style="width:52px; font-weight:800; font-size:0.85rem;">
+                        <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">€</span>
+                    </div>
+                </div>
+            `).join('');
+        }
     }
 
     function saveBarMatrixFromModal() {
@@ -746,28 +891,78 @@
             };
         }
 
-        PricingIntelligence.saveBarMatrix(matrix);
+        PricingIntelligence.saveBarMatrix(matrixModalActiveHotel, matrixModalActiveYear, matrix);
 
         // Escalados
-        const currentTiers = PricingIntelligence.getOccTiersJanFeb();
-        currentTiers.forEach((t, idx) => {
+        const currentTiers = PricingIntelligence.getOccTiers(matrixModalActiveHotel, matrixModalActiveYear, matrixModalActiveMonth);
+        const updatedTiers = currentTiers.map((t, idx) => {
             const inp = document.getElementById(`tier_input_${idx}`);
-            if (inp) t.price = parseFloat(inp.value) || t.price;
+            return {
+                ...t,
+                price: inp ? (parseFloat(inp.value) || t.price) : t.price
+            };
         });
-        PricingIntelligence.saveOccTiersJanFeb(currentTiers);
+        PricingIntelligence.saveOccTiers(matrixModalActiveHotel, matrixModalActiveYear, matrixModalActiveMonth, updatedTiers);
 
         closeBarMatrixModal();
         if (typeof refreshActiveView === 'function') refreshActiveView();
-        alert('✅ Matriz de Tarifas Base 2027 y escalados guardados con éxito.');
+        alert(`✅ Estrategia y tarifas base guardadas para ${matrixModalActiveHotel} (${matrixModalActiveYear}).`);
     }
 
-    function resetBarMatrixToOriginals() {
-        if (!confirm('¿Deseas restablecer todas las tarifas base a los valores oficiales del Excel Precios 2027?')) return;
+    function toggleCopyMatrixPanel() {
+        const p = document.getElementById('copyMatrixSubPanel');
+        if (!p) return;
+        p.style.display = (p.style.display === 'none' || p.style.display === '') ? 'block' : 'none';
+    }
+
+    function applyCopyMatrix() {
+        if (!window.PricingIntelligence) return;
+        const fromH = document.getElementById('copyFromHotel')?.value || 'Guadiana';
+        const fromY = parseInt(document.getElementById('copyFromYear')?.value, 10) || 2027;
+        const toH = document.getElementById('copyToHotel')?.value || 'Cumbria';
+        const toY = parseInt(document.getElementById('copyToYear')?.value, 10) || 2027;
+        const pct = parseFloat(document.getElementById('copyPctAdjust')?.value) || 0;
+
+        PricingIntelligence.copyBarMatrix(fromH, fromY, toH, toY, pct);
+
+        matrixModalActiveHotel = toH;
+        matrixModalActiveYear = toY;
+        renderMatrixModalControls();
+        renderMatrixModalGrid();
+        renderMatrixModalTiers();
+
+        toggleCopyMatrixPanel();
+        alert(`✓ Tarifas copiadas con éxito de ${fromH} ${fromY} a ${toH} ${toY}${pct !== 0 ? ` (Ajuste: ${pct > 0 ? '+' : ''}${pct}%)` : ''}.`);
+    }
+
+    function resetActiveMatrixToDefaults() {
+        if (!confirm(`¿Deseas restablecer las tarifas base a los valores recomendados predeterminados para ${matrixModalActiveHotel} ${matrixModalActiveYear}?`)) return;
         if (window.PricingIntelligence) {
-            PricingIntelligence.resetBarMatrixToDefault();
-            openBarMatrixModal();
+            PricingIntelligence.resetBarMatrixToDefault(matrixModalActiveHotel, matrixModalActiveYear);
+            renderMatrixModalGrid();
+            renderMatrixModalTiers();
             if (typeof refreshActiveView === 'function') refreshActiveView();
+            alert(`✓ Tarifas de partida restablecidas para ${matrixModalActiveHotel} ${matrixModalActiveYear}.`);
         }
+    }
+
+    function copyTiersToAllMonths() {
+        if (!window.PricingIntelligence) return;
+        const currentTiers = PricingIntelligence.getOccTiers(matrixModalActiveHotel, matrixModalActiveYear, matrixModalActiveMonth);
+        const updatedTiers = currentTiers.map((t, idx) => {
+            const inp = document.getElementById(`tier_input_${idx}`);
+            return {
+                ...t,
+                price: inp ? (parseFloat(inp.value) || t.price) : t.price
+            };
+        });
+
+        PricingIntelligence.saveOccTiers(matrixModalActiveHotel, matrixModalActiveYear, 'all', updatedTiers);
+        for (let m = 1; m <= 12; m++) {
+            PricingIntelligence.saveOccTiers(matrixModalActiveHotel, matrixModalActiveYear, String(m), updatedTiers);
+        }
+        renderMatrixModalTiers();
+        alert(`✓ Escalados de ocupación aplicados a todos los meses de ${matrixModalActiveHotel} ${matrixModalActiveYear}.`);
     }
 
     // Exportación pública
@@ -779,6 +974,7 @@
         closeColumnConfigModal,
         saveColumnConfigFromModal,
         renderMonthAndDowView,
+        selectMonthFromStrip,
         toggleDowSubrow,
         runComparisonAnalysis,
         openDayDetailModal,
@@ -786,8 +982,15 @@
         saveDayCustomException,
         openBarMatrixModal,
         closeBarMatrixModal,
+        switchMatrixHotel,
+        switchMatrixYear,
+        switchMatrixMonth,
+        calcMatrixRowAvg,
         saveBarMatrixFromModal,
-        resetBarMatrixToOriginals
+        toggleCopyMatrixPanel,
+        applyCopyMatrix,
+        resetActiveMatrixToDefaults,
+        copyTiersToAllMonths
     };
 
     root.CompetenciaIntelUI = api;
@@ -805,6 +1008,6 @@
     root.openBarMatrixModal = openBarMatrixModal;
     root.closeBarMatrixModal = closeBarMatrixModal;
     root.saveBarMatrixFromModal = saveBarMatrixFromModal;
-    root.resetBarMatrixToOriginals = resetBarMatrixToOriginals;
+    root.resetBarMatrixToOriginals = resetActiveMatrixToDefaults;
 
 })(typeof window === 'object' ? window : globalThis);

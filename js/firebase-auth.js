@@ -141,6 +141,8 @@ const syncFields = {
     capasuite_yield_strategy_v1: 'yieldStrategy',
     capasuite_pricing_matrix_2027_v1: 'pricingMatrix2027',
     capasuite_occ_tiers_jan_feb_v1: 'occTiersJanFeb',
+    capasuite_pricing_matrix_master_v2: 'pricingMatrixMasterV2',
+    capasuite_occ_tiers_master_v2: 'occTiersMasterV2',
     daily_otb_snapshots_v1: 'otbSnapshots',
     capasuite_pricing_exceptions_v1: 'pricingExceptions'
 };
@@ -151,6 +153,7 @@ const EXTENDED_SYNC_KEYS = new Set([
     'channel_commissions_Guadiana', 'channel_commissions_Cumbria',
     'capasuite_room_costs_v1', 'capasuite_yield_strategy_v1',
     'capasuite_pricing_matrix_2027_v1', 'capasuite_occ_tiers_jan_feb_v1',
+    'capasuite_pricing_matrix_master_v2', 'capasuite_occ_tiers_master_v2',
     'daily_otb_snapshots_v1', 'capasuite_pricing_exceptions_v1'
 ]);
 let extendedSyncDisabled = false;

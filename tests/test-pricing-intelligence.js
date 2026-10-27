@@ -185,6 +185,30 @@ assert.strictEqual(recJan.occTierRefPrice, 70, 'Escalado de enero al 65% debe in
 
 console.log('✅ Test 6 Superado: Motor de Recomendación con justificación y reglas de seguridad verificadas.');
 
+
+    // -------------------------------------------------------------
+    // Test 7: Gestión Multi-Hotel, Multi-Año y Multi-Mes (CapaSuite Nativo)
+    // -------------------------------------------------------------
+    console.log('Test 7: Gestión Multi-Hotel, Multi-Año y Multi-Mes...');
+    const mGuadiana27 = PricingIntelligence.getBarMatrix('Guadiana', 2027);
+    const mCumbria27 = PricingIntelligence.getBarMatrix('Cumbria', 2027);
+    assert(mGuadiana27[1][1] === 62, 'Guadiana Enero Lunes debe ser 62');
+    assert(mCumbria27[1][1] === 52, 'Cumbria Enero Lunes debe ser 52');
+
+    // Test copyBarMatrix con ajuste +5%
+    PricingIntelligence.copyBarMatrix('Guadiana', 2027, 'Guadiana', 2029, 5);
+    const mGuadiana29 = PricingIntelligence.getBarMatrix('Guadiana', 2029);
+    assert.strictEqual(mGuadiana29[1][1], Math.round(62 * 1.05), 'Guadiana 2029 debe tener +5%');
+
+    // Test tiers multi-mes
+    const tiersJan = PricingIntelligence.getOccTiers('Guadiana', 2027, 1);
+    assert(tiersJan.length === 10, 'Debe haber 10 tramos de ocupación');
+    tiersJan[0].price = 65;
+    PricingIntelligence.saveOccTiers('Guadiana', 2027, 1, tiersJan);
+    const reloadedJan = PricingIntelligence.getOccTiers('Guadiana', 2027, 1);
+    assert.strictEqual(reloadedJan[0].price, 65, 'El precio del tramo guardado debe persistir');
+    console.log('✅ Test 7 Superado: Gestión Multi-Hotel, Multi-Año y Multi-Mes verificada.');
+
 console.log('\n============================================================');
 console.log('🎉 TODOS LOS TESTS DE PRICING INTELLIGENCE HAN FINALIZADO CON ÉXITO.');
 console.log('============================================================\n');
